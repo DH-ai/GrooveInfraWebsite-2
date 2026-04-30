@@ -1,95 +1,63 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { NextResponse } from 'next/server';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
+
+type ProjectData = {
+  title: string;
+  slug: string;
+  category: string;
+  location: string;
+  client_name: string;
+  testimonial: string;
+  description: string;
+  year: number;
+  area: string;
+  duration: string;
+  featured: boolean;
+  tags: string[];
+  cover_image?: string;
+};
 
 export async function POST(req: Request) {
   try {
-    // Check authentication
-    const cookieStore = await cookies()
-    const session = cookieStore.get('admin-session')
-
-    if (!session || session.value !== 'authenticated') {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      )
-    }
-
-    const body = await req.json()
+    const body: ProjectData = await req.json();
 
     // Validate required fields
-    const required = [
-      'title',
-      'slug',
-      'category',
-      'location',
-      'client_name',
-      'testimonial',
-      'description',
-      'year',
-      'area',
-      'duration',
-      'tags',
-    ]
-
-    for (const field of required) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Validate category
-    const validCategories = ['commercial', 'retail', 'residential', 'civil']
-    if (!validCategories.includes(body.category)) {
+    if (
+      !body.title ||
+      !body.slug ||
+      !body.location ||
+      !body.client_name ||
+      !body.testimonial ||
+      !body.description ||
+      !body.area ||
+      !body.duration ||
+      !body.tags.length
+    ) {
       return NextResponse.json(
-        { error: 'Invalid category' },
+        { error: 'Missing required fields' },
         { status: 400 }
-      )
+      );
     }
 
-    const { slug, tags } = body
+    // Create project directory structure
+    const projectDir = join(process.cwd(), 'content', 'projects', body.slug);
+    const imageDir = join(process.cwd(), 'public', 'images', 'projects', body.slug);
 
-    // Ensure slug is valid
-    if (!/^[a-z0-9-]+$/.test(slug)) {
-      return NextResponse.json(
-        { error: 'Slug must contain only lowercase letters, numbers, and hyphens' },
-        { status: 400 }
-      )
+    if (!existsSync(projectDir)) {
+      mkdirSync(projectDir, { recursive: true });
     }
 
-    // Ensure tags is an array
-    if (!Array.isArray(tags) || tags.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one tag is required' },
-        { status: 400 }
-      )
+    if (!existsSync(imageDir)) {
+      mkdirSync(imageDir, { recursive: true });
     }
 
-    // Create project directory
-    const projectDir = path.join(
-      process.cwd(),
-      'content',
-      'projects',
-      slug
-    )
-
-    // Check if project already exists
-    try {
-      await fs.access(projectDir)
-      return NextResponse.json(
-        { error: 'Project with this slug already exists' },
-        { status: 409 }
-      )
-    } catch {
-      // Directory doesn't exist, which is what we want
-    }
-
-    // Create the directory
-    await fs.mkdir(projectDir, { recursive: true })
+    // Create placeholder image URLs for initial setup
+    const placeholder_images = [
+      `https://picsum.photos/800/600?random=${Date.now()}`,
+      `https://picsum.photos/800/600?random=${Date.now() + 1}`,
+      `https://picsum.photos/800/600?random=${Date.now() + 2}`,
+    ];
 
     // Create metadata.json
     const metadata = {
@@ -103,43 +71,27 @@ export async function POST(req: Request) {
       year: body.year,
       area: body.area,
       duration: body.duration,
-      featured: body.featured ?? false,
+      featured: body.featured,
       tags: body.tags,
-      placeholder_images: Array(4)
-        .fill(null)
-        .map((_, i) =>
-          `https://picsum.photos/seed/${slug}-${i + 1}/1200/800`
-        ),
-      cover_image: `https://picsum.photos/seed/${slug}-1/1200/800`,
-    }
+      ...(body.cover_image && { cover_image: body.cover_image }),
+      placeholder_images,
+    };
 
-    const metadataPath = path.join(projectDir, 'metadata.json')
-    await fs.writeFile(
-      metadataPath,
-      JSON.stringify(metadata, null, 2)
-    )
-
-    // Create images directory
-    const imagesDir = path.join(
-      process.cwd(),
-      'public',
-      'images',
-      'projects',
-      slug
-    )
-    await fs.mkdir(imagesDir, { recursive: true })
+    const metadataPath = join(projectDir, 'metadata.json');
+    writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 
     return NextResponse.json({
       ok: true,
-      message: `Project "${body.title}" created successfully`,
+      message: 'Project created successfully',
       slug: body.slug,
-      imageDir: `/images/projects/${slug}/`,
-    })
-  } catch (err) {
-    console.error('[admin/projects] Error:', err)
+      path: `/content/projects/${body.slug}/`,
+      imagePath: `/public/images/projects/${body.slug}/`,
+    });
+  } catch (error) {
+    console.error('[admin/projects] error:', error);
     return NextResponse.json(
       { error: 'Failed to create project' },
       { status: 500 }
-    )
+    );
   }
 }
