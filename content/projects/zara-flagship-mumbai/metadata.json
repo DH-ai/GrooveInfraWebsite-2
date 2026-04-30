@@ -1,0 +1,21 @@
+{
+  "title": "Zara Flagship Mumbai",
+  "slug": "zara-flagship-mumbai",
+  "category": "retail",
+  "location": "Lower Parel, Mumbai",
+  "client_name": "Inditex Retail India",
+  "testimonial": "The store design captured our brand essence perfectly. Sales metrics improved 42% in the first quarter post-opening.",
+  "description": "8,500 sq ft premium fashion retail flagship on Mumbai's most premium shopping destination. Features custom oak display systems, interactive digital zones, VIP fitting rooms with smart mirrors, and a rooftop café overlooking the city skyline.",
+  "year": 2024,
+  "area": "8,500 sq ft",
+  "duration": "14 weeks",
+  "featured": true,
+  "tags": ["Retail Fit-Out", "Premium Finishes", "Custom Display", "Digital Integration", "VIP Spaces"],
+  "placeholder_images": [
+    "https://picsum.photos/seed/zara-flagship-1/1200/800",
+    "https://picsum.photos/seed/zara-flagship-2/1200/800",
+    "https://picsum.photos/seed/zara-flagship-3/1200/800",
+    "https://picsum.photos/seed/zara-flagship-4/1200/800"
+  ],
+  "cover_image": "https://picsum.photos/seed/zara-flagship-1/1200/800"
+}
