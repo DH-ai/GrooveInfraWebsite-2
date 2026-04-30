@@ -2,20 +2,38 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Send, CheckCircle } from 'lucide-react'
+import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 
 const projectTypes = ['Retail', 'Hospitality & Clubs', 'Commercial', 'Residential', 'Civil', 'Other']
 
-export default function ContactForm() {
-  const [submitted, setSubmitted] = useState(false)
-  const [type, setType] = useState('')
+type Status = 'idle' | 'loading' | 'success' | 'error'
 
-  function handleSubmit(e: React.FormEvent) {
+export default function ContactForm() {
+  const [status, setStatus] = useState<Status>('idle')
+  const [projectType, setProjectType] = useState('')
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setSubmitted(true)
+    setStatus('loading')
+
+    const form = e.currentTarget
+    const data = Object.fromEntries(new FormData(form))
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, projectType }),
+      })
+
+      if (!res.ok) throw new Error('send failed')
+      setStatus('success')
+    } catch {
+      setStatus('error')
+    }
   }
 
-  if (submitted) {
+  if (status === 'success') {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -37,8 +55,12 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className="block text-xs font-medium text-secondary mb-2">Your Name *</label>
+          <label htmlFor="name" className="block text-xs font-medium text-secondary mb-2">
+            Your Name *
+          </label>
           <input
+            id="name"
+            name="name"
             type="text"
             required
             placeholder="Rahul Sharma"
@@ -46,8 +68,12 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-secondary mb-2">Company / Brand</label>
+          <label htmlFor="company" className="block text-xs font-medium text-secondary mb-2">
+            Company / Brand
+          </label>
           <input
+            id="company"
+            name="company"
             type="text"
             placeholder="Acme Retail Pvt Ltd"
             className="w-full px-4 py-3 rounded-xl bg-surface-2 border border-subtle text-primary placeholder:text-muted-custom text-sm focus:outline-none focus:border-groove-gold/50 transition-colors"
@@ -57,8 +83,12 @@ export default function ContactForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className="block text-xs font-medium text-secondary mb-2">Email *</label>
+          <label htmlFor="email" className="block text-xs font-medium text-secondary mb-2">
+            Email *
+          </label>
           <input
+            id="email"
+            name="email"
             type="email"
             required
             placeholder="rahul@company.com"
@@ -66,8 +96,12 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-secondary mb-2">Phone</label>
+          <label htmlFor="phone" className="block text-xs font-medium text-secondary mb-2">
+            Phone
+          </label>
           <input
+            id="phone"
+            name="phone"
             type="tel"
             placeholder="+91 98765 43210"
             className="w-full px-4 py-3 rounded-xl bg-surface-2 border border-subtle text-primary placeholder:text-muted-custom text-sm focus:outline-none focus:border-groove-gold/50 transition-colors"
@@ -75,6 +109,7 @@ export default function ContactForm() {
         </div>
       </div>
 
+      {/* Project type pills */}
       <div>
         <label className="block text-xs font-medium text-secondary mb-2">Project Type</label>
         <div className="flex flex-wrap gap-2">
@@ -82,9 +117,9 @@ export default function ContactForm() {
             <button
               key={t}
               type="button"
-              onClick={() => setType(t)}
+              onClick={() => setProjectType(t === projectType ? '' : t)}
               className={`px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200 ${
-                type === t
+                projectType === t
                   ? 'bg-groove-gold text-black border-groove-gold'
                   : 'border-subtle text-secondary hover:border-groove-gold/40 hover:text-primary'
               }`}
@@ -96,8 +131,12 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-secondary mb-2">City / Location</label>
+        <label htmlFor="location" className="block text-xs font-medium text-secondary mb-2">
+          City / Location
+        </label>
         <input
+          id="location"
+          name="location"
           type="text"
           placeholder="Mumbai, Delhi, Bangalore..."
           className="w-full px-4 py-3 rounded-xl bg-surface-2 border border-subtle text-primary placeholder:text-muted-custom text-sm focus:outline-none focus:border-groove-gold/50 transition-colors"
@@ -105,8 +144,12 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-secondary mb-2">Tell Us About Your Project *</label>
+        <label htmlFor="message" className="block text-xs font-medium text-secondary mb-2">
+          Tell Us About Your Project *
+        </label>
         <textarea
+          id="message"
+          name="message"
           required
           rows={5}
           placeholder="Share your vision, timeline, approximate budget, and any specific requirements..."
@@ -114,12 +157,34 @@ export default function ContactForm() {
         />
       </div>
 
+      {/* Error state */}
+      {status === 'error' && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 text-sm text-red-500 bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3"
+        >
+          <AlertCircle size={15} />
+          Something went wrong. Please try again or email us directly.
+        </motion.div>
+      )}
+
       <button
         type="submit"
-        className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold transition-all duration-300 hover:scale-[1.02]"
+        disabled={status === 'loading'}
+        className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold transition-all duration-300 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
       >
-        Send Message
-        <Send size={14} className="transition-transform group-hover:translate-x-0.5" />
+        {status === 'loading' ? (
+          <>
+            <Loader2 size={14} className="animate-spin" />
+            Sending…
+          </>
+        ) : (
+          <>
+            Send Message
+            <Send size={14} className="transition-transform group-hover:translate-x-0.5" />
+          </>
+        )}
       </button>
     </form>
   )
