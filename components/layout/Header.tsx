@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/ui/ThemeToggle'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
+  { href: '/', label: 'Home' },
   { href: '/projects', label: 'Portfolio' },
   { href: '/about', label: 'About' },
   { href: '/innovation', label: 'Innovation' },
@@ -100,8 +101,8 @@ export default function Header() {
               className={cn(
                 'hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300',
                 scrolled || !isHeroPage
-                  ? 'bg-primary text-[rgb(var(--bg))] hover:opacity-80'
-                  : 'bg-white text-black hover:bg-white/90'
+                  ? 'bg-white text-black hover:bg-white/90'
+                  : 'bg-primary text-[rgb(var(--bg))] hover:opacity-80'
               )}
             >
               Enquire
