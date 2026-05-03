@@ -1556,6 +1556,85 @@ export default function NewPage() {
 
 ---
 
+## Supabase Migration — Project Data Schema
+
+The filesystem-based content system (`content/projects/*/metadata.json` + `public/images/`) is being replaced with Supabase. Below is the full field reference for the `projects` table, derived from the original metadata.json structure.
+
+### `projects` Table Schema
+
+| Column | Type | Required | Notes |
+|---|---|---|---|
+| `id` | `uuid` | Yes | Primary key, auto-generated |
+| `title` | `text` | Yes | Display name, e.g. `"Bata India Office"` |
+| `slug` | `text` | Yes | URL-safe identifier, e.g. `"bata-india-office"` — must be unique |
+| `category` | `text` | Yes | One of: `retail`, `commercial`, `residential`, `civil` |
+| `location` | `text` | Yes | City/region string, e.g. `"Gurgaon, Haryana"` |
+| `client_name` | `text` | Yes | Client's full company name |
+| `description` | `text` | Yes | Project summary paragraph |
+| `testimonial` | `text` | No | Optional client quote |
+| `year` | `int4` | No | Completion year, e.g. `2025` |
+| `area` | `text` | No | Floor area string, e.g. `"10,000 sq ft"` |
+| `duration` | `text` | No | Project duration string, e.g. `"25 weeks"` |
+| `featured` | `bool` | No | If `true`, surfaces on homepage featured section |
+| `highlight` | `text` | No | One-liner callout, e.g. `"Live renovation, 3 phased floors"` |
+| `tags` | `text[]` | No | Array of keyword tags, e.g. `["office-design", "lighting"]` |
+| `cover_image` | `text` | No | URL of the hero/cover image |
+| `images` | `text[]` | No | Ordered array of all project image URLs |
+| `logo` | `text` | No | URL of the client/project logo image |
+| `created_at` | `timestamptz` | Yes | Auto-set by Supabase |
+
+### Example Row (JSON)
+
+```json
+{
+  "title": "Bata India Office",
+  "slug": "bata-india-office",
+  "category": "commercial",
+  "location": "Gurgaon, Haryana",
+  "client_name": "Bata India LTD",
+  "description": "Designed and executed a 10,000 sq ft corporate office space, focusing on efficient space planning, collaborative work environments, and ergonomic design.",
+  "testimonial": "The team delivered a modern retail space that perfectly aligns with our brand identity while enhancing customer experience.",
+  "year": 2025,
+  "area": "10,000 sq ft",
+  "duration": "25 weeks",
+  "featured": true,
+  "highlight": null,
+  "tags": ["office-design", "workspace-planning", "interiors", "lighting", "execution"],
+  "cover_image": "https://your-storage-url/bata-india-office/cover.jpg",
+  "images": [
+    "https://your-storage-url/bata-india-office/DSC_0023.jpg",
+    "https://your-storage-url/bata-india-office/DSC_0026.jpg"
+  ],
+  "logo": null
+}
+```
+
+### Image Storage
+
+Images previously stored in `public/images/projects/[slug]/` should be uploaded to **Supabase Storage** (or another CDN). Recommended bucket structure:
+
+```
+projects/
+└── [slug]/
+    ├── cover.jpg
+    ├── DSC_0023.jpg
+    └── logo/
+        └── logo.svg
+```
+
+The `cover_image`, `images[]`, and `logo` columns store the public URLs returned by Supabase Storage.
+
+### Category Enum Values
+
+```
+retail       — Retail fit-outs, shops, showrooms
+commercial   — Offices, corporate interiors
+residential  — Homes, apartments
+civil        — Civil/infrastructure projects
+```
+
+---
+
 ## Environment Variables
 
 | Variable | Required | Description |
