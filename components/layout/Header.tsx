@@ -77,14 +77,15 @@ export default function Header() {
                     active
                       ? 'text-groove-gold'
                       : scrolled || !isHeroPage
-                      ? 'text-secondary hover:text-primary'
-                      : 'text-white/75 hover:text-white'
+                      ? 'text-white/2 hover:text-primary'
+                      : 'text-white hover:text-white'
                   )}
                 >
                   {link.label}
                   <span
-                    className={cn(
-                      'absolute -bottom-0.5 left-0 h-px bg-groove-gold transition-all duration-300',
+                    className={
+                      cn(
+                      'absolute -bottom-0.5 left-0 h-px bg-groove-gold transition-all duration-100',
                       active ? 'w-full' : 'w-0 group-hover:w-full'
                     )}
                   />
@@ -99,10 +100,10 @@ export default function Header() {
             <Link
               href="/contact"
               className={cn(
-                'hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300',
+                'hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300',
                 scrolled || !isHeroPage
                   ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-primary text-[rgb(var(--bg))] hover:opacity-80'
+                  : 'bg-black text-white hover:opacity-80'
               )}
             >
               Enquire
