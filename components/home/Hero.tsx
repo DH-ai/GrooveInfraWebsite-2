@@ -8,25 +8,29 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const slides = [
   {
-    image: 'https://picsum.photos/seed/hero-slide-a/1920/1080',
+    image:
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1920&q=80',
     tag: 'Retail Rollouts',
     heading: ['Spaces That', 'Drive Sales'],
     sub: "End-to-end retail fit-outs for India's fastest-growing brands.",
   },
   {
-    image: 'https://picsum.photos/seed/hero-slide-b/1920/1080',
+    image:
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80',
     tag: 'Commercial Interiors',
     heading: ['Where Work', 'Becomes Culture'],
     sub: 'Corporate environments engineered for performance and identity.',
   },
   {
-    image: 'https://picsum.photos/seed/hero-slide-c/1920/1080',
+    image:
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=80',
     tag: 'Hospitality & Clubs',
     heading: ['Atmospheres', 'People Return To'],
     sub: 'Hotels, restaurants, and lounges built to leave a lasting impression.',
   },
   {
-    image: 'https://picsum.photos/seed/hero-slide-d/1920/1080',
+    image:
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1920&q=80',
     tag: 'Residential Makeovers',
     heading: ['Your Home,', 'Reimagined'],
     sub: 'Bespoke residential interiors crafted to reflect who you are.',

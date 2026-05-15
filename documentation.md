@@ -48,7 +48,7 @@ This is a **hybrid SSG + SSR + CSR** Next.js 14 application with a content-first
 │  ├─ Static Pages (/about, /innovation, /contact)        │
 │  ├─ Dynamic Pages (/projects/[slug] with SSG)           │
 │  ├─ Interactivity Pages (/projects with client filter)  │
-│  └─ API Routes (Contact form, Admin auth)               │
+│  └─ API Routes (Contact form)                            │
 ├─────────────────────────────────────────────────────────┤
 │  DATA LAYER (Filesystem-based Content)                  │
 │  ├─ JSON metadata (content/projects/*/metadata.json)    │
@@ -95,11 +95,8 @@ Route Handler (page.tsx or route.ts)
 
 ### Authentication & Security
 
-- **Admin Panel** (`/admin/login`) — Password-protected via `/api/admin/login` (POST)
-  - Validates password against `process.env.ADMIN_PASSWORD`
-  - Sets HTTP-only secure cookie (`admin-session`) with 24h TTL
-  - Cookie checked in middleware (not yet implemented)
-  
+- **Admin / internal tools** — Not included in this repository or deployment. Operations such as project authoring or authenticated dashboards are intended to run on a separate app (for example `https://admin.grooveinfra.in`) with its own API surface, secrets, and infrastructure. This public site only ships static and SSR marketing pages plus the contact endpoint below.
+
 - **Contact Form** — Server-side email sending via Resend
   - Validates required fields (name, email, message)
   - Sends to `CONTACT_EMAIL` with reply-to set to sender
@@ -369,7 +366,6 @@ All functions are server-side (no `'use client'`). They read from the filesystem
 | `/innovation` | Server | SSG @ build | Hardcoded | Static |
 | `/projects` | Hybrid | SSR | `.getAllProjects()`, `.getProjectCategories()` | Dynamic (supports filtering UI) |
 | `/projects/[slug]` | Hybrid | ISR via `generateStaticParams()` | `.getProjectBySlug()` | Pregenerated (incremental revalidation) |
-| `/admin/login` | Client | SSR | None | Dynamic |
 
 ---
 
@@ -534,29 +530,6 @@ export default function ProjectPage({ params }) {
 4. **Project Intelligence** — Analytics dashboard
 
 **Note:** All 4 products marked "Coming Soon"; no actual functionality yet.
-
----
-
-### [`app/admin/login/page.tsx`](app/admin/login/page.tsx) — Admin Login
-
-**Rendering:** SSR, client-interactive (`'use client'`)
-
-**Form:**
-- Password input field
-- Submit button with loading state
-- Error message display
-
-**Flow:**
-1. User enters password
-2. POST to `/api/admin/login` with password
-3. If valid:
-   - Server sets `admin-session` cookie
-   - Client redirects to `/admin`
-4. If invalid:
-   - Show error message
-   - User can retry
-
-**Security:** Password checked server-side only; never sent to frontend storage.
 
 ---
 
@@ -727,6 +700,8 @@ These are all client components (`'use client'`) with animations via Framer Moti
 2. Commercial Interiors: "Where Work Becomes Culture"
 3. Hospitality & Clubs: "Atmospheres People Return To"
 4. Residential Makeovers: "Your Home, Reimagined"
+
+**Background images:** Curated interior photography from Unsplash (`images.unsplash.com`). Swap URLs or move assets under `public/` when you have final brand photography.
 
 **State:**
 ```typescript
@@ -1321,89 +1296,7 @@ Handled by [`app/api/contact/route.ts`](app/api/contact/route.ts).
 
 **Used by:** `ContactForm.tsx` (client-side form submission)
 
----
-
-### `POST /api/admin/login`
-
-Handled by [`app/api/admin/login/route.ts`](app/api/admin/login/route.ts).
-
-**Request body (JSON):**
-```json
-{
-  "password": "string (required)"
-}
-```
-
-**Response:**
-- **Success (200):** `{ "ok": true }`
-- **Invalid password (401):** `{ "error": "Invalid password" }`
-- **Not configured (500):** `{ "error": "Admin password not configured" }`
-
-**Behavior:**
-- Validates password against `process.env.ADMIN_PASSWORD`
-- Sets HTTP-only secure cookie: `admin-session = 'authenticated'`
-- Cookie expires in 24 hours
-- `secure: true` in production (HTTPS only)
-- `sameSite: 'lax'` to prevent CSRF
-
-**Security notes:**
-- Password checked on every login (bcrypt hashing recommended for production)
-- Cookie is httpOnly (not accessible via JavaScript)
-- Should be paired with middleware to protect admin routes
-
----
-
-### `GET /api/admin/check-auth`
-
-Handled by [`app/api/admin/check-auth/route.ts`](app/api/admin/check-auth/route.ts).
-
-**Response:**
-- **Authenticated (200):** `{ "ok": true }`
-- **Not authenticated (401):** `{ "error": "Not authenticated" }`
-
-**Behavior:**
-- Validates `admin-session` cookie exists and equals `'authenticated'`
-- Used by client-side components to check auth status
-
-**Used by:** Admin UI components (not yet implemented in this project)
-
----
-
-### `POST /api/admin/projects`
-
-Handled by [`app/api/admin/projects/route.ts`](app/api/admin/projects/route.ts).
-
-**Request body (JSON):**
-```json
-{
-  "title": "string (required)",
-  "slug": "string (required)",
-  "category": "retail|commercial|residential|civil (required)",
-  "location": "string (required)",
-  "client_name": "string (required)",
-  "testimonial": "string (required)",
-  "description": "string (required)",
-  "year": "number (required)",
-  "area": "string (required)",
-  "duration": "string (required)",
-  "featured": "boolean (required)",
-  "tags": "string[] (required, non-empty)",
-  "cover_image": "string (optional)"
-}
-```
-
-**Response:**
-- **Success (200):** `{ "message": "Project created successfully", "project": {...} }`
-- **Validation error (400):** `{ "error": "Missing required fields" }`
-- **File system error (500):** `{ "error": "Failed to create project" }`
-
-**Behavior:**
-- Creates directory: `content/projects/[slug]/`
-- Creates directory: `public/images/projects/[slug]/`
-- Writes metadata to `content/projects/[slug]/metadata.json`
-- Automatically picks up local images from `public/images/projects/[slug]/` on next build
-
-**Note:** Requires authentication (check `admin-session` cookie before accepting request)
+**Admin APIs:** Any future authenticated project-management or CMS APIs belong on the separate admin deployment (for example `admin.grooveinfra.in`), not on this marketing site, so cookies and credentials are not shared across origins and this app stays a minimal static + contact surface.
 
 ---
 
@@ -1412,7 +1305,7 @@ Handled by [`app/api/admin/projects/route.ts`](app/api/admin/projects/route.ts).
 **Standard HTTP status codes used:**
 - `200` — Success (GET, POST successful)
 - `400` — Bad request (missing/invalid fields)
-- `401` — Unauthorized (admin auth failed)
+- `401` — Unauthorized (not used by `/api/contact`; reserved for any future authenticated routes)
 - `404` — Not found (invalid project slug via `notFound()`)
 - `500` — Server error (Resend API failure, filesystem error)
 

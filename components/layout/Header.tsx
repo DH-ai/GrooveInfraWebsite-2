@@ -77,7 +77,7 @@ export default function Header() {
                     active
                       ? 'text-groove-gold'
                       : scrolled || !isHeroPage
-                      ? 'text-white/2 hover:text-primary'
+                      ? 'text-secondary hover:text-primary'
                       : 'text-white hover:text-white'
                   )}
                 >
