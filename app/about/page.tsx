@@ -32,7 +32,7 @@ const team = [
     name: 'Dhruv Chaturvedi',
     role: 'Chief Technology Officer',
     image: 'https://picsum.photos/seed/team-dhruv/400/400',
-    bio: 'Leads technology, digital systems, and the innovation roadmap at Groove Infra. Passionate about using technology to transform how interior projects are planned and delivered.',
+    bio: 'Leads technology, digital systems, and internal tooling at Groove Infra. Passionate about using technology to transform how interior projects are planned and delivered.',
   },
   {
     name: 'Rohit Chaturvedi',

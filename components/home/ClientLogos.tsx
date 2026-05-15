@@ -1,32 +1,51 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
-const clients = [
-  { name: 'Zara', initial: 'Z' },
-  { name: 'Nykaa', initial: 'N' },
-  { name: 'Wow Momo', initial: 'W' },
-  { name: 'Byju\'s', initial: 'B' },
-  { name: 'Decathlon', initial: 'D' },
-  { name: 'Lenskart', initial: 'L' },
-  { name: 'Bata', initial: 'B' },
-  { name: 'Croma', initial: 'C' },
-  { name: 'Malabar Gold', initial: 'M' },
-  { name: 'Kalyan Jewellers', initial: 'K' },
+type ClientMarkConfig = { name: string; logoSrc?: string }
+
+/**
+ * Trusted-by row: shows `name` until you add assets under `public/` and set `logoSrc`
+ * (e.g. `/images/clients/zara.svg`). Use monochrome or full-colour SVG/PNG; keep wide logos readable at ~110×36px.
+ */
+const clients: ClientMarkConfig[] = [
+  { name: 'Zara' },
+  { name: 'Nykaa' },
+  { name: 'Wow Momo' },
+  { name: "Byju's" },
+  { name: 'Decathlon' },
+  { name: 'Lenskart' },
+  { name: 'Bata' },
+  { name: 'Croma' },
+  { name: 'Malabar Gold' },
+  { name: 'Kalyan Jewellers' },
 ]
 
-function LogoPlaceholder({ name, initial }: { name: string; initial: string }) {
+function ClientMark({ name, logoSrc }: ClientMarkConfig) {
   return (
     <motion.div
-      className="silver-logo flex items-center justify-center h-12 px-6 rounded-lg border border-subtle bg-surface cursor-default"
+      className="silver-logo flex items-center justify-center h-14 min-w-[7rem] px-5 rounded-lg border border-subtle bg-surface cursor-default"
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}
       title={name}
     >
-      <span className="font-display font-semibold text-lg tracking-wide text-secondary">
-        {name}
-      </span>
+      {logoSrc ? (
+        <div className="relative h-9 w-[110px]">
+          <Image
+            src={logoSrc}
+            alt={name}
+            fill
+            className="object-contain object-center"
+            sizes="110px"
+          />
+        </div>
+      ) : (
+        <span className="font-display font-semibold text-base tracking-wide text-secondary whitespace-nowrap">
+          {name}
+        </span>
+      )}
     </motion.div>
   )
 }
@@ -55,7 +74,7 @@ export default function ClientLogos() {
             transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
           >
             {[...clients, ...clients].map((client, i) => (
-              <LogoPlaceholder key={`${client.name}-${i}`} {...client} />
+              <ClientMark key={`${client.name}-${i}`} {...client} />
             ))}
           </motion.div>
 
@@ -64,9 +83,11 @@ export default function ClientLogos() {
             animate={{ x: ['-50%', '0%'] }}
             transition={{ duration: 35, repeat: Infinity, ease: 'linear' }}
           >
-            {[...clients.slice(5), ...clients.slice(0, 5), ...clients.slice(5), ...clients.slice(0, 5)].map((client, i) => (
-              <LogoPlaceholder key={`row2-${client.name}-${i}`} {...client} />
-            ))}
+            {[...clients.slice(5), ...clients.slice(0, 5), ...clients.slice(5), ...clients.slice(0, 5)].map(
+              (client, i) => (
+                <ClientMark key={`row2-${client.name}-${i}`} {...client} />
+              )
+            )}
           </motion.div>
         </div>
       </div>

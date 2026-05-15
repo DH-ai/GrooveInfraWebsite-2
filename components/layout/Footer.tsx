@@ -11,7 +11,6 @@ const footerLinks = {
   Company: [
     { label: 'Portfolio', href: '/projects' },
     { label: 'About Us', href: '/about' },
-    { label: 'Innovation Lab', href: '/innovation' },
     { label: 'Contact', href: '/contact' },
   ],
 }

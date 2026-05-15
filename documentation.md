@@ -45,7 +45,7 @@ This is a **hybrid SSG + SSR + CSR** Next.js 14 application with a content-first
 │  └─ Layout System (shared Header, Footer, Theme)        │
 ├─────────────────────────────────────────────────────────┤
 │  APPLICATION LAYER (Next.js 14 App Router)              │
-│  ├─ Static Pages (/about, /innovation, /contact)        │
+│  ├─ Static Pages (/about, /contact)                      │
 │  ├─ Dynamic Pages (/projects/[slug] with SSG)           │
 │  ├─ Interactivity Pages (/projects with client filter)  │
 │  └─ API Routes (Contact form)                            │
@@ -66,7 +66,8 @@ This is a **hybrid SSG + SSR + CSR** Next.js 14 application with a content-first
 
 | Route Type | Pattern | Rationale |
 |---|---|---|
-| **Static pages** (`/about`, `/innovation`) | SSG @ build time | Hardcoded content, no dynamic data |
+| **Static pages** (`/about`) | SSG @ build time | Hardcoded content, no dynamic data |
+| **Unlisted page** (`/innovation`) | SSG @ build | Hardcoded; `noindex` + `robots.txt` disallow; not linked from chrome |
 | **Project detail** (`/projects/[slug]`) | ISR w/ `generateStaticParams()` | Pre-render all project pages at build time for fast initial load |
 | **Projects listing** (`/projects`) | SSR (fetch @ render) | Supports future filtering/sorting without cache busting |
 | **Home** (`/`) | SSG @ build time | Calls `getAllProjects()` statically, no user interactivity |
@@ -145,12 +146,13 @@ npm run lint      # ESLint check
 /
 ├── app/                        # Next.js App Router pages & API
 │   ├── layout.tsx              # Root layout (header, footer, theme)
+│   ├── robots.ts               # robots.txt — disallow /innovation
 │   ├── page.tsx                # Homepage
 │   ├── globals.css             # Global styles & CSS variables
 │   ├── not-found.tsx           # 404 page
 │   ├── about/page.tsx
 │   ├── contact/page.tsx
-│   ├── innovation/page.tsx
+│   ├── innovation/page.tsx     # unlisted: noindex, not in Header/Footer
 │   ├── projects/
 │   │   ├── page.tsx            # Portfolio listing
 │   │   └── [slug]/page.tsx     # Individual project detail
@@ -193,6 +195,7 @@ npm run lint      # ESLint check
 │   └── utils.ts                # Shared utility functions
 ├── public/
 │   └── images/
+│       ├── clients/            # Optional trusted-by logos (see ClientLogos)
 │       └── projects/
 │           └── [slug]/         # Local project images
 │               └── logo/       # Optional project logos
@@ -212,6 +215,9 @@ TypeScript in strict mode. Path alias `@/*` maps to the repo root, so imports li
 
 ### `next.config.js`
 Permits external images from `picsum.photos`, `images.unsplash.com`, and `plus.unsplash.com` via `images.remotePatterns`.
+
+### `app/robots.ts`
+App Router [`robots` convention](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots): allows `/` for all agents and disallows `/innovation` (pairs with page-level `noindex`).
 
 ### `tailwind.config.ts`
 Extends Tailwind with:
@@ -363,7 +369,7 @@ All functions are server-side (no `'use client'`). They read from the filesystem
 | `/` | Server | SSG @ build | `.getAllProjects()`, `.getAllTestimonials()` | Static (revalidate on rebuild) |
 | `/about` | Server | SSG @ build | Hardcoded | Static |
 | `/contact` | Hybrid | SSR | None | Dynamic (CTA stays fresh) |
-| `/innovation` | Server | SSG @ build | Hardcoded | Static |
+| `/innovation` | Server | SSG @ build | Hardcoded | Static; `robots` noindex; disallow in `robots.txt`; omit from nav |
 | `/projects` | Hybrid | SSR | `.getAllProjects()`, `.getProjectCategories()` | Dynamic (supports filtering UI) |
 | `/projects/[slug]` | Hybrid | ISR via `generateStaticParams()` | `.getProjectBySlug()` | Pregenerated (incremental revalidation) |
 
@@ -403,7 +409,7 @@ const testimonials = getAllTestimonials() // filters projects with testimonial f
 2. `<Stats />` — 4 animated counters
 3. `<Services />` — 4 service cards
 4. `<PhotoCarousel />` — Infinite horizontal scroll of project images
-5. `<ClientLogos />` — Marquee of brand names
+5. `<ClientLogos />` — Marquee of client marks (text labels until `logoSrc` assets exist under `public/images/clients/`)
 6. `<Testimonials />` — Carousel of project testimonials
 7. `<BlogInsights />` — 3 blog preview cards
 8. `<CallToAction />` — Dark section with radial glows
@@ -519,17 +525,15 @@ export default function ProjectPage({ params }) {
 
 ---
 
-### [`app/innovation/page.tsx`](app/innovation/page.tsx) — Innovation
+### [`app/innovation/page.tsx`](app/innovation/page.tsx) — Unlisted roadmap page
 
 **Rendering:** SSG
 
-**Content:** Showcase of 4 upcoming products (placeholders):
-1. **AI Cost Estimator** — Estimate project costs instantly
-2. **Modular Interior Systems** — Pre-fabricated components library
-3. **Vendor Marketplace** — B2B marketplace for materials
-4. **Project Intelligence** — Analytics dashboard
+**Discovery:** Not linked from `Header` or `Footer`. Intended only for direct URL sharing.
 
-**Note:** All 4 products marked "Coming Soon"; no actual functionality yet.
+**SEO:** `metadata.robots` sets `noindex, nofollow`. [`app/robots.ts`](app/robots.ts) disallows `/innovation` for crawlers that respect `robots.txt`.
+
+**Content:** “Future programs” cards (coming soon) plus optional CTA to `/contact`.
 
 ---
 
@@ -569,7 +573,7 @@ const [menuOpen, setMenuOpen] = useState(false)  // for mobile menu overlay
 - Throttled via `{ passive: true }` flag
 - Cleanup removes listener on unmount
 
-**Navigation links:** Portfolio, About, Innovation, Contact
+**Navigation links:** Home, Portfolio, About, Contact
 
 **Active link styling:**
 - Full-width gold underline for current page
@@ -613,7 +617,6 @@ Services:
 Company:
   - Portfolio (/projects)
   - About Us (/about)
-  - Innovation Lab (/innovation)
   - Contact (/contact)
 ```
 
@@ -793,13 +796,15 @@ const [paused, setPaused] = useState(false) // pause on hover
 
 ### [`components/home/ClientLogos.tsx`](components/home/ClientLogos.tsx)
 
-**Marquee effect with brand names**
+**Marquee of client marks**
+
+**Data:** `clients[]` with `name` and optional `logoSrc` (public path, e.g. `/images/clients/zara.svg`). Without `logoSrc`, the mark renders the brand name as typography.
 
 **Behavior:**
 - 2 marquee rows (opposite directions)
-- ~10 brand names per row
+- Duplicated arrays for seamless loop
 - Gradient fade masks on left/right edges
-- Hover: restores from grayscale to full color
+- Optional `next/image` when `logoSrc` is set (`object-contain`, fixed slot ~110×36px)
 
 ---
 
