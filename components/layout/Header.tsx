@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ArrowUpRight } from 'lucide-react'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { cn } from '@/lib/utils'
 
@@ -30,9 +30,10 @@ export default function Header() {
     setMenuOpen(false)
   }, [pathname])
 
-  // On hero pages the nav overlays the dark image, so text should be white.
-  // On other pages, it adapts to theme.
   const isHeroPage = pathname === '/'
+
+  // On the hero page the left panel is dark navy — text should always be white.
+  const lightText = isHeroPage && !scrolled
 
   return (
     <>
@@ -43,28 +44,32 @@ export default function Header() {
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
           scrolled
-            ? 'py-3 bg-surface/80 backdrop-blur-xl border-b border-subtle'
-            : 'py-5 bg-transparent'
+            ? 'py-3 bg-surface/90 backdrop-blur-xl border-b border-subtle'
+            : 'py-5 bg-transparent border-b border-transparent'
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded-sm bg-groove-gold flex items-center justify-center">
-              <span className="text-black font-display font-bold text-xs">G</span>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+          {/* Logo — left */}
+          <Link href="/" className="flex items-center gap-1 flex-none group">
             <span
               className={cn(
-                'font-display font-semibold text-base tracking-widest uppercase transition-colors duration-300',
-                scrolled || !isHeroPage ? 'text-primary' : 'text-white'
+                'font-display font-bold text-xl tracking-[0.08em] uppercase transition-colors duration-300',
+                lightText ? 'text-white' : 'text-primary'
               )}
             >
-              Groove Infra
+              Groove
+            </span>
+            {/* Decorative dot — aria-hidden so screen readers read only "Groove" */}
+            <span
+              aria-hidden="true"
+              className="font-display font-bold text-xl text-groove-copper group-hover:scale-110 transition-transform duration-200"
+            >
+              .
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          {/* Nav — absolutely centered */}
+          <nav className="hidden md:flex items-center gap-9 absolute left-1/2 -translate-x-1/2">
             {navLinks.map((link) => {
               const active = pathname === link.href || pathname.startsWith(link.href + '/')
               return (
@@ -74,17 +79,16 @@ export default function Header() {
                   className={cn(
                     'text-sm tracking-wide transition-colors duration-200 relative group',
                     active
-                      ? 'text-groove-gold'
-                      : scrolled || !isHeroPage
-                      ? 'text-secondary hover:text-primary'
-                      : 'text-white hover:text-white'
+                      ? 'text-groove-copper'
+                      : lightText
+                      ? 'text-white/75 hover:text-white'
+                      : 'text-secondary hover:text-primary'
                   )}
                 >
                   {link.label}
                   <span
-                    className={
-                      cn(
-                      'absolute -bottom-0.5 left-0 h-px bg-groove-gold transition-all duration-100',
+                    className={cn(
+                      'absolute -bottom-0.5 left-0 h-px bg-groove-copper transition-all duration-200',
                       active ? 'w-full' : 'w-0 group-hover:w-full'
                     )}
                   />
@@ -94,24 +98,25 @@ export default function Header() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-4">
             <ThemeToggle />
             <Link
               href="/contact"
               className={cn(
-                'hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300',
-                scrolled || !isHeroPage
-                  ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-black text-white hover:opacity-80'
+                'hidden md:inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider transition-all duration-200',
+                lightText
+                  ? 'text-white/75 hover:text-white'
+                  : 'text-secondary hover:text-groove-copper'
               )}
             >
-              Enquire
+              Start a Project
+              <ArrowUpRight size={12} />
             </Link>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className={cn(
                 'md:hidden p-2 transition-colors',
-                scrolled || !isHeroPage ? 'text-secondary hover:text-primary' : 'text-white/80 hover:text-white'
+                lightText ? 'text-white/80 hover:text-white' : 'text-secondary hover:text-primary'
               )}
               aria-label="Toggle menu"
             >
@@ -154,7 +159,7 @@ export default function Header() {
                       href={link.href}
                       className={cn(
                         'text-2xl font-display font-medium',
-                        pathname === link.href ? 'text-accent-gold' : 'text-primary'
+                        pathname === link.href ? 'text-groove-copper' : 'text-primary'
                       )}
                     >
                       {link.label}
@@ -169,9 +174,10 @@ export default function Header() {
                 >
                   <Link
                     href="/contact"
-                    className="inline-flex items-center px-7 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold tracking-wide uppercase"
+                    className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-groove-copper text-white text-sm font-semibold tracking-wide uppercase"
                   >
-                    Enquire
+                    Start a Project
+                    <ArrowUpRight size={14} />
                   </Link>
                 </motion.div>
               </div>
