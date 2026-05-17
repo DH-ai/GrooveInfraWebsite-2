@@ -18,31 +18,31 @@ const workingPhases = [
   { num: '05', title: 'Production', desc: 'Procurement, fabrication, and pre-assembly of all custom elements at our production units.' },
   { num: '06', title: 'Technology', desc: 'AV, smart home, lighting control, and MEP integration coordinated with specialist consultants.' },
   { num: '07', title: 'Deployment', desc: 'On-site construction, quality checks at every milestone, and snagging before handover.' },
-  { num: '08', title: 'User Experience', desc: 'Post-handover review, client training on installed systems, and a 12-month warranty period.' },
+  { num: '08', title: 'User Experience', desc: 'Post-handover review, client training on installed systems.' },
 ]
 
 const team = [
   {
-    name: 'Abhay',
+    name: 'Abhay Chaturvedi',
     role: 'Founder & CEO',
-    image: 'https://picsum.photos/seed/team-abhay/400/400',
-    bio: 'Visionary entrepreneur with 15+ years in commercial construction. Built Groove Infra from a small fit-out team into one of India\'s most trusted interior construction firms.',
+    image: 'https://media.licdn.com/dms/image/v2/D4E03AQFQtx4JESlynw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1643562051823?e=1780531200&v=beta&t=LFM5I5yGZJMhC6pU2Rm97m4c0SH_yPO0Im9XEPT0h8c',
+    bio: 'A Project Management Professional having more than 18 years of experience in Commercial interior fit outs , business development, strategic management. Worked with renowned organizations like Bose India Ltd., LG India Ltd. Amtek Auto Ltd. etc.  Handled various projects such as Corporate offices, Warehouse, Data centers, IT parks, Hospitality & Retail projects. Well conversant with Team Building activities including vendor selection, Project Planning, Negotiation, Budgeting, MIS etc',
   },
-  {
-    name: 'Dhruv Chaturvedi',
-    role: 'Chief Technology Officer',
-    image: 'https://picsum.photos/seed/team-dhruv/400/400',
-    bio: 'Leads technology, digital systems, and internal tooling at Groove Infra. Passionate about using technology to transform how interior projects are planned and delivered.',
-  },
-  {
-    name: 'Rohit Chaturvedi',
-    role: 'Chief Design Officer',
-    image: 'https://picsum.photos/seed/team-rohit/400/400',
-    bio: 'Award-winning designer responsible for Groove Infra\'s creative direction. Every project that leaves our studio carries Rohit\'s signature balance of aesthetics and function.',
-  },
+  // {
+  //   name: 'Dhruv Chaturvedi',
+  //   role: 'Chief Technology Officer',
+  //   image: 'https://picsum.photos/seed/team-dhruv/400/400',
+  //   bio: 'Leads technology, digital systems, and internal tooling at Groove Infra.',
+  // },
+  // {
+  //   name: 'Rohit Chaturvedi',
+  //   role: 'Chief Design Officer',
+  //   image: 'https://picsum.photos/seed/team-rohit/400/400',
+  //   bio: '<Upcoming></Upcoming> designer responsible for Groove Infra\'s creative direction. Every project that leaves our studio carries Rohit\'s signature balance of aesthetics and function.',
+  // },
 ]
 
-const serviceAreas = ['Delhi', 'Gurgaon', 'Noida', 'Jaipur', 'Mumbai']
+const serviceAreas = ['Delhi', 'Gurgaon', 'Noida']
 
 export default function AboutPage() {
   return (
@@ -99,15 +99,16 @@ export default function AboutPage() {
             </div>
             <div className="space-y-5 text-secondary leading-relaxed text-lg">
               <p>
-                Groove Infra was founded on a simple belief: that the built environment shapes
-                human behaviour. A well-designed retail store increases dwell time and sales. A
-                thoughtful office reduces friction and boosts productivity. A beautifully executed
-                hotel lobby sets the tone for every guest experience.
+                
+                At Groove Infra, we believe great spaces do more than look good — they shape experiences.
+                Whether it&apos;s a retail outlet, workspace, hospitality project, 
+                or commercial interior, every detail influences how people i
+                nteract with the environment around them.
               </p>
               <p>
-                Over 12 years, we&apos;ve delivered 200+ projects for brands ranging from D2C
-                startups to Fortune 500 companies — each one a testament to our obsession with
-                detail, rigour in execution, and commitment to keeping promises.
+                Over the years, we&apos;ve worked with businesses across India to deliver thoughtfully
+                designed and precisely executed spaces, built on a foundation of 
+                craftsmanship, reliability, and long-term trust.
               </p>
             </div>
           </AnimatedSection>
@@ -128,10 +129,7 @@ export default function AboutPage() {
               opportunity to create something that outlasts the brief — a space with genuine
               character, embedded purpose, and long-term durability.
             </p>
-            <p className="text-secondary leading-relaxed">
-              Our 80+ team of architects, project managers, site engineers, and craftspeople work
-              as one seamless unit, ensuring that what is designed is exactly what gets built.
-            </p>
+            
           </AnimatedSection>
         </div>
       </section>
@@ -244,7 +242,7 @@ export default function AboutPage() {
             Ready to Transform Your Space?
           </h2>
           <p className="text-secondary mb-8 max-w-md mx-auto">
-            Whether it&apos;s a single store or a 50-city rollout — we&apos;re ready to build.
+            Whether it&apos;s a single store or a city rollout — we&apos;re ready to build.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
