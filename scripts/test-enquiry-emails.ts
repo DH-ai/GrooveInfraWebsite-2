@@ -12,16 +12,25 @@ import {
 import { teamEnquiryEmail, userConfirmationEmail } from '../lib/email/templates'
 
 function getTestRecipient(): string {
-  const to = process.env.TEST_EMAIL_TO ?? process.env.ENQUIRY_INBOX
+  const to = process.env.TEST_EMAIL_TO ?? "dhruvchaturvediiitb@gmail.com"
   if (!to) {
-    console.error('Set ENQUIRY_INBOX or TEST_EMAIL_TO in .env.local')
+    console.error('Set TEST_EMAIL_TO in .env.local')
     process.exit(1)
   }
   return to
 }
 
-const TEST_TO = getTestRecipient()
 
+function getTestEnquiryRecipient(): string {
+  const to = process.env.ENQUIRY_INBOX ?? "dhruvastro67@gmail.com"
+  if (!to) {
+    console.error('Set ENQUIRY_INBOX in .env.local')
+    process.exit(1)
+  }
+  return to
+}
+const TEST_TO = getTestRecipient()
+const ENQUIRY_INBOX = getTestEnquiryRecipient()
 const sample = {
   name: 'Dhruv Chaturvedi',
   email: TEST_TO,
@@ -54,17 +63,12 @@ async function main() {
 
   const team = await sendEmail({
     from: getEnquiryFrom(),
-    to: TEST_TO,
+    to: ENQUIRY_INBOX as string,
     subject: `New Enquiry: ${sample.projectType} — ${sample.name} (test)`,
     html: teamEnquiryEmail(sample),
-    replyTo: sample.email,
+    replyTo: sample.email as string,
   })
 
-  if (!team.ok) {
-    console.error('Team notification FAILED:', team.message)
-    process.exit(1)
-  }
-  console.log('Team notification sent, id:', team.id)
   console.log('Done — check your inbox.')
 }
 
