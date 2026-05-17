@@ -11,9 +11,20 @@ export const metadata: Metadata = {
 }
 
 const contactInfo = [
-  { icon: Mail, label: 'Email', value: 'hello@grooveinfra.in', href: 'mailto:hello@grooveinfra.in' },
-  { icon: Phone, label: 'Phone', value: '+91 22 1234 5678', href: 'tel:+912212345678' },
-  { icon: MapPin, label: 'Office', value: 'Bandra Kurla Complex, Mumbai 400051', href: '#' },
+  {
+    icon: Mail,
+    label: 'Email',
+    value: 'contactus@grooveinfra.in',
+    href: 'mailto:contactus@grooveinfra.in',
+  },
+  { icon: Phone, label: 'Phone', value: '+91 88003 85198', href: 'tel:+918800385198' },
+  {
+    icon: MapPin,
+    label: 'Office',
+    value:
+      'Plot No-416/2, Metro Pillar No-127, Mehrauli-Gurgaon Rd, Ghitorni, New Delhi, Delhi 110030',
+    href: 'https://www.google.com/maps/search/?api=1&query=Plot+No-416%2F2%2C+Metro+Pillar+No-127%2C+Mehrauli-Gurgaon+Rd%2C+Ghitorni%2C+New+Delhi%2C+Delhi+110030',
+  },
 ]
 
 export default function ContactPage() {

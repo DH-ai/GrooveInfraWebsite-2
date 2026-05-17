@@ -67,14 +67,20 @@ function CarouselRow({
 }
 
 export default function PhotoCarousel({ projects }: PhotoCarouselProps) {
-  if (!projects.length) return null
+  const items = projects
+    .map((p) => {
+      const src = getCoverImage(p)
+      if (!src) return null
+      return {
+        src,
+        href: `/projects/${p.slug}`,
+        title: p.title,
+        category: p.category,
+      }
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
 
-  const items = projects.map((p) => ({
-    src: getCoverImage(p),
-    href: `/projects/${p.slug}`,
-    title: p.title,
-    category: p.category,
-  }))
+  if (!items.length) return null
 
   const row1 = items
   const row2 = [...items.slice(Math.floor(items.length / 2)), ...items.slice(0, Math.floor(items.length / 2))]

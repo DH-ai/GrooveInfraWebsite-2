@@ -4,17 +4,12 @@ import { ArrowRight, Sparkles, Boxes, Store, BarChart3 } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
 export const metadata: Metadata = {
-  title: 'Future programs',
+  title: 'Innovation',
   description:
-    'Internal roadmap for digital tools, modular systems, and platforms that support how Groove Infra delivers interior construction.',
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false },
-  },
+    'Groove Infra Innovation Lab — reimagining the future of interior construction with AI, modular systems, and digital platforms.',
 }
 
-const programCards = [
+const innovations = [
   {
     icon: Sparkles,
     title: 'AI Cost Estimator',
@@ -58,25 +53,25 @@ export default function InnovationPage() {
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-12 bg-groove-gold" />
             <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-              Future programs
+              Innovation Lab
             </span>
           </div>
           <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold text-primary leading-tight mb-6">
             Groove Infra
             <br />
-            Future programs
+            Innovation Lab
           </h1>
           <p className="text-secondary text-xl leading-relaxed max-w-xl">
-            Reimagining how interior construction is delivered — with stronger tooling, modular
-            systems, and data where it helps. Building smarter, faster, and more sustainable spaces.
+            Reimagining the future of interior construction with cutting-edge technology and
+            innovation. Building smarter, faster, and more sustainable spaces.
           </p>
         </AnimatedSection>
       </section>
 
-      {/* Program cards */}
+      {/* Innovation cards */}
       <section className="pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {programCards.map((item, i) => {
+          {innovations.map((item, i) => {
             const Icon = item.icon
             return (
               <AnimatedSection key={item.title} delay={i * 0.08}>
@@ -125,10 +120,10 @@ export default function InnovationPage() {
               </h2>
               <div className="space-y-4 text-secondary leading-relaxed">
                 <p>
-                  At Groove Infra, we believe the future of commercial interior construction lies at
-                  the intersection of technology, creativity, and craftsmanship. Our team is dedicated
-                  to developing solutions that make interior construction faster, smarter, and more
-                  sustainable.
+                  At Groove Infra, we believe the future of commercial interior construction lies
+                  at the intersection of technology, creativity, and craftsmanship. Our innovation
+                  lab is dedicated to developing solutions that make interior construction faster,
+                  smarter, and more sustainable.
                 </p>
                 <p>
                   We&apos;re investing in AI-powered cost estimation, modular interior systems,
@@ -141,7 +136,7 @@ export default function InnovationPage() {
             <AnimatedSection delay={0.15}>
               <div className="rounded-2xl border border-subtle bg-base p-8">
                 <h3 className="font-display text-xl font-bold text-primary mb-4">
-                  Interested in these initiatives?
+                  Interested in Our Innovation Initiatives?
                 </h3>
                 <p className="text-secondary text-sm leading-relaxed mb-6">
                   Let&apos;s discuss how we can leverage cutting-edge technology to transform your

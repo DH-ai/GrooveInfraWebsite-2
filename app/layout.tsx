@@ -31,7 +31,9 @@ export const metadata: Metadata = {
     'retail interior',
     'office interior',
     'hospitality design',
-    'Mumbai',
+    'Delhi',
+    'Gurgaon',
+    'NCR',
     'India',
   ],
 }

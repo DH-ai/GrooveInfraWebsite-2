@@ -5,10 +5,10 @@ import { useInView } from 'framer-motion'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
 const stats = [
-  { value: 200, suffix: '+', label: 'Projects Delivered', description: 'Across retail, office & hospitality' },
-  { value: 50, suffix: '+', label: 'Brand Partners', description: 'From startups to Fortune 500' },
-  { value: 12, suffix: '+', label: 'Years of Excellence', description: 'Trusted since 2012' },
-  { value: 98, suffix: '%', label: 'On-Time Delivery', description: 'Precision execution, every time' },
+  { value: 150, suffix: '+', label: 'Projects Delivered', description: 'Across retail, office & hospitality' },
+  { value: 25, suffix: '+', label: 'Brands', description: 'Retail, commercial & hospitality partners' },
+  { value: 11, suffix: '+', label: 'Years of Experience', description: 'Trusted since 2016' },
+  { value: 96, suffix: '%', label: 'One-Time Completion', description: 'Precision execution, every time' },
 ]
 
 function CountUp({ target, suffix }: { target: number; suffix: string }) {

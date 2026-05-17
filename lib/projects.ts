@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import type { Project, ProjectMetadata, Testimonial, ProjectCategory } from '@/types/project'
+import type { Project, ProjectMetadata, Testimonial } from '@/types/project'
+import { hasRealCoverImage } from '@/lib/utils'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content', 'projects')
 const PUBLIC_IMAGES_DIR = path.join(process.cwd(), 'public', 'images', 'projects')
@@ -34,7 +35,7 @@ export function getAllProjects(): Project[] {
 
       const metadata: ProjectMetadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
       const localImages = getLocalImages(dir.name)
-      const images = localImages.length > 0 ? localImages : (metadata.placeholder_images ?? [])
+      const images = localImages
 
       return {
         ...metadata,
@@ -53,6 +54,10 @@ export function getFeaturedProjects(): Project[] {
   const all = getAllProjects()
   const featured = all.filter((p) => p.featured)
   return featured.length ? featured : all.slice(0, 6)
+}
+
+export function getProjectsForCarousel(): Project[] {
+  return getAllProjects().filter((p) => p.images.length > 0 && hasRealCoverImage(p))
 }
 
 export function getAllImages(): string[] {

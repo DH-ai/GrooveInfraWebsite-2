@@ -35,13 +35,15 @@ function ProjectCard({
             whileHover={{ scale: 1.04 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            <Image
-              src={cover}
-              alt={project.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+            {cover && (
+              <Image
+                src={cover}
+                alt={project.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            )}
           </motion.div>
 
           {/* Gradients */}

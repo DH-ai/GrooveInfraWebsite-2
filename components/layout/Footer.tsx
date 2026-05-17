@@ -33,18 +33,27 @@ export default function Footer() {
             </Link>
             <p className="text-sm text-secondary leading-relaxed mb-6 max-w-xs">
               Premium interior construction for retail, commercial, hospitality, and residential
-              projects across India since 2012.
+              projects across India since 2016.
             </p>
             <div className="flex flex-col gap-3 text-sm text-secondary">
-              <a href="mailto:hello@grooveinfra.in" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
-                <Mail size={13} /> hello@grooveinfra.in
+              <a href="mailto:contactus@grooveinfra.in" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
+                <Mail size={13} /> contactus@grooveinfra.in
               </a>
-              <a href="tel:+912212345678" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
-                <Phone size={13} /> +91 22 1234 5678
+              <a href="tel:+918800385198" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
+                <Phone size={13} /> +91 88003 85198
               </a>
-              <span className="flex items-center gap-2">
-                <MapPin size={13} /> Mumbai, Maharashtra
-              </span>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Plot+No-416%2F2%2C+Metro+Pillar+No-127%2C+Mehrauli-Gurgaon+Rd%2C+Ghitorni%2C+New+Delhi%2C+Delhi+110030"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-2 hover:text-accent-gold transition-colors"
+              >
+                <MapPin size={13} className="flex-shrink-0 mt-0.5" />
+                <span>
+                  Plot No-416/2, Metro Pillar No-127, Mehrauli-Gurgaon Rd, Ghitorni, New Delhi, Delhi
+                  110030
+                </span>
+              </a>
             </div>
           </div>
 
@@ -89,7 +98,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="py-6 border-t border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-custom">
           <span>© {new Date().getFullYear()} Groove Infra. All rights reserved.</span>
-          <span>Crafted with precision in Mumbai, India.</span>
+          <span>Crafted with precision in Delhi, India.</span>
         </div>
       </div>
     </footer>

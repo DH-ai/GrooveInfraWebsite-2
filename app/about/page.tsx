@@ -7,7 +7,7 @@ import AnimatedSection from '@/components/ui/AnimatedSection'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Groove Infra — 12+ years of building premium interior spaces across India. Our story, philosophy, team, and working process.',
+    'Groove Infra — 11+ years of building premium interior spaces across India. Our story, philosophy, team, and working process.',
 }
 
 const workingPhases = [
@@ -62,7 +62,7 @@ export default function AboutPage() {
             Driven by Vision.
           </h1>
           <p className="text-secondary text-xl leading-relaxed max-w-xl">
-            Since 2012, Groove Infra has been transforming empty spaces into experiences — retail
+            Since 2016, Groove Infra has been transforming empty spaces into experiences — retail
             environments that sell, offices that inspire, hospitality spaces that linger in memory.
           </p>
         </AnimatedSection>

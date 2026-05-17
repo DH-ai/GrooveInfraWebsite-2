@@ -28,13 +28,19 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               whileHover={{ scale: 1.06 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
             >
-              <Image
-                src={cover}
-                alt={project.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
+              {cover ? (
+                <Image
+                  src={cover}
+                  alt={project.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+              ) : (
+                <motion.div className="absolute inset-0 bg-surface flex items-center justify-center p-6">
+                  <span className="font-display text-lg text-muted-custom text-center">{project.title}</span>
+                </motion.div>
+              )}
             </motion.div>
 
             {/* Overlay */}

@@ -41,15 +41,17 @@ export default function ProjectPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-base pt-20">
       {/* Hero image */}
-      <div className="relative h-[55vh] sm:h-[65vh] overflow-hidden">
-        <Image
-          src={cover}
-          alt={project.title}
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
+      <div className="relative h-[55vh] sm:h-[65vh] overflow-hidden bg-surface">
+        {cover && (
+          <Image
+            src={cover}
+            alt={project.title}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--bg))] via-black/20 to-black/40" />
         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
           <div className="max-w-7xl mx-auto">
