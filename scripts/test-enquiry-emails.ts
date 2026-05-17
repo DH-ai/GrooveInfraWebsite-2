@@ -11,7 +11,16 @@ import {
 } from '../lib/email/resend'
 import { teamEnquiryEmail, userConfirmationEmail } from '../lib/email/templates'
 
-const TEST_TO = process.env.TEST_EMAIL_TO ?? 'dhruvastro67@gmail.com'
+function getTestRecipient(): string {
+  const to = process.env.TEST_EMAIL_TO ?? process.env.ENQUIRY_INBOX
+  if (!to) {
+    console.error('Set ENQUIRY_INBOX or TEST_EMAIL_TO in .env.local')
+    process.exit(1)
+  }
+  return to
+}
+
+const TEST_TO = getTestRecipient()
 
 const sample = {
   name: 'Dhruv Chaturvedi',

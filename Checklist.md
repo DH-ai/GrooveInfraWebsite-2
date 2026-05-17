@@ -2,19 +2,22 @@
 
 ## Email setup (clarified)
 
-| Address | Purpose |
-|---------|---------|
-| **contactus@grooveinfra.in** | Public contact on the website. People email Groove Infra directly. Set up **forwarding** at your domain host (not Resend). |
-| **noreply@grooveinfra.in** | Resend **From** when someone submits the enquiry form → sends **confirmation** to the visitor. |
-| **enquire@grooveinfra.in** | Resend **From** for **you** when someone submits the form → alert sent to your personal inbox. |
-| **dhruvastro67@gmail.com** (or `ENQUIRY_INBOX`) | Where enquiry alerts are **delivered**. |
+| Address | Purpose | Where it lives |
+|---------|---------|----------------|
+| **contactus@grooveinfra.in** | Public contact on the website. People email Groove Infra directly. | Site + `PUBLIC_CONTACT_EMAIL` in env |
+| **noreply@grooveinfra.in** | Form confirmation **to the visitor** | `NOREPLY_FROM` in env |
+| **enquire@grooveinfra.in** | Form alert **from** address (you receive the lead info) | `ENQUIRY_FROM` in env |
+| **Your personal Gmail** | Where enquiry alerts are **delivered** | `ENQUIRY_INBOX` in **`.env.local` only** — never commit |
 
-### Resend / DNS
-- [ ] Verify `grooveinfra.in` at [resend.com/domains](https://resend.com/domains)
-- [ ] Set `.env.local`: `NOREPLY_FROM`, `ENQUIRY_FROM`, `ENQUIRY_INBOX`
-- [ ] Set `RESEND_USE_TEST_SENDER=false` after domain is live
-- [ ] Forward **contactus@** → personal Gmail (registrar / Cloudflare Email Routing)
-- [ ] Test form: visitor gets confirmation from noreply@, you get alert from enquire@
+### Environment files
+- [ ] Copy `.env.local.example` → `.env.local`
+- [ ] Set `ENQUIRY_INBOX` to your personal email in `.env.local` (not in `.env.example` or git)
+- [ ] Set `RESEND_API_KEY`, `NOREPLY_FROM`, `ENQUIRY_FROM` in `.env.local`
+- [ ] On Vercel: add the same vars under Project → Environment Variables (not in the repo)
+
+### Email (ongoing)
+- [ ] Forward **contactus@** → personal inbox (registrar / Cloudflare Email Routing)
+- [ ] Test form: visitor gets confirmation from noreply@, you get alert from enquire@ → `ENQUIRY_INBOX`
 
 ### Future (not Resend)
 - [ ] Reply to leads via email/SMS from admin (see Admin panel below)
@@ -54,4 +57,4 @@ Internal tool (e.g. `admin.grooveinfra.in`) for operations — not on the public
 - [x] Project-only images in Our Work carousel
 - [x] Dual Resend emails on contact form (confirmation + enquiry alert)
 - [ ] Add real project photos so Our Work carousel appears
-- [ ] Production env on Vercel (`ENQUIRY_INBOX`, Resend keys, domain verified)
+- [ ] Production env on Vercel (`ENQUIRY_INBOX`, Resend keys)

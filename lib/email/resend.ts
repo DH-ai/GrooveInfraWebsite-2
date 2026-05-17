@@ -26,16 +26,19 @@ export function getEnquiryFrom(): string {
   return devOr(process.env.ENQUIRY_FROM ?? 'Groove Infra Enquiries <enquire@grooveinfra.in>')
 }
 
-/** Your personal inbox — where enquiry notifications are delivered. */
+/** Your private inbox — set ENQUIRY_INBOX in .env.local only (never commit). */
 export function getEnquiryInbox(): string {
-  return (
-    process.env.ENQUIRY_INBOX ??
-    process.env.CONTACT_EMAIL ?? // legacy name
-    'dhruvastro67@gmail.com'
-  )
+  const inbox =
+    process.env.ENQUIRY_INBOX ?? process.env.CONTACT_EMAIL // legacy; prefer ENQUIRY_INBOX
+
+  if (!inbox) {
+    throw new Error('ENQUIRY_INBOX is not set. Add your personal email to .env.local')
+  }
+
+  return inbox
 }
 
-/** Public address on the website for manual contact (not the form pipeline). */
+/** Public address on the website for manual contact (not your private inbox). */
 export function getPublicContactEmail(): string {
   return process.env.PUBLIC_CONTACT_EMAIL ?? 'contactus@grooveinfra.in'
 }

@@ -31,11 +31,14 @@ Create a `.env.local` at the project root:
 
 ```env
 RESEND_API_KEY=re_xxxxxxxxxxxx
-ENQUIRY_INBOX=dhruvastro67@gmail.com          # you receive form alerts here
-NOREPLY_FROM=Groove Infra <noreply@grooveinfra.in>   # visitor confirmation
-ENQUIRY_FROM=Groove Infra Enquiries <enquire@grooveinfra.in>  # alert sender
-PUBLIC_CONTACT_EMAIL=contactus@grooveinfra.in # public site email (forward separately)
-RESEND_USE_TEST_SENDER=true                   # false after domain verified in Resend
+
+# Public (@grooveinfra.in)
+PUBLIC_CONTACT_EMAIL=contactus@grooveinfra.in
+NOREPLY_FROM=Groove Infra <noreply@grooveinfra.in>
+ENQUIRY_FROM=Groove Infra Enquiries <enquire@grooveinfra.in>
+
+# Private — set only in .env.local (never commit)
+ENQUIRY_INBOX=your-personal@gmail.com
 ```
 
 See [Checklist.md](Checklist.md) for email roles and admin panel tasks.
