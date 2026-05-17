@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 
+const SLIDE_INTERVAL_MS = 6000
+
 const slides = [
   {
     image:
@@ -46,7 +48,7 @@ export default function Hero() {
 
   useEffect(() => {
     if (paused) return
-    const id = setInterval(next, 6000)
+    const id = setInterval(next, SLIDE_INTERVAL_MS)
     return () => clearInterval(id)
   }, [paused, next])
 
@@ -215,7 +217,7 @@ export default function Hero() {
             className="absolute bottom-0 left-0 h-[2px] bg-groove-copper/70 origin-left"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 6, ease: 'linear' }}
+            transition={{ duration: SLIDE_INTERVAL_MS / 1000, ease: 'linear' }}
             style={{ width: '100%' }}
           />
         )}

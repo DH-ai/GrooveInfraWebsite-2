@@ -113,10 +113,10 @@ export default function Services() {
                     </h3>
                     <div
                       style={{
-                        maxHeight: isHovered ? '80px' : '0',
+                        maxHeight: isHovered ? '120px' : '0',
                         opacity: isHovered ? 1 : 0,
                         overflow: 'hidden',
-                        transition: 'max-height 0.35s ease, opacity 0.3s ease',
+                        transition: 'max-height 0.4s ease, opacity 0.3s ease',
                       }}
                     >
                       <p className="text-sm text-secondary leading-relaxed mt-3">

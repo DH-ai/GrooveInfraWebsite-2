@@ -59,7 +59,10 @@ export default function Header() {
             >
               Groove
             </span>
-            <span className="font-display font-bold text-xl text-groove-copper group-hover:scale-110 transition-transform duration-200">
+            <span
+              aria-hidden="true"
+              className="font-display font-bold text-xl text-groove-copper group-hover:scale-110 transition-transform duration-200"
+            >
               .
             </span>
           </Link>
