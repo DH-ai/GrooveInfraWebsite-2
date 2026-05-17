@@ -13,10 +13,10 @@ const faqs = [
     q: 'How long does a typical interior project take?',
     a: 'Project timelines depend on scope and size. A single retail store typically takes 8–14 weeks; a mid-sized corporate office takes 16–24 weeks; large hospitality and residential projects can run 20–36 weeks. We provide a detailed timeline at project kickoff.',
   },
-  {
-    q: 'Do you work outside Mumbai?',
-    a: 'Yes — we operate in Delhi, Gurgaon, Noida, Jaipur, Mumbai, Hyderabad, Bangalore, and Goa. We also handle nationwide rollouts for retail chains across 50+ cities.',
-  },
+  // {
+  //   q: 'Do you work outside Mumbai?',
+  //   a: 'Yes — we operate in Delhi, Gurgaon, Noida, Jaipur, Mumbai, Hyderabad, Bangalore, and Goa. We also handle nationwide rollouts for retail chains across 50+ cities.',
+  // },
   {
     q: 'What is the minimum project budget you work with?',
     a: 'Our minimum engagement is ₹20 lakhs for interior fit-outs. For nationwide rollouts, the aggregate budget is considered rather than per-store spend. Contact us and we\'ll advise on feasibility.',
@@ -25,10 +25,10 @@ const faqs = [
     q: 'Do you provide design services, or just construction?',
     a: 'We provide fully integrated design-and-build services — from concept and space planning through to on-site construction and handover. You work with one team throughout, ensuring design intent is perfectly executed.',
   },
-  {
-    q: 'What warranties do you offer after handover?',
-    a: 'All Groove Infra projects come with a standard 12-month warranty covering material defects and workmanship issues. For specific finishes and systems (AV, smart home), extended manufacturer warranties apply.',
-  },
+  // {
+  //   q: 'What warranties do you offer after handover?',
+  //   a: 'All Groove Infra projects come with a standard 12-month warranty covering material defects and workmanship issues. For specific finishes and systems (AV, smart home), extended manufacturer warranties apply.',
+  // },
 ]
 
 export default function FaqAccordion() {

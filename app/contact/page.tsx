@@ -91,7 +91,7 @@ export default function ContactPage() {
             <div className="p-6 rounded-2xl bg-surface-2 border border-subtle">
               <h3 className="font-semibold text-primary mb-3 text-sm">We Operate In</h3>
               <div className="flex flex-wrap gap-1.5">
-                {['Mumbai', 'Delhi', 'Gurgaon', 'Noida', 'Jaipur', 'Hyderabad', 'Bangalore', 'Goa'].map((city) => (
+                {['Delhi', 'Gurgaon', 'Noida', 'NCR (National Capital Region)'].map((city) => (
                   <span key={city} className="text-xs px-2.5 py-1 rounded-full border border-subtle text-secondary">
                     {city}
                   </span>
