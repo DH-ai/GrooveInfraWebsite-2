@@ -152,4 +152,204 @@
   .dark .glow-gold-text {
     text-shadow: 0 0 20px rgba(196, 98, 45, 0.45);
   }
+
+  /* ─── Hero art panel — CSS-only, no external images needed ─── */
+
+  /* Main gradient background of the right panel */
+  .hero-art-panel {
+    position: relative;
+    background:
+      radial-gradient(ellipse 90% 70% at 75% 15%, rgba(196, 98, 45, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 55% at 20% 85%, rgba(196, 98, 45, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(30, 50, 100, 0.25) 0%, transparent 70%),
+      linear-gradient(148deg, #080c14 0%, #0e1628 45%, #080c14 100%);
+    overflow: hidden;
+  }
+
+  /* Diagonal hairline grid overlay */
+  .hero-art-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        -50deg,
+        rgba(255, 255, 255, 0.025) 0px,
+        rgba(255, 255, 255, 0.025) 1px,
+        transparent 1px,
+        transparent 48px
+      );
+    pointer-events: none;
+  }
+
+  /* Fine dot matrix overlay */
+  .hero-art-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  /* Soft glowing blob — top right */
+  .hero-orb-1 {
+    position: absolute;
+    top: 8%;
+    right: 10%;
+    width: clamp(200px, 28vw, 380px);
+    height: clamp(200px, 28vw, 380px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196, 98, 45, 0.22) 0%, transparent 70%);
+    filter: blur(48px);
+    animation: hero-float-a 14s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Soft glowing blob — bottom left */
+  .hero-orb-2 {
+    position: absolute;
+    bottom: 12%;
+    left: 8%;
+    width: clamp(140px, 18vw, 260px);
+    height: clamp(140px, 18vw, 260px);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(80, 120, 220, 0.14) 0%, transparent 70%);
+    filter: blur(40px);
+    animation: hero-float-b 18s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Thin copper ring accent */
+  .hero-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(260px, 36vw, 520px);
+    height: clamp(260px, 36vw, 520px);
+    border-radius: 50%;
+    border: 1px solid rgba(196, 98, 45, 0.12);
+    animation: hero-ring-spin 40s linear infinite;
+    pointer-events: none;
+  }
+
+  .hero-ring::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 30%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(196, 98, 45, 0.6);
+    box-shadow: 0 0 12px rgba(196, 98, 45, 0.5);
+  }
+
+  /* Second, larger ring */
+  .hero-ring-outer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(360px, 50vw, 680px);
+    height: clamp(360px, 50vw, 680px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    animation: hero-ring-spin 60s linear infinite reverse;
+    pointer-events: none;
+  }
+
+  /* Large ghost typography in the background */
+  .hero-bg-text {
+    position: absolute;
+    bottom: -0.1em;
+    right: -0.05em;
+    font-family: var(--font-playfair);
+    font-size: clamp(100px, 16vw, 200px);
+    font-weight: 900;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.045);
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    letter-spacing: -0.04em;
+  }
+
+  /* Small horizontal rule with copper dot */
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-divider::before,
+  .hero-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .hero-divider::before {
+    max-width: 40px;
+  }
+
+  /* Stats strip that lives inside the art panel */
+  .hero-stat-strip {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(8, 12, 20, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .hero-stat-item {
+    flex: 1;
+    padding: 18px 20px;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .hero-stat-item:last-child {
+    border-right: none;
+  }
+
+  .hero-stat-number {
+    font-family: var(--font-playfair);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hero-stat-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* Keyframes */
+  @keyframes hero-float-a {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    30%       { transform: translate(-18px, 28px) scale(1.06); }
+    65%       { transform: translate(14px, -18px) scale(0.94); }
+  }
+
+  @keyframes hero-float-b {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%       { transform: translate(22px, -32px) scale(1.1); }
+  }
+
+  @keyframes hero-ring-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
 }

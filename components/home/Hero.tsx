@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -10,29 +9,21 @@ const SLIDE_INTERVAL_MS = 6000
 
 const slides = [
   {
-    image:
-      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1920&q=80',
     tag: 'Retail Rollouts',
     heading: ['Spaces That', 'Drive Sales'],
     sub: "End-to-end retail fit-outs for India's fastest-growing brands.",
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80',
     tag: 'Commercial Interiors',
     heading: ['Where Work', 'Becomes Culture'],
     sub: 'Corporate environments engineered for performance and identity.',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1920&q=80',
     tag: 'Hospitality & Clubs',
     heading: ['Atmospheres', 'People Return To'],
     sub: 'Hotels, restaurants, and lounges built to leave a lasting impression.',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1920&q=80',
     tag: 'Residential Makeovers',
     heading: ['Your Home,', 'Reimagined'],
     sub: 'Bespoke residential interiors crafted to reflect who you are.',
@@ -160,57 +151,57 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* ── Right panel: image ── */}
-      <div className="hidden lg:block relative flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`img-${current}`}
-            className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.85, ease: [0.25, 0.1, 0.25, 1] }}
-          >
-            <Image
-              src={slides[current].image}
-              alt={slides[current].tag}
-              fill
-              priority={current === 0}
-              className="object-cover"
-              sizes="56vw"
-            />
-          </motion.div>
-        </AnimatePresence>
+      {/* ── Right panel: CSS-only art (no external images) ── */}
+      <div className="hidden lg:block relative flex-1 overflow-hidden hero-art-panel">
+        {/* Ambient blobs */}
+        <div className="hero-orb-1" />
+        <div className="hero-orb-2" />
 
-        {/* Subtle vertical gradient at left edge to blend with dark panel */}
-        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-groove-navy to-transparent" />
+        {/* Spinning rings */}
+        <div className="hero-ring" />
+        <div className="hero-ring-outer" />
 
-        {/* Caption card */}
+        {/* Ghost outline typography */}
+        <span className="hero-bg-text" aria-hidden="true">INFRA</span>
+
+        {/* Stats strip at the bottom */}
+        <div className="hero-stat-strip">
+          {[
+            { n: '200+', l: 'Projects' },
+            { n: '12+',  l: 'Years' },
+            { n: '50+',  l: 'Brands' },
+            { n: '98%',  l: 'On-Time' },
+          ].map((s) => (
+            <div key={s.l} className="hero-stat-item">
+              <div className="hero-stat-number">{s.n}</div>
+              <div className="hero-stat-label">{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Category label card — transitions with current slide */}
         <AnimatePresence mode="wait">
           <motion.div
             key={`caption-${current}`}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            transition={{ delay: 0.35, duration: 0.4 }}
-            className="absolute bottom-8 left-8 bg-black/65 backdrop-blur-md border border-white/10 rounded-2xl p-5 max-w-[220px]"
+            transition={{ delay: 0.25, duration: 0.4 }}
+            className="absolute top-12 right-10 border border-white/10 rounded-2xl px-5 py-4"
+            style={{ background: 'rgba(8,12,20,0.55)', backdropFilter: 'blur(12px)' }}
           >
-            <p className="text-white/45 text-[10px] uppercase tracking-widest mb-1.5">
-              {slides[current].tag}
-            </p>
-            <p className="text-white font-display font-semibold text-sm leading-snug">
-              {slides[current].heading[0]} {slides[current].heading[1]}
-            </p>
+            <p className="text-white/40 text-[9px] uppercase tracking-widest mb-1">Currently showing</p>
+            <p className="text-white font-display font-semibold text-sm">{slides[current].tag}</p>
             <Link
               href="/projects"
-              className="mt-3 inline-flex items-center gap-1.5 text-groove-copper text-xs font-medium hover:gap-2.5 transition-all duration-200"
+              className="mt-2.5 inline-flex items-center gap-1.5 text-groove-copper text-xs font-medium hover:gap-2.5 transition-all duration-200"
             >
               View portfolio <ArrowUpRight size={11} />
             </Link>
           </motion.div>
         </AnimatePresence>
 
-        {/* Auto-play progress bar at the very bottom */}
+        {/* Auto-play progress bar */}
         {!paused && (
           <motion.div
             key={`prog-${current}`}
@@ -223,27 +214,11 @@ export default function Hero() {
         )}
       </div>
 
-      {/* Mobile: show image as full background (small screens only) */}
-      <div className="absolute inset-0 lg:hidden -z-10">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`mob-bg-${current}`}
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Image
-              src={slides[current].image}
-              alt={slides[current].tag}
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </motion.div>
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-groove-navy/85" />
+      {/* Mobile: art panel as full-screen background */}
+      <div className="absolute inset-0 lg:hidden -z-10 hero-art-panel">
+        <div className="hero-orb-1" />
+        <div className="hero-orb-2" />
+        <div className="hero-ring" />
       </div>
     </section>
   )
