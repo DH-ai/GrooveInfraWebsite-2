@@ -111,14 +111,7 @@ export default function Services() {
                     >
                       {service.title}
                     </h3>
-                    <div
-                      style={{
-                        maxHeight: isHovered ? '120px' : '0',
-                        opacity: isHovered ? 1 : 0,
-                        overflow: 'hidden',
-                        transition: 'max-height 0.4s ease, opacity 0.3s ease',
-                      }}
-                    >
+                    <div className={`service-description${isHovered ? ' is-visible' : ''}`}>
                       <p className="text-sm text-secondary leading-relaxed mt-3">
                         {service.description}
                       </p>

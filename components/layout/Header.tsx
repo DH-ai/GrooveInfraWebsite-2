@@ -59,6 +59,7 @@ export default function Header() {
             >
               Groove
             </span>
+            {/* Decorative dot — aria-hidden so screen readers read only "Groove" */}
             <span
               aria-hidden="true"
               className="font-display font-bold text-xl text-groove-copper group-hover:scale-110 transition-transform duration-200"

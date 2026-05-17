@@ -162,7 +162,7 @@ export default function Hero() {
         <div className="hero-ring-outer" />
 
         {/* Ghost outline typography */}
-        <span className="hero-bg-text" aria-hidden="true">INFRA</span>
+        <span className="hero-bg-text" aria-hidden="true">GROOVE</span>
 
         {/* Stats strip at the bottom */}
         <div className="hero-stat-strip">

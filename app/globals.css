@@ -153,7 +153,18 @@
     text-shadow: 0 0 20px rgba(196, 98, 45, 0.45);
   }
 
-  /* ─── Hero art panel — CSS-only, no external images needed ─── */
+  /* Services list — hover-reveal description */
+  .service-description {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
+
+  .service-description.is-visible {
+    max-height: 120px;
+    opacity: 1;
+  }
 
   /* Main gradient background of the right panel */
   .hero-art-panel {
@@ -263,6 +274,8 @@
   /* Large ghost typography in the background */
   .hero-bg-text {
     position: absolute;
+    /* Slight overhang: the descender sits below the container edge and the
+       right edge bleeds off-screen, giving a cropped architectural feel */
     bottom: -0.1em;
     right: -0.05em;
     font-family: var(--font-playfair);
