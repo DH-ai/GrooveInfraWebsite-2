@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getProjectBySlug } from '@/lib/projects'
+import DeleteProjectForm from '@/components/admin/DeleteProjectForm'
 
 export const metadata: Metadata = {
   title: 'Edit Project',
@@ -261,15 +262,14 @@ export default function AdminEditPage({ params, searchParams }: AdminEditPagePro
           </button>
         </form>
 
-        <form action={`/api/admin/projects/${project.slug}`} method="post" className="mt-8">
-          <input type="hidden" name="_action" value="delete" />
-          <button
-            type="submit"
-            className="inline-flex items-center rounded-full border border-red-500/40 px-4 py-2 text-sm text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
-          >
-            Delete project
-          </button>
-        </form>
+        <div className="mt-8">
+          <DeleteProjectForm
+            action={`/api/admin/projects/${project.slug}`}
+            projectTitle={project.title}
+            buttonLabel="Delete project"
+            buttonClassName="inline-flex items-center rounded-full border border-red-500/40 px-4 py-2 text-sm text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
+          />
+        </div>
       </div>
     </div>
   )

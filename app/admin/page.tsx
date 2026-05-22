@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getAllProjects } from '@/lib/projects'
+import DeleteProjectForm from '@/components/admin/DeleteProjectForm'
 
 export const metadata: Metadata = {
   title: 'Admin',
@@ -267,15 +268,11 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
                     >
                       Edit
                     </Link>
-                    <form action={`/api/admin/projects/${project.slug}`} method="post">
-                      <input type="hidden" name="_action" value="delete" />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center rounded-full border border-red-500/40 px-3 py-1 text-xs text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
-                      >
-                        Delete
-                      </button>
-                    </form>
+                    <DeleteProjectForm
+                      action={`/api/admin/projects/${project.slug}`}
+                      projectTitle={project.title}
+                      buttonClassName="inline-flex items-center rounded-full border border-red-500/40 px-3 py-1 text-xs text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
+                    />
                   </div>
                 </div>
               ))}
