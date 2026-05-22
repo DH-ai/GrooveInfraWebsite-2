@@ -6,7 +6,8 @@ export interface ProjectMetadata {
   category: ProjectCategory
   location: string
   client_name: string
-  testimonial: string
+  testimonial?: string
+  basic_description?: string
   description: string
   year?: number
   area?: string

@@ -13,6 +13,7 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const cover = getCoverImage(project)
+  const summary = project.basic_description ?? project.description
 
   return (
     <motion.article
@@ -74,14 +75,18 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 </>
               )}
             </div>
-            {project.description && (
+            {summary && (
               <p className="text-secondary text-sm leading-relaxed line-clamp-2">
-                {project.description}
+                {summary}
               </p>
             )}
-            {project.area && (
-              <div className="mt-3 pt-3 border-t border-subtle flex items-center justify-between">
-                <span className="text-xs text-muted-custom">{project.area}</span>
+            {(project.area || project.duration) && (
+              <div
+                className={`mt-3 pt-3 border-t border-subtle flex items-center ${
+                  project.area && project.duration ? 'justify-between' : 'justify-end'
+                }`}
+              >
+                {project.area && <span className="text-xs text-muted-custom">{project.area}</span>}
                 {project.duration && (
                   <span className="text-xs text-muted-custom">{project.duration}</span>
                 )}

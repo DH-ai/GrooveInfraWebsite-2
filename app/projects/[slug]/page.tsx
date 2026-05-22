@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!project) return {}
   return {
     title: project.title,
-    description: project.description,
+    description: project.basic_description ?? project.description,
   }
 }
 
@@ -84,6 +84,11 @@ export default function ProjectPage({ params }: PageProps) {
             {/* Description */}
             <AnimatedSection>
               <h2 className="font-display text-2xl font-bold text-primary mb-4">About This Project</h2>
+              {project.basic_description && (
+                <p className="text-primary text-lg font-medium mb-3">
+                  {project.basic_description}
+                </p>
+              )}
               <p className="text-secondary leading-relaxed text-lg">{project.description}</p>
             </AnimatedSection>
 
