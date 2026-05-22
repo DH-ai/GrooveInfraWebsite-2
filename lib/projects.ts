@@ -66,9 +66,9 @@ export function getAllImages(): string[] {
 
 export function getAllTestimonials(): Testimonial[] {
   return getAllProjects()
-    .filter((p) => p.testimonial)
-    .map((p) => ({
-      text: p.testimonial,
+
+    .filter((p) => p.testimonial).map((p) => ({
+      text: p.testimonial ?? '',
       client: p.client_name,
       project: p.title,
       slug: p.slug,
