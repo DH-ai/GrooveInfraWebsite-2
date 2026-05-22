@@ -2,24 +2,23 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getAllProjects } from '@/lib/projects'
+import { getProjectBySlug } from '@/lib/projects'
 
 export const metadata: Metadata = {
-  title: 'Admin',
+  title: 'Edit Project',
 }
 
 const CATEGORIES = ['commercial', 'retail', 'residential', 'civil'] as const
 
-interface AdminPageProps {
+interface AdminEditPageProps {
+  params: { slug: string }
   searchParams?: {
     success?: string
-    deleted?: string
     error?: string
-    slug?: string
   }
 }
 
-export default function AdminPage({ searchParams }: AdminPageProps) {
+export default function AdminEditPage({ params, searchParams }: AdminEditPageProps) {
   const adminToken = process.env.ADMIN_TOKEN
   if (!adminToken) {
     redirect('/admin/login?error=missing-config')
@@ -30,9 +29,12 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
     redirect('/admin/login')
   }
 
-  const projects = getAllProjects()
-  const successSlug = searchParams?.success === '1' ? searchParams.slug : undefined
-  const deletedSlug = searchParams?.deleted === '1' ? searchParams.slug : undefined
+  const project = getProjectBySlug(params.slug)
+  if (!project) {
+    redirect('/admin?error=not-found')
+  }
+
+  const success = searchParams?.success === '1'
   const error = searchParams?.error
 
   return (
@@ -44,51 +46,44 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
               Admin
             </p>
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-primary mt-3">
-              Upload New Project
+              Edit Project
             </h1>
+            <p className="text-sm text-muted-custom mt-2">/{project.slug}</p>
           </div>
-          <form action="/api/admin/logout" method="post">
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-subtle text-sm text-secondary hover:text-primary hover:border-groove-gold/50 transition-all"
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/projects/${project.slug}`}
+              className="inline-flex items-center rounded-full border border-subtle px-4 py-2 text-sm text-secondary hover:text-primary hover:border-groove-gold/50 transition-all"
             >
-              Logout
-            </button>
-          </form>
+              View project
+            </Link>
+            <Link
+              href="/admin"
+              className="inline-flex items-center rounded-full border border-subtle px-4 py-2 text-sm text-secondary hover:text-primary hover:border-groove-gold/50 transition-all"
+            >
+              Back to admin
+            </Link>
+          </div>
         </div>
 
-        {successSlug && (
+        {success && (
           <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-            Project created. View it at{' '}
-            <Link href={`/projects/${successSlug}`} className="underline underline-offset-2">
-              /projects/{successSlug}
-            </Link>
-            .
-          </div>
-        )}
-
-        {deletedSlug && (
-          <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-            Project deleted: <span className="font-semibold">{deletedSlug}</span>.
+            Project updated.
           </div>
         )}
 
         {error && (
           <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-            {error === 'slug-exists'
-              ? 'A project with that slug already exists.'
-              : error === 'invalid'
-                ? 'Please fill all required fields.'
-                : error === 'not-found'
-                  ? 'Project not found.'
-                  : error === 'delete-failed'
-                    ? 'Unable to delete the project.'
-                : 'Something went wrong while saving the project.'}
+            {error === 'invalid'
+              ? 'Please fill all required fields.'
+              : error === 'update-failed'
+                ? 'Unable to update the project.'
+                : 'Something went wrong while updating.'}
           </div>
         )}
 
         <form
-          action="/api/admin/projects"
+          action={`/api/admin/projects/${project.slug}`}
           method="post"
           encType="multipart/form-data"
           className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
@@ -99,16 +94,17 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
               <input
                 name="title"
                 required
+                defaultValue={project.title}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="Project title"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
-              Slug (auto if empty)
+              Slug
               <input
                 name="slug"
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="bata-india-office"
+                readOnly
+                defaultValue={project.slug}
+                className="h-11 rounded-xl border border-subtle bg-base px-4 text-muted-custom"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -117,11 +113,8 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
                 name="category"
                 required
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                defaultValue=""
+                defaultValue={project.category}
               >
-                <option value="" disabled>
-                  Select category
-                </option>
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -134,8 +127,8 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
               <input
                 name="location"
                 required
+                defaultValue={project.location}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="Gurgaon, Haryana"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -145,8 +138,8 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
                 type="number"
                 min="1900"
                 max="2100"
+                defaultValue={project.year ?? ''}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="2025"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -154,8 +147,8 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
               <input
                 name="client_name"
                 required
+                defaultValue={project.client_name}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="Bata India LTD"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -163,16 +156,16 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
               <input
                 name="duration"
                 required
+                defaultValue={project.duration ?? ''}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="25 weeks"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
               Area (optional)
               <input
                 name="area"
+                defaultValue={project.area ?? ''}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="10,000 sq ft"
               />
             </label>
           </div>
@@ -184,8 +177,8 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
                 name="basic_description"
                 required
                 rows={2}
+                defaultValue={project.basic_description ?? ''}
                 className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
-                placeholder="Short summary used on cards."
               />
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -194,8 +187,8 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
                 name="description"
                 required
                 rows={4}
+                defaultValue={project.description}
                 className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
-                placeholder="Full project description for the detail page."
               />
             </label>
           </div>
@@ -206,9 +199,13 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
               <input
                 name="cover_image_url"
                 type="url"
+                defaultValue={project.cover_image ?? ''}
                 className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
                 placeholder="https://..."
               />
+              <span className="text-xs text-muted-custom">
+                Leave empty to keep existing cover unless you upload a new file.
+              </span>
             </label>
             <label className="flex flex-col gap-2 text-sm text-secondary">
               Cover image file (optional)
@@ -221,67 +218,58 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
             </label>
           </div>
 
-          <label className="flex flex-col gap-2 text-sm text-secondary">
-            Gallery images (multiple)
+          <label className="flex items-center gap-3 text-sm text-secondary">
             <input
-              name="gallery"
-              type="file"
-              accept="image/*"
-              multiple
-              required
-              className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
+              name="remove_cover"
+              type="checkbox"
+              value="1"
+              className="h-4 w-4 rounded border-subtle bg-base"
             />
+            Remove cover image
           </label>
+
+          <div className="space-y-3">
+            <label className="flex flex-col gap-2 text-sm text-secondary">
+              Add gallery images (optional)
+              <input
+                name="gallery"
+                type="file"
+                accept="image/*"
+                multiple
+                className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
+              />
+            </label>
+            <label className="flex items-center gap-3 text-sm text-secondary">
+              <input
+                name="replace_gallery"
+                type="checkbox"
+                value="1"
+                className="h-4 w-4 rounded border-subtle bg-base"
+              />
+              Replace existing gallery images
+            </label>
+            <p className="text-xs text-muted-custom">
+              Current gallery images: {project.images.length}. If you replace, upload new images.
+            </p>
+          </div>
 
           <button
             type="submit"
             className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold hover:shadow-gold transition-all"
           >
-            Save project
+            Save changes
           </button>
         </form>
 
-        {projects.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-4">
-              Existing projects
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projects.map((project) => (
-                <div
-                  key={project.slug}
-                  className="rounded-2xl border border-subtle bg-surface-2 p-4 text-sm text-secondary"
-                >
-                  <div className="font-semibold text-primary">{project.title}</div>
-                  <div className="text-xs mt-1 text-muted-custom">/{project.slug}</div>
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="inline-flex items-center rounded-full border border-subtle px-3 py-1 text-xs text-secondary hover:text-primary hover:border-groove-gold/50 transition-all"
-                    >
-                      View
-                    </Link>
-                    <Link
-                      href={`/admin/projects/${project.slug}`}
-                      className="inline-flex items-center rounded-full border border-subtle px-3 py-1 text-xs text-secondary hover:text-primary hover:border-groove-gold/50 transition-all"
-                    >
-                      Edit
-                    </Link>
-                    <form action={`/api/admin/projects/${project.slug}`} method="post">
-                      <input type="hidden" name="_action" value="delete" />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center rounded-full border border-red-500/40 px-3 py-1 text-xs text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
-                      >
-                        Delete
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <form action={`/api/admin/projects/${project.slug}`} method="post" className="mt-8">
+          <input type="hidden" name="_action" value="delete" />
+          <button
+            type="submit"
+            className="inline-flex items-center rounded-full border border-red-500/40 px-4 py-2 text-sm text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
+          >
+            Delete project
+          </button>
+        </form>
       </div>
     </div>
   )
