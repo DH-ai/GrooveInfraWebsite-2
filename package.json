@@ -10,6 +10,7 @@
     "email:test": "tsx --env-file=.env.local scripts/test-enquiry-emails.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
     "clsx": "^2.1.1",
     "framer-motion": "^11.2.0",
     "lucide-react": "^0.378.0",

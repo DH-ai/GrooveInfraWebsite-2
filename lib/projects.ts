@@ -1,73 +1,116 @@
-import fs from 'fs'
-import path from 'path'
-import type { Project, ProjectMetadata, Testimonial } from '@/types/project'
+import type { Project, ProjectCategory, Testimonial } from '@/types/project'
 import { hasRealCoverImage } from '@/lib/utils'
+import { getSupabaseRead } from '@/lib/supabase'
 
-const CONTENT_DIR = path.join(process.cwd(), 'content', 'projects')
-const PUBLIC_IMAGES_DIR = path.join(process.cwd(), 'public', 'images', 'projects')
-
-function getLocalImages(slug: string): string[] {
-  const dir = path.join(PUBLIC_IMAGES_DIR, slug)
-  if (!fs.existsSync(dir)) return []
-  return fs
-    .readdirSync(dir)
-    .filter((f) => /\.(jpg|jpeg|png|webp|avif)$/i.test(f))
-    .sort()
-    .map((f) => `/images/projects/${slug}/${f}`)
+interface ProjectRow {
+  title: string
+  slug: string
+  category: ProjectCategory
+  location: string
+  client_name: string
+  testimonial: string | null
+  basic_description: string | null
+  description: string
+  year: number | null
+  area: string | null
+  duration: string | null
+  featured: boolean | null
+  highlight: string | null
+  tags: string[] | null
+  cover_image: string | null
+  images: string[] | null
+  logo: string | null
+  created_at?: string
 }
 
-function getLocalLogo(slug: string): string | undefined {
-  const dir = path.join(PUBLIC_IMAGES_DIR, slug, 'logo')
-  if (!fs.existsSync(dir)) return undefined
-  const file = fs.readdirSync(dir).find((f) => /\.(jpg|jpeg|png|webp|svg)$/i.test(f))
-  return file ? `/images/projects/${slug}/logo/${file}` : undefined
+function rowToProject(row: ProjectRow): Project {
+  return {
+    title: row.title,
+    slug: row.slug,
+    category: row.category,
+    location: row.location,
+    client_name: row.client_name,
+    testimonial: row.testimonial ?? undefined,
+    basic_description: row.basic_description ?? undefined,
+    description: row.description,
+    year: row.year ?? undefined,
+    area: row.area ?? undefined,
+    duration: row.duration ?? undefined,
+    featured: row.featured ?? undefined,
+    highlight: row.highlight ?? undefined,
+    tags: row.tags ?? undefined,
+    cover_image: row.cover_image ?? undefined,
+    images: row.images ?? [],
+    logo: row.logo ?? undefined,
+  }
 }
 
-export function getAllProjects(): Project[] {
-  if (!fs.existsSync(CONTENT_DIR)) return []
+export async function getAllProjects(): Promise<Project[]> {
+  let supabase
+  try {
+    supabase = getSupabaseRead()
+  } catch (err) {
+    console.error('[projects] Supabase not configured:', (err as Error).message)
+    return []
+  }
 
-  return fs
-    .readdirSync(CONTENT_DIR, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((dir) => {
-      const metaPath = path.join(CONTENT_DIR, dir.name, 'metadata.json')
-      if (!fs.existsSync(metaPath)) return null
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .order('created_at', { ascending: false })
 
-      const metadata: ProjectMetadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
-      const localImages = getLocalImages(dir.name)
-      const images = localImages
+  if (error) {
+    console.error('[projects] getAllProjects error:', error.message)
+    return []
+  }
 
-      return {
-        ...metadata,
-        images,
-        logo: getLocalLogo(dir.name),
-      }
-    })
-    .filter(Boolean) as Project[]
+  return (data as ProjectRow[]).map(rowToProject)
 }
 
-export function getProjectBySlug(slug: string): Project | null {
-  return getAllProjects().find((p) => p.slug === slug) ?? null
+export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  let supabase
+  try {
+    supabase = getSupabaseRead()
+  } catch (err) {
+    console.error('[projects] Supabase not configured:', (err as Error).message)
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[projects] getProjectBySlug error:', error.message)
+    return null
+  }
+
+  return data ? rowToProject(data as ProjectRow) : null
 }
 
-export function getFeaturedProjects(): Project[] {
-  const all = getAllProjects()
+export async function getFeaturedProjects(): Promise<Project[]> {
+  const all = await getAllProjects()
   const featured = all.filter((p) => p.featured)
   return featured.length ? featured : all.slice(0, 6)
 }
 
-export function getProjectsForCarousel(): Project[] {
-  return getAllProjects().filter((p) => p.images.length > 0 && hasRealCoverImage(p))
+export async function getProjectsForCarousel(): Promise<Project[]> {
+  const all = await getAllProjects()
+  return all.filter((p) => p.images.length > 0 && hasRealCoverImage(p))
 }
 
-export function getAllImages(): string[] {
-  return getAllProjects().flatMap((p) => p.images)
+export async function getAllImages(): Promise<string[]> {
+  const all = await getAllProjects()
+  return all.flatMap((p) => p.images)
 }
 
-export function getAllTestimonials(): Testimonial[] {
-  return getAllProjects()
-
-    .filter((p) => p.testimonial).map((p) => ({
+export async function getAllTestimonials(): Promise<Testimonial[]> {
+  const all = await getAllProjects()
+  return all
+    .filter((p) => p.testimonial)
+    .map((p) => ({
       text: p.testimonial ?? '',
       client: p.client_name,
       project: p.title,
@@ -80,6 +123,7 @@ export function getProjectCategories(): string[] {
   return ['all', 'commercial', 'retail', 'residential', 'civil']
 }
 
-export function getProjectsByCategory(category: string): Project[] {
-  return getAllProjects().filter((p) => p.category === category)
+export async function getProjectsByCategory(category: string): Promise<Project[]> {
+  const all = await getAllProjects()
+  return all.filter((p) => p.category === category)
 }

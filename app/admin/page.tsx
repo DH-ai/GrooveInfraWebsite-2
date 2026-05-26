@@ -20,7 +20,7 @@ interface AdminPageProps {
   }
 }
 
-export default function AdminPage({ searchParams }: AdminPageProps) {
+export default async function AdminPage({ searchParams }: AdminPageProps) {
   const adminToken = process.env.ADMIN_TOKEN
   if (!adminToken) {
     redirect('/admin/login?error=missing-config')
@@ -31,7 +31,7 @@ export default function AdminPage({ searchParams }: AdminPageProps) {
     redirect('/admin/login')
   }
 
-  const projects = getAllProjects()
+  const projects = await getAllProjects()
   const successSlug = searchParams?.success === '1' ? searchParams.slug : undefined
   const deletedSlug = searchParams?.deleted === '1' ? searchParams.slug : undefined
   const error = searchParams?.error

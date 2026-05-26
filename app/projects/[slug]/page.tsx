@@ -13,11 +13,12 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  return getAllProjects().map((p) => ({ slug: p.slug }))
+  const all = await getAllProjects()
+  return all.map((p) => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const project = getProjectBySlug(params.slug)
+  const project = await getProjectBySlug(params.slug)
   if (!project) return {}
   return {
     title: project.title,
@@ -25,8 +26,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default function ProjectPage({ params }: PageProps) {
-  const project = getProjectBySlug(params.slug)
+export default async function ProjectPage({ params }: PageProps) {
+  const project = await getProjectBySlug(params.slug)
   if (!project) notFound()
 
   const cover = getCoverImage(project)

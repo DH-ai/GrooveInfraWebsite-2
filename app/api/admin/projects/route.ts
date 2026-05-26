@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import path from 'path'
-import fs from 'fs/promises'
+import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
 
-const CONTENT_DIR = path.join(process.cwd(), 'content', 'projects')
-const PUBLIC_IMAGES_DIR = path.join(process.cwd(), 'public', 'images', 'projects')
 const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif'])
 const CATEGORY_OPTIONS = new Set(['commercial', 'retail', 'residential', 'civil'])
 
@@ -24,9 +22,18 @@ function getFileExtension(file: File): string {
   return path.extname(file.name).toLowerCase()
 }
 
-async function writeFileFromUpload(file: File, targetPath: string) {
+async function uploadToStorage(file: File, storagePath: string, contentType: string) {
+  const supabase = getSupabaseAdmin()
   const buffer = Buffer.from(await file.arrayBuffer())
-  await fs.writeFile(targetPath, buffer)
+  const { error } = await supabase.storage
+    .from(PROJECTS_BUCKET)
+    .upload(storagePath, buffer, {
+      contentType,
+      upsert: true,
+    })
+  if (error) throw new Error(`Upload failed for ${storagePath}: ${error.message}`)
+  const { data } = supabase.storage.from(PROJECTS_BUCKET).getPublicUrl(storagePath)
+  return data.publicUrl
 }
 
 export async function POST(request: Request) {
@@ -72,30 +79,21 @@ export async function POST(request: Request) {
     year = parsed
   }
 
-  const contentDir = path.join(CONTENT_DIR, slug)
-  try {
-    await fs.access(contentDir)
-    return NextResponse.redirect(new URL('/admin?error=slug-exists', request.url))
-  } catch {
-    // Directory does not exist yet.
+  const supabase = getSupabaseAdmin()
+
+  const { data: existing, error: existingError } = await supabase
+    .from('projects')
+    .select('slug')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (existingError) {
+    console.error('[admin/projects] existence check failed:', existingError.message)
+    return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
   }
 
-  await fs.mkdir(contentDir, { recursive: true })
-  const imagesDir = path.join(PUBLIC_IMAGES_DIR, slug)
-  await fs.mkdir(imagesDir, { recursive: true })
-
-  const coverFileEntry = formData.get('cover_image_file')
-  let coverImage: string | undefined
-  if (isFile(coverFileEntry) && coverFileEntry.size > 0) {
-    const ext = getFileExtension(coverFileEntry)
-    if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
-      return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
-    }
-    const fileName = `cover${ext}`
-    await writeFileFromUpload(coverFileEntry, path.join(imagesDir, fileName))
-    coverImage = `/images/projects/${slug}/${fileName}`
-  } else if (coverImageUrl) {
-    coverImage = coverImageUrl
+  if (existing) {
+    return NextResponse.redirect(new URL('/admin?error=slug-exists', request.url))
   }
 
   const galleryEntries = formData.getAll('gallery')
@@ -105,33 +103,61 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
   }
 
-  let index = 1
-  for (const file of galleryFiles) {
-    const ext = getFileExtension(file)
-    if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
+  try {
+    let coverImage: string | undefined
+    const coverFileEntry = formData.get('cover_image_file')
+    if (isFile(coverFileEntry) && coverFileEntry.size > 0) {
+      const ext = getFileExtension(coverFileEntry)
+      if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
+        return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
+      }
+      coverImage = await uploadToStorage(
+        coverFileEntry,
+        `${slug}/cover${ext}`,
+        coverFileEntry.type || 'image/jpeg'
+      )
+    } else if (coverImageUrl) {
+      coverImage = coverImageUrl
+    }
+
+    const imageUrls: string[] = []
+    let index = 1
+    for (const file of galleryFiles) {
+      const ext = getFileExtension(file)
+      if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
+        return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
+      }
+      const fileName = `image-${String(index).padStart(2, '0')}${ext}`
+      const url = await uploadToStorage(file, `${slug}/${fileName}`, file.type || 'image/jpeg')
+      imageUrls.push(url)
+      index += 1
+    }
+
+    const row: Record<string, unknown> = {
+      title,
+      slug,
+      category,
+      location,
+      client_name: clientName,
+      basic_description: basicDescription,
+      description,
+      duration,
+      images: imageUrls,
+    }
+
+    if (year !== undefined) row.year = year
+    if (area) row.area = area
+    if (coverImage) row.cover_image = coverImage
+
+    const { error: insertError } = await supabase.from('projects').insert(row)
+    if (insertError) {
+      console.error('[admin/projects] insert failed:', insertError.message)
       return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
     }
-    const fileName = `image-${String(index).padStart(2, '0')}${ext}`
-    await writeFileFromUpload(file, path.join(imagesDir, fileName))
-    index += 1
+
+    return NextResponse.redirect(new URL(`/admin?success=1&slug=${slug}`, request.url))
+  } catch (err) {
+    console.error('[admin/projects] create failed:', err)
+    return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
   }
-
-  const metadata: Record<string, unknown> = {
-    title,
-    slug,
-    category,
-    location,
-    client_name: clientName,
-    basic_description: basicDescription,
-    description,
-    duration,
-  }
-
-  if (year !== undefined) metadata.year = year
-  if (area) metadata.area = area
-  if (coverImage) metadata.cover_image = coverImage
-
-  await fs.writeFile(path.join(contentDir, 'metadata.json'), JSON.stringify(metadata, null, 2))
-
-  return NextResponse.redirect(new URL(`/admin?success=1&slug=${slug}`, request.url))
 }
