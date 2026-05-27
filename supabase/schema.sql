@@ -72,3 +72,9 @@ create policy "project_images_public_read"
 
 -- Writes/deletes are done with the service-role key from the API routes,
 -- which bypasses RLS — no extra storage policies needed for that path.
+
+
+-- Grant access to the default authenticated/anon API roles
+-- GRANT ALL PRIVILEGES ON TABLE public.projects TO authenticated;
+-- GRANT ALL PRIVILEGES ON TABLE public.projects TO anon;
+-- GRANT ALL PRIVILEGES ON TABLE public.projects TO service_role;
