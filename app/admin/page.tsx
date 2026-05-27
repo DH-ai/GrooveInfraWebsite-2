@@ -4,12 +4,11 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getAllProjects } from '@/lib/projects'
 import DeleteProjectForm from '@/components/admin/DeleteProjectForm'
+import CreateProjectForm from '@/components/admin/CreateProjectForm'
 
 export const metadata: Metadata = {
   title: 'Admin',
 }
-
-const CATEGORIES = ['commercial', 'retail', 'residential', 'civil'] as const
 
 interface AdminPageProps {
   searchParams?: {
@@ -88,159 +87,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </div>
         )}
 
-        <form
-          action="/api/admin/projects"
-          method="post"
-          encType="multipart/form-data"
-          className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Title
-              <input
-                name="title"
-                required
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="Project title"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Slug (auto if empty)
-              <input
-                name="slug"
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="bata-india-office"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Category
-              <select
-                name="category"
-                required
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select category
-                </option>
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Location
-              <input
-                name="location"
-                required
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="Gurgaon, Haryana"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Year
-              <input
-                name="year"
-                type="number"
-                min="1900"
-                max="2100"
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="2025"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Client name
-              <input
-                name="client_name"
-                required
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="Bata India LTD"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Time to complete
-              <input
-                name="duration"
-                required
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="25 weeks"
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Area (optional)
-              <input
-                name="area"
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="10,000 sq ft"
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5">
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Basic description
-              <textarea
-                name="basic_description"
-                required
-                rows={2}
-                className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
-                placeholder="Short summary used on cards."
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Description
-              <textarea
-                name="description"
-                required
-                rows={4}
-                className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
-                placeholder="Full project description for the detail page."
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Cover image URL (optional)
-              <input
-                name="cover_image_url"
-                type="url"
-                className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-                placeholder="https://..."
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm text-secondary">
-              Cover image file (optional)
-              <input
-                name="cover_image_file"
-                type="file"
-                accept="image/*"
-                className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
-              />
-            </label>
-          </div>
-
-          <label className="flex flex-col gap-2 text-sm text-secondary">
-            Gallery images (multiple)
-            <input
-              name="gallery"
-              type="file"
-              accept="image/*"
-              multiple
-              required
-              className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold hover:shadow-gold transition-all"
-          >
-            Save project
-          </button>
-        </form>
+        <CreateProjectForm />
 
         {projects.length > 0 && (
           <div className="mt-12">

@@ -18,6 +18,7 @@ export async function POST(request: Request) {
   }
 
   const response = NextResponse.redirect(new URL('/admin', request.url))
+  
   response.cookies.set('admin_auth', adminToken, {
     httpOnly: true,
     sameSite: 'lax',
