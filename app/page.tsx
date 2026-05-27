@@ -6,9 +6,11 @@ import Testimonials from '@/components/home/Testimonials'
 import CallToAction from '@/components/home/CallToAction'
 import { getProjectsForCarousel, getAllTestimonials } from '@/lib/projects'
 
-export default function HomePage() {
-  const projects = getProjectsForCarousel()
-  const testimonials = getAllTestimonials()
+export default async function HomePage() {
+  const [projects, testimonials] = await Promise.all([
+    getProjectsForCarousel(),
+    getAllTestimonials(),
+  ])
 
   return (
     <>

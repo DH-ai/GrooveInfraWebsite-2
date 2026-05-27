@@ -19,7 +19,7 @@ interface AdminEditPageProps {
   }
 }
 
-export default function AdminEditPage({ params, searchParams }: AdminEditPageProps) {
+export default async function AdminEditPage({ params, searchParams }: AdminEditPageProps) {
   const adminToken = process.env.ADMIN_TOKEN
   if (!adminToken) {
     redirect('/admin/login?error=missing-config')
@@ -30,7 +30,7 @@ export default function AdminEditPage({ params, searchParams }: AdminEditPagePro
     redirect('/admin/login')
   }
 
-  const project = getProjectBySlug(params.slug)
+  const project = await getProjectBySlug(params.slug)
   if (!project) {
     redirect('/admin?error=not-found')
   }
