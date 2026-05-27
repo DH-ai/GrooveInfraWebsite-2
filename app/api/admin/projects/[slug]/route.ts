@@ -1,53 +1,34 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import path from 'path'
+import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
+import { checkAdminAuth } from '@/lib/admin-auth'
+import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
 
-const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif'])
-const CATEGORY_OPTIONS = new Set(['commercial', 'retail', 'residential', 'civil'])
-
-function sanitizeSlug(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+interface UpdateProjectBody {
+  _action?: string
+  title?: string
+  category?: string
+  location?: string
+  client_name?: string
+  basic_description?: string
+  description?: string
+  duration?: string
+  area?: string
+  year?: string | number | null
+  cover_image?: string | null
+  images?: string[]
+  remove_cover?: boolean
+  replace_gallery?: boolean
 }
 
-function isFile(value: FormDataEntryValue | null): value is File {
-  return Boolean(value && typeof value === 'object' && 'arrayBuffer' in value)
+function getPublicUrlPrefix(): string {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  return `${base.replace(/\/$/, '')}/storage/v1/object/public/${PROJECTS_BUCKET}/`
 }
 
-function getFileExtension(file: File): string {
-  return path.extname(file.name).toLowerCase()
-}
-
-function requireAdmin(request: Request): NextResponse | null {
-  const adminToken = process.env.ADMIN_TOKEN
-  if (!adminToken) {
-    return NextResponse.redirect(new URL('/admin/login?error=missing-config', request.url))
-  }
-
-  const token = cookies().get('admin_auth')?.value
-  if (!token || token !== adminToken) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
-  }
-
-  return null
-}
-
-async function uploadToStorage(file: File, storagePath: string, contentType: string) {
-  const supabase = getSupabaseAdmin()
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const { error } = await supabase.storage
-    .from(PROJECTS_BUCKET)
-    .upload(storagePath, buffer, {
-      contentType,
-      upsert: true,
-    })
-  if (error) throw new Error(`Upload failed for ${storagePath}: ${error.message}`)
-  const { data } = supabase.storage.from(PROJECTS_BUCKET).getPublicUrl(storagePath)
-  return data.publicUrl
+function isAllowedImageUrl(url: string): boolean {
+  if (!url) return false
+  return url.startsWith(getPublicUrlPrefix())
 }
 
 async function listStorageFiles(slug: string): Promise<string[]> {
@@ -70,10 +51,20 @@ async function removeCoverInStorage(slug: string) {
   await removeStoragePaths(covers)
 }
 
-async function removeGalleryInStorage(slug: string) {
+async function removeGalleryInStorage(slug: string, keepUrls: string[]) {
+  const prefix = `${getPublicUrlPrefix()}${slug}/`
+  const keepNames = new Set(
+    keepUrls
+      .filter((u) => u.startsWith(prefix))
+      .map((u) => u.slice(prefix.length).split('?')[0])
+  )
   const files = await listStorageFiles(slug)
-  const gallery = files.filter((p) => !path.basename(p).startsWith('cover'))
-  await removeStoragePaths(gallery)
+  const toRemove = files.filter((p) => {
+    const name = path.basename(p)
+    if (name.startsWith('cover')) return false
+    return !keepNames.has(name)
+  })
+  await removeStoragePaths(toRemove)
 }
 
 async function deleteProjectEverywhere(slug: string) {
@@ -88,25 +79,31 @@ export async function POST(
   request: Request,
   { params }: { params: { slug: string } }
 ) {
-  const authResponse = requireAdmin(request)
-  if (authResponse) return authResponse
+  const auth = checkAdminAuth()
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.reason }, { status: 401 })
+  }
 
   const rawSlug = params.slug ?? ''
   const slug = sanitizeSlug(rawSlug)
   if (!slug || slug !== rawSlug) {
-    return NextResponse.redirect(new URL('/admin?error=invalid', request.url))
+    return NextResponse.json({ error: 'invalid-slug' }, { status: 400 })
   }
 
-  const formData = await request.formData()
-  const action = String(formData.get('_action') ?? '')
+  let body: UpdateProjectBody
+  try {
+    body = (await request.json()) as UpdateProjectBody
+  } catch {
+    return NextResponse.json({ error: 'invalid-json' }, { status: 400 })
+  }
 
-  if (action === 'delete') {
+  if (body._action === 'delete') {
     try {
       await deleteProjectEverywhere(slug)
-      return NextResponse.redirect(new URL(`/admin?deleted=1&slug=${slug}`, request.url))
+      return NextResponse.json({ ok: true, deleted: slug })
     } catch (err) {
       console.error('[admin/projects] delete failed:', err)
-      return NextResponse.redirect(new URL('/admin?error=delete-failed', request.url))
+      return NextResponse.json({ error: 'delete-failed' }, { status: 500 })
     }
   }
 
@@ -118,86 +115,73 @@ export async function POST(
     .maybeSingle()
 
   if (existingError || !existing) {
-    return NextResponse.redirect(new URL('/admin?error=not-found', request.url))
+    return NextResponse.json({ error: 'not-found' }, { status: 404 })
   }
 
-  const title = String(formData.get('title') ?? '').trim()
-  const category = String(formData.get('category') ?? '').trim()
-  const location = String(formData.get('location') ?? '').trim()
-  const clientName = String(formData.get('client_name') ?? '').trim()
-  const basicDescription = String(formData.get('basic_description') ?? '').trim()
-  const description = String(formData.get('description') ?? '').trim()
-  const duration = String(formData.get('duration') ?? '').trim()
-  const area = String(formData.get('area') ?? '').trim()
-  const yearRaw = String(formData.get('year') ?? '').trim()
-  const coverImageUrl = String(formData.get('cover_image_url') ?? '').trim()
-  const removeCover = String(formData.get('remove_cover') ?? '') === '1'
-  const replaceGallery = String(formData.get('replace_gallery') ?? '') === '1'
+  const title = String(body.title ?? '').trim()
+  const category = String(body.category ?? '').trim()
+  const location = String(body.location ?? '').trim()
+  const clientName = String(body.client_name ?? '').trim()
+  const basicDescription = String(body.basic_description ?? '').trim()
+  const description = String(body.description ?? '').trim()
+  const duration = String(body.duration ?? '').trim()
+  const area = String(body.area ?? '').trim()
+  const yearRaw = body.year == null ? '' : String(body.year).trim()
+  const coverImageRaw = body.cover_image == null ? '' : String(body.cover_image).trim()
+  const removeCover = Boolean(body.remove_cover)
+  const replaceGallery = Boolean(body.replace_gallery)
+  const images = Array.isArray(body.images) ? body.images.map((v) => String(v).trim()) : []
 
   if (!title || !category || !location || !clientName || !basicDescription || !description || !duration) {
-    return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=invalid`, request.url))
+    return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
 
   if (!CATEGORY_OPTIONS.has(category)) {
-    return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=invalid`, request.url))
+    return NextResponse.json({ error: 'invalid-category' }, { status: 400 })
   }
 
   let year: number | undefined
   if (yearRaw) {
     const parsed = Number(yearRaw)
     if (!Number.isFinite(parsed)) {
-      return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=invalid`, request.url))
+      return NextResponse.json({ error: 'invalid-year' }, { status: 400 })
     }
     year = parsed
   }
 
-  const galleryEntries = formData.getAll('gallery')
-  const galleryFiles = galleryEntries.filter((entry) => isFile(entry) && entry.size > 0) as File[]
+  let coverImage: string | null = (existing.cover_image as string | null) ?? null
+  if (removeCover) {
+    coverImage = null
+  }
+  if (coverImageRaw) {
+    if (!isAllowedImageUrl(coverImageRaw)) {
+      return NextResponse.json({ error: 'invalid-cover-url' }, { status: 400 })
+    }
+    coverImage = coverImageRaw
+  }
 
-  if (replaceGallery && galleryFiles.length === 0) {
-    return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=invalid`, request.url))
+  let finalImages: string[]
+  if (replaceGallery) {
+    if (images.length === 0) {
+      return NextResponse.json({ error: 'images-required' }, { status: 400 })
+    }
+    finalImages = images
+  } else {
+    finalImages = ((existing.images as string[] | null) ?? []).slice().concat(images)
+  }
+
+  for (const url of finalImages) {
+    if (!isAllowedImageUrl(url)) {
+      return NextResponse.json({ error: 'invalid-image-url', url }, { status: 400 })
+    }
   }
 
   try {
-    let coverImage: string | undefined = (existing.cover_image as string | null) ?? undefined
-
-    if (removeCover) {
-      coverImage = undefined
+    if (removeCover || coverImageRaw) {
       await removeCoverInStorage(slug)
     }
-
-    const coverFileEntry = formData.get('cover_image_file')
-    if (isFile(coverFileEntry) && coverFileEntry.size > 0) {
-      const ext = getFileExtension(coverFileEntry)
-      if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
-        return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=invalid`, request.url))
-      }
-      await removeCoverInStorage(slug)
-      coverImage = await uploadToStorage(
-        coverFileEntry,
-        `${slug}/cover${ext}`,
-        coverFileEntry.type || 'image/jpeg'
-      )
-    } else if (coverImageUrl) {
-      coverImage = coverImageUrl
-    }
-
-    let images = ((existing.images as string[] | null) ?? []).slice()
     if (replaceGallery) {
-      await removeGalleryInStorage(slug)
-      images = []
-    }
-
-    let index = images.length + 1
-    for (const file of galleryFiles) {
-      const ext = getFileExtension(file)
-      if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
-        return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=invalid`, request.url))
-      }
-      const fileName = `image-${String(index).padStart(2, '0')}${ext}`
-      const url = await uploadToStorage(file, `${slug}/${fileName}`, file.type || 'image/jpeg')
-      images.push(url)
-      index += 1
+      await removeGalleryInStorage(slug, finalImages)
     }
 
     const updated: Record<string, unknown> = {
@@ -208,21 +192,21 @@ export async function POST(
       basic_description: basicDescription,
       description,
       duration,
-      images,
+      images: finalImages,
       year: year ?? null,
       area: area || null,
-      cover_image: coverImage ?? null,
+      cover_image: coverImage,
     }
 
     const { error: updateError } = await supabase.from('projects').update(updated).eq('slug', slug)
     if (updateError) {
       console.error('[admin/projects] update failed:', updateError.message)
-      return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=update-failed`, request.url))
+      return NextResponse.json({ error: 'update-failed' }, { status: 500 })
     }
 
-    return NextResponse.redirect(new URL(`/admin/projects/${slug}?success=1`, request.url))
+    return NextResponse.json({ ok: true, slug })
   } catch (err) {
     console.error('[admin/projects] update failed:', err)
-    return NextResponse.redirect(new URL(`/admin/projects/${slug}?error=update-failed`, request.url))
+    return NextResponse.json({ error: 'update-failed' }, { status: 500 })
   }
 }
