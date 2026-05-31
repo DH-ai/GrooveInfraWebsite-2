@@ -18,6 +18,8 @@ interface CreateProjectBody {
   images?: string[]
 }
 
+const DEFAULT_CATEGORY = 'commercial'
+
 function getPublicUrlPrefix(): string {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   return `${base.replace(/\/$/, '')}/storage/v1/object/public/${PROJECTS_BUCKET}/`
@@ -45,7 +47,7 @@ export async function POST(request: Request) {
   const slugInput = String(body.slug ?? '').trim()
   const slug = sanitizeSlug(slugInput || title)
   const categoryInput = String(body.category ?? '').trim()
-  const category = categoryInput || 'commercial'
+  const category = categoryInput || DEFAULT_CATEGORY
   const location = String(body.location ?? '').trim()
   const clientName = String(body.client_name ?? '').trim()
   const basicDescription = String(body.basic_description ?? '').trim()
