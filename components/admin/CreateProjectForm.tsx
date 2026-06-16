@@ -11,20 +11,9 @@ import {
 } from '@/lib/admin-upload'
 import { sanitizeSlug } from '@/lib/upload-constants'
 
-const CATEGORIES = ['commercial', 'retail', 'residential', 'civil'] as const
-
 export default function CreateProjectForm() {
   const router = useRouter()
   const [title, setTitle] = useState('')
-  const [slug, setSlug] = useState('')
-  const [category, setCategory] = useState('')
-  const [location, setLocation] = useState('')
-  const [year, setYear] = useState('')
-  const [clientName, setClientName] = useState('')
-  const [duration, setDuration] = useState('')
-  const [area, setArea] = useState('')
-  const [basicDescription, setBasicDescription] = useState('')
-  const [description, setDescription] = useState('')
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [galleryFiles, setGalleryFiles] = useState<File[]>([])
   const [busy, setBusy] = useState(false)
@@ -32,21 +21,16 @@ export default function CreateProjectForm() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const computedSlug = useMemo(
-    () => sanitizeSlug(slug.trim() || title.trim()),
-    [slug, title]
+    () => sanitizeSlug(title.trim()),
+    [title]
   )
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setErrorMsg(null)
 
-    if (!title.trim() || !category || !location.trim() || !clientName.trim() ||
-        !basicDescription.trim() || !description.trim() || !duration.trim()) {
-      setErrorMsg('Please fill all required fields.')
-      return
-    }
-    if (!computedSlug) {
-      setErrorMsg('Slug is required.')
+    if (!title.trim()) {
+      setErrorMsg('Please enter a project name.')
       return
     }
     if (galleryFiles.length === 0) {
@@ -96,14 +80,6 @@ export default function CreateProjectForm() {
         body: JSON.stringify({
           title: title.trim(),
           slug: computedSlug,
-          category,
-          location: location.trim(),
-          client_name: clientName.trim(),
-          basic_description: basicDescription.trim(),
-          description: description.trim(),
-          duration: duration.trim(),
-          area: area.trim(),
-          year: year.trim(),
           cover_image: coverUrl,
           images: galleryUrls,
         }),
@@ -141,114 +117,15 @@ export default function CreateProjectForm() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-5">
         <label className="flex flex-col gap-2 text-sm text-secondary">
-          Title
+          Project name
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
             placeholder="Project title"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Slug (auto if empty)
-          <input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            placeholder={computedSlug || 'bata-india-office'}
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Category
-          <select
-            required
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-          >
-            <option value="" disabled>Select category</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Location
-          <input
-            required
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            placeholder="Gurgaon, Haryana"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Year
-          <input
-            type="number"
-            min="1900"
-            max="2100"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            placeholder="2025"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Client name
-          <input
-            required
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            placeholder="Bata India LTD"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Time to complete
-          <input
-            required
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            placeholder="25 weeks"
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Area (optional)
-          <input
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            placeholder="10,000 sq ft"
-          />
-        </label>
-      </div>
-
-      <div className="grid grid-cols-1 gap-5">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Basic description
-          <textarea
-            required
-            rows={2}
-            value={basicDescription}
-            onChange={(e) => setBasicDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
-            placeholder="Short summary used on cards."
-          />
-        </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
-          Description
-          <textarea
-            required
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
-            placeholder="Full project description for the detail page."
           />
         </label>
       </div>

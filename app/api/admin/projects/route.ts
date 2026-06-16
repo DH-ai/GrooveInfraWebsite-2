@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
-import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
+import { sanitizeSlug } from '@/lib/upload-constants'
 
 interface CreateProjectBody {
   title?: string
@@ -55,12 +55,8 @@ export async function POST(request: Request) {
   const coverImageRaw = body.cover_image == null ? '' : String(body.cover_image).trim()
   const images = Array.isArray(body.images) ? body.images.map((v) => String(v).trim()) : []
 
-  if (!title || !slug || !category || !location || !clientName || !basicDescription || !description || !duration) {
+  if (!title || !slug) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
-  }
-
-  if (!CATEGORY_OPTIONS.has(category)) {
-    return NextResponse.json({ error: 'invalid-category' }, { status: 400 })
   }
 
   let year: number | undefined
@@ -109,15 +105,15 @@ export async function POST(request: Request) {
   const row: Record<string, unknown> = {
     title,
     slug,
-    category,
-    location,
-    client_name: clientName,
-    basic_description: basicDescription,
-    description,
-    duration,
     images,
   }
 
+  if (category) row.category = category
+  if (location) row.location = location
+  if (clientName) row.client_name = clientName
+  if (basicDescription) row.basic_description = basicDescription
+  if (description) row.description = description
+  if (duration) row.duration = duration
   if (year !== undefined) row.year = year
   if (area) row.area = area
   if (coverImage) row.cover_image = coverImage
