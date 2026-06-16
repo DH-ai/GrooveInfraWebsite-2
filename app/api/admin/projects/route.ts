@@ -18,6 +18,8 @@ interface CreateProjectBody {
   images?: string[]
 }
 
+const DEFAULT_CATEGORY = 'commercial'
+
 function getPublicUrlPrefix(): string {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   return `${base.replace(/\/$/, '')}/storage/v1/object/public/${PROJECTS_BUCKET}/`
@@ -44,7 +46,8 @@ export async function POST(request: Request) {
   const title = String(body.title ?? '').trim()
   const slugInput = String(body.slug ?? '').trim()
   const slug = sanitizeSlug(slugInput || title)
-  const category = String(body.category ?? '').trim()
+  const categoryInput = String(body.category ?? '').trim()
+  const category = categoryInput || DEFAULT_CATEGORY
   const location = String(body.location ?? '').trim()
   const clientName = String(body.client_name ?? '').trim()
   const basicDescription = String(body.basic_description ?? '').trim()
@@ -55,7 +58,7 @@ export async function POST(request: Request) {
   const coverImageRaw = body.cover_image == null ? '' : String(body.cover_image).trim()
   const images = Array.isArray(body.images) ? body.images.map((v) => String(v).trim()) : []
 
-  if (!title || !slug || !category || !location || !clientName || !basicDescription || !description || !duration) {
+  if (!title || !slug) {
     return NextResponse.json({ error: 'invalid' }, { status: 400 })
   }
 

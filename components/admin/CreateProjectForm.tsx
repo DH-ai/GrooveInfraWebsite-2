@@ -40,9 +40,8 @@ export default function CreateProjectForm() {
     e.preventDefault()
     setErrorMsg(null)
 
-    if (!title.trim() || !category || !location.trim() || !clientName.trim() ||
-        !basicDescription.trim() || !description.trim() || !duration.trim()) {
-      setErrorMsg('Please fill all required fields.')
+    if (!title.trim()) {
+      setErrorMsg('Project title is required.')
       return
     }
     if (!computedSlug) {
@@ -164,12 +163,11 @@ export default function CreateProjectForm() {
         <label className="flex flex-col gap-2 text-sm text-secondary">
           Category
           <select
-            required
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
           >
-            <option value="" disabled>Select category</option>
+            <option value="">Select category (optional)</option>
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
@@ -178,7 +176,6 @@ export default function CreateProjectForm() {
         <label className="flex flex-col gap-2 text-sm text-secondary">
           Location
           <input
-            required
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
@@ -200,7 +197,6 @@ export default function CreateProjectForm() {
         <label className="flex flex-col gap-2 text-sm text-secondary">
           Client name
           <input
-            required
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
             className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
@@ -210,7 +206,6 @@ export default function CreateProjectForm() {
         <label className="flex flex-col gap-2 text-sm text-secondary">
           Time to complete
           <input
-            required
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
             className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
@@ -232,7 +227,6 @@ export default function CreateProjectForm() {
         <label className="flex flex-col gap-2 text-sm text-secondary">
           Basic description
           <textarea
-            required
             rows={2}
             value={basicDescription}
             onChange={(e) => setBasicDescription(e.target.value)}
@@ -243,7 +237,6 @@ export default function CreateProjectForm() {
         <label className="flex flex-col gap-2 text-sm text-secondary">
           Description
           <textarea
-            required
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
