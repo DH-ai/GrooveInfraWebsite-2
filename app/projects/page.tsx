@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     'Browse our portfolio of premium interior construction projects — retail, commercial, residential, and civil across India.',
 }
 
+export const revalidate = 0
+
 export default async function ProjectsPage() {
   const projects = await getAllProjects()
   const categories = getProjectCategories()
