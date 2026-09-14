@@ -31,8 +31,15 @@ sudo usermod -aG docker "$(id -un)" 2>/dev/null || true
 sudo chmod 666 /var/run/docker.sock 2>/dev/null || true
 
 # --- 2. Supabase stack -------------------------------------------------------
+# On a fresh boot from a snapshot, Docker may restore stale container records
+# that are not actually healthy. If `supabase start` fails, reset the stack
+# (removing stale containers while keeping images + the db backup) and retry.
 echo "==> Starting local Supabase stack"
-supabase start
+if ! supabase start; then
+  echo "==> supabase start failed; resetting stale containers and retrying"
+  supabase stop 2>/dev/null || true
+  supabase start
+fi
 # Apply any migrations that are not yet applied (no-op when already current).
 supabase migration up --local 2>/dev/null || true
 
