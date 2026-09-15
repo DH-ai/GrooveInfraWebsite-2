@@ -2,6 +2,7 @@ import path from 'path'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
+import { revalidateProjectSurfaces } from '@/lib/revalidate'
 import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
 
 interface UpdateProjectBody {
@@ -100,6 +101,7 @@ export async function POST(
   if (body._action === 'delete') {
     try {
       await deleteProjectEverywhere(slug)
+      revalidateProjectSurfaces(slug)
       return NextResponse.json({ ok: true, deleted: slug })
     } catch (err) {
       console.error('[admin/projects] delete failed:', err)
@@ -203,6 +205,8 @@ export async function POST(
       console.error('[admin/projects] update failed:', updateError.message)
       return NextResponse.json({ error: 'update-failed' }, { status: 500 })
     }
+
+    revalidateProjectSurfaces(slug)
 
     return NextResponse.json({ ok: true, slug })
   } catch (err) {

@@ -29,6 +29,8 @@ create table if not exists public.projects (
 
 create index if not exists projects_category_idx on public.projects (category);
 create index if not exists projects_featured_idx on public.projects (featured);
+-- Every read orders by created_at desc.
+create index if not exists projects_created_at_idx on public.projects (created_at desc);
 
 -- updated_at trigger
 create or replace function public.set_updated_at()

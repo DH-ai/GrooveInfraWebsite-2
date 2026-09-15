@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
+import { revalidateProjectSurfaces } from '@/lib/revalidate'
 import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
 
 interface CreateProjectBody {
@@ -130,6 +131,8 @@ export async function POST(request: Request) {
     console.error('[admin/projects] insert failed:', insertError.message)
     return NextResponse.json({ error: 'insert-failed' }, { status: 500 })
   }
+
+  revalidateProjectSurfaces(slug)
 
   return NextResponse.json({ ok: true, slug })
 }
