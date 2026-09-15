@@ -22,10 +22,23 @@ interface SignUploadResponse {
   error?: string
 }
 
+/** Keeps a stray RAW export or video from being pushed into the bucket. */
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+
+function formatMb(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export function validateImageFile(file: File): string | null {
   const ext = getExtension(file.name)
   if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
     return `Unsupported file type: ${file.name}`
+  }
+  if (file.size === 0) {
+    return `${file.name} is empty`
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return `${file.name} is ${formatMb(file.size)}; the limit is ${formatMb(MAX_IMAGE_BYTES)}`
   }
   return null
 }
@@ -72,7 +85,8 @@ export async function uploadFilesToSupabase(planned: PlannedUpload[]): Promise<U
   )
 
   return planned.map(({ path }) => {
-    const entry = tokenByPath.get(path)!
+    const entry = tokenByPath.get(path)
+    if (!entry) throw new Error(`Missing signed upload result for ${path}`)
     return { path, publicUrl: entry.publicUrl }
   })
 }
