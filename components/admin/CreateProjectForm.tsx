@@ -48,10 +48,6 @@ export default function CreateProjectForm() {
       setErrorMsg('Slug is required.')
       return
     }
-    if (galleryFiles.length === 0) {
-      setErrorMsg('Please add at least one gallery image.')
-      return
-    }
     if (coverFile) {
       const err = validateImageFile(coverFile)
       if (err) {
@@ -259,17 +255,20 @@ export default function CreateProjectForm() {
       </div>
 
       <label className="flex flex-col gap-2 text-sm text-secondary">
-        Gallery images (multiple)
+        Gallery images (optional, multiple)
         <input
           type="file"
           accept="image/*"
           multiple
-          required
           onChange={(e) =>
             setGalleryFiles(e.target.files ? Array.from(e.target.files) : [])
           }
           className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
         />
+        <span className="text-xs text-muted-custom">
+          Leave empty to publish now and add photography later. The project will show a generated
+          plate until images are uploaded, then switch to them automatically.
+        </span>
       </label>
 
       <button
