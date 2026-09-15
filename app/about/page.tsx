@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: 'About',
   description:
     'Groove Infra — 11+ years of building premium interior spaces across India. Our story, philosophy, team, and working process.',
+  // Required on every page: without it the root layout's canonical is inherited,
+  // so each page would declare itself canonical at the homepage URL.
+  alternates: { canonical: '/about' },
 }
 
 const workingPhases = [

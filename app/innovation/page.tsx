@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'Innovation',
   description:
     'Groove Infra Innovation Lab — reimagining the future of interior construction with AI, modular systems, and digital platforms.',
+  alternates: { canonical: '/innovation' },
+  // This page describes unreleased work and is disallowed in robots.txt. robots.txt
+  // only asks crawlers not to fetch it; a page already in an index needs this tag
+  // to be dropped, so the two work together rather than either alone.
+  robots: { index: false, follow: false },
 }
 
 const innovations = [
