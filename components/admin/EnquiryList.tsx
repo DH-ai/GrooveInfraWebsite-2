@@ -79,7 +79,7 @@ export default function EnquiryList({ enquiries }: EnquiryListProps) {
           <p className="mt-3 whitespace-pre-line text-secondary">{enquiry.message}</p>
 
           {!enquiry.email_sent && (
-            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-200">
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-800 dark:text-amber-200">
               <AlertTriangle size={11} aria-hidden="true" />
               Notification email did not send — follow up manually
             </p>
