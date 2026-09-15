@@ -106,9 +106,13 @@ export default async function ProjectPage({ params }: PageProps) {
         <AnimatedSection className="mb-10">
           <Link
             href="/projects"
-            className="inline-flex items-center gap-2 text-sm text-secondary hover:text-primary transition-colors group"
+            className="group inline-flex min-h-11 items-center gap-2 text-sm text-secondary transition-colors hover:text-primary"
           >
-            <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+            <ArrowLeft
+              size={14}
+              aria-hidden="true"
+              className="transition-transform group-hover:-translate-x-1"
+            />
             Back to Projects
           </Link>
         </AnimatedSection>

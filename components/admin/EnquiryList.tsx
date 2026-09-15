@@ -45,10 +45,14 @@ export default function EnquiryList({ enquiries }: EnquiryListProps) {
             </time>
           </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+          {/*
+            Every row here is 44px tall. The email and phone are tap targets, and
+            this list is the screen most likely to be read on a phone.
+          */}
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 text-xs">
             <a
               href={`mailto:${enquiry.email}`}
-              className="inline-flex items-center gap-1.5 text-accent-gold hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 text-accent-gold hover:underline"
             >
               <Mail size={12} aria-hidden="true" />
               {enquiry.email}
@@ -56,20 +60,20 @@ export default function EnquiryList({ enquiries }: EnquiryListProps) {
             {enquiry.phone && (
               <a
                 href={`tel:${enquiry.phone}`}
-                className="inline-flex items-center gap-1.5 text-accent-gold hover:underline"
+                className="inline-flex min-h-11 items-center gap-1.5 text-accent-gold hover:underline"
               >
                 <Phone size={12} aria-hidden="true" />
                 {enquiry.phone}
               </a>
             )}
             {enquiry.location && (
-              <span className="inline-flex items-center gap-1.5 text-muted-custom">
+              <span className="inline-flex min-h-11 items-center gap-1.5 text-muted-custom">
                 <MapPin size={12} aria-hidden="true" />
                 {enquiry.location}
               </span>
             )}
             {enquiry.project_type && (
-              <span className="inline-flex items-center gap-1.5 text-muted-custom">
+              <span className="inline-flex min-h-11 items-center gap-1.5 text-muted-custom">
                 <Building2 size={12} aria-hidden="true" />
                 {enquiry.project_type}
               </span>
