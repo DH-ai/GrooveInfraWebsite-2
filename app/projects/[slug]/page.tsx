@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, MapPin, Calendar, Maximize2, Clock, Quote } from 'lucide-react'
 import ProjectGallery from '@/components/projects/ProjectGallery'
 import AnimatedSection from '@/components/ui/AnimatedSection'
+import ProjectImage from '@/components/ui/ProjectImage'
 import { getAllProjects, getProjectBySlug } from '@/lib/projects'
 import { absoluteUrl } from '@/lib/site'
-import { formatCategory, getCoverImage } from '@/lib/utils'
+import { formatCategory } from '@/lib/utils'
 
 interface PageProps {
   params: { slug: string }
@@ -35,10 +35,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = project.basic_description ?? project.description
   const canonical = `/projects/${project.slug}`
 
-  // Prefer the project's own photograph for the social card. getCoverImage skips
-  // stock placeholder hosts, so a project without owned imagery falls through to
-  // the site-wide generated card rather than sharing someone else's stock photo.
-  const cover = getCoverImage(project)
+  /*
+   * Only a real photograph is worth putting on a social card. A drawn placeholder
+   * has no `src` to link to, and a bare tonal field would make a worse preview
+   * than the site-wide generated card that Next falls back to, so placeholders
+   * are omitted rather than rendered into the OG image.
+   */
+  const cover = project.imagery.cover.src
 
   return {
     title: project.title,
@@ -64,7 +67,7 @@ export default async function ProjectPage({ params }: PageProps) {
   const project = await getProjectBySlug(params.slug)
   if (!project) notFound()
 
-  const cover = getCoverImage(project)
+  const { imagery } = project
 
   const metaItems = [
     project.location && { icon: MapPin, label: 'Location', value: project.location },
@@ -77,16 +80,12 @@ export default async function ProjectPage({ params }: PageProps) {
     <div className="min-h-screen bg-base pt-20">
       {/* Hero image */}
       <div className="relative h-[55vh] sm:h-[65vh] overflow-hidden bg-surface">
-        {cover && (
-          <Image
-            src={cover}
-            alt={project.title}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
-        )}
+        <ProjectImage
+          image={imagery.cover}
+          alt={project.title}
+          sizes="100vw"
+          priority
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--bg))] via-black/20 to-black/40" />
         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
           <div className="max-w-7xl mx-auto">
@@ -131,11 +130,19 @@ export default async function ProjectPage({ params }: PageProps) {
               <p className="text-secondary leading-relaxed text-lg">{project.description}</p>
             </AnimatedSection>
 
-            {/* Gallery */}
-            {project.images.length > 0 && (
+            {/*
+              Gated on owned photography rather than on the gallery being
+              non-empty. A project with nothing uploaded still has plates to fill
+              its hero, but a "Gallery" heading over a grid of drawn plates would
+              promise photographs of the finished space and then offer a lightbox
+              that zooms into a texture — padding the page with a dead end. The
+              hero plate carries the page; the gallery appears when there is
+              something to show.
+            */}
+            {imagery.hasOwnPhotography && (
               <AnimatedSection delay={0.1}>
                 <h2 className="font-display text-2xl font-bold text-primary mb-6">Gallery</h2>
-                <ProjectGallery images={project.images} title={project.title} />
+                <ProjectGallery images={imagery.gallery} title={project.title} />
               </AnimatedSection>
             )}
 

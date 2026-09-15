@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, MapPin } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
+import ProjectImage from '@/components/ui/ProjectImage'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -24,28 +25,42 @@ const workingPhases = [
   { num: '08', title: 'User Experience', desc: 'Post-handover review, client training on installed systems.' },
 ]
 
-const team = [
+/**
+ * `image` is a path under `public/team/`. Leave it unset and the card renders a
+ * monogram instead.
+ *
+ * The founder's portrait was previously hotlinked from media.licdn.com. Those
+ * URLs are signed and expiring, and LinkedIn rejects requests it does not
+ * recognise as coming from its own pages, so that image had already stopped
+ * loading. Portraits have to be committed here or uploaded to storage; there is
+ * no version of hotlinking a CDN we do not control that keeps working.
+ */
+interface TeamMember {
+  name: string
+  role: string
+  bio: string
+  image?: string
+}
+
+const team: TeamMember[] = [
   {
     name: 'Abhay Chaturvedi',
     role: 'Founder & CEO',
-    image: 'https://media.licdn.com/dms/image/v2/D4E03AQFQtx4JESlynw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1643562051823?e=1780531200&v=beta&t=LFM5I5yGZJMhC6pU2Rm97m4c0SH_yPO0Im9XEPT0h8c',
     bio: 'A Project Management Professional having more than 18 years of experience in Commercial interior fit outs , business development, strategic management. Worked with renowned organizations like Bose India Ltd., LG India Ltd. Amtek Auto Ltd. etc.  Handled various projects such as Corporate offices, Warehouse, Data centers, IT parks, Hospitality & Retail projects. Well conversant with Team Building activities including vendor selection, Project Planning, Negotiation, Budgeting, MIS etc',
   },
-  // {
-  //   name: 'Dhruv Chaturvedi',
-  //   role: 'Chief Technology Officer',
-  //   image: 'https://picsum.photos/seed/team-dhruv/400/400',
-  //   bio: 'Leads technology, digital systems, and internal tooling at Groove Infra.',
-  // },
-  // {
-  //   name: 'Rohit Chaturvedi',
-  //   role: 'Chief Design Officer',
-  //   image: 'https://picsum.photos/seed/team-rohit/400/400',
-  //   bio: '<Upcoming></Upcoming> designer responsible for Groove Infra\'s creative direction. Every project that leaves our studio carries Rohit\'s signature balance of aesthetics and function.',
-  // },
 ]
 
 const serviceAreas = ['Delhi', 'Gurgaon', 'Noida']
+
+/** Falls back to initials so a member without a committed portrait still reads as deliberate. */
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
 
 export default function AboutPage() {
   return (
@@ -74,16 +89,34 @@ export default function AboutPage() {
       {/* Image collage */}
       <section className="pb-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <AnimatedSection>
+          {/*
+            Three drawn plates, where three hotlinked picsum.photos images used to
+            sit under the alt text "Groove Infra at work". Once the client's
+            photography is in storage these become a curated selection from it.
+          */}
           <div className="grid grid-cols-3 gap-3" style={{ height: '440px' }}>
             <div className="col-span-2 relative rounded-2xl overflow-hidden">
-              <Image src="https://picsum.photos/seed/about-main/1200/800" alt="Groove Infra at work" fill className="object-cover" sizes="66vw" />
+              <ProjectImage
+                image={{ src: null, isPlaceholder: true, seed: 'about-lead' }}
+                alt=""
+                sizes="66vw"
+                label="Site work, Delhi NCR"
+              />
             </div>
             <div className="flex flex-col gap-3">
               <div className="relative flex-1 rounded-2xl overflow-hidden">
-                <Image src="https://picsum.photos/seed/about-2/600/400" alt="Project detail" fill className="object-cover" sizes="33vw" />
+                <ProjectImage
+                  image={{ src: null, isPlaceholder: true, seed: 'about-detail' }}
+                  alt=""
+                  sizes="33vw"
+                />
               </div>
               <div className="relative flex-1 rounded-2xl overflow-hidden">
-                <Image src="https://picsum.photos/seed/about-3/600/400" alt="Completed space" fill className="object-cover" sizes="33vw" />
+                <ProjectImage
+                  image={{ src: null, isPlaceholder: true, seed: 'about-handover' }}
+                  alt=""
+                  sizes="33vw"
+                />
               </div>
             </div>
           </div>
@@ -189,13 +222,27 @@ export default function AboutPage() {
             <AnimatedSection key={member.name} delay={i * 0.1}>
               <div className="group">
                 <div className="relative aspect-square rounded-2xl overflow-hidden mb-5 bg-surface-2">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
+                  {member.image ? (
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  ) : (
+                    <span
+                      /*
+                       * The name is printed directly beneath, so the monogram is
+                       * decoration and is kept out of the accessibility tree
+                       * rather than being announced a second time.
+                       */
+                      aria-hidden="true"
+                      className="absolute inset-0 flex items-center justify-center border border-subtle font-display text-5xl font-bold text-muted-custom"
+                    >
+                      {initials(member.name)}
+                    </span>
+                  )}
                 </div>
                 <h3 className="font-display font-semibold text-primary text-xl mb-0.5">
                   {member.name}
