@@ -24,7 +24,7 @@ function isValidPath(path: string): boolean {
 }
 
 export async function POST(request: Request) {
-  const auth = checkAdminAuth()
+  const auth = await checkAdminAuth()
   if (!auth.ok) {
     return NextResponse.json({ error: auth.reason }, { status: 401 })
   }
