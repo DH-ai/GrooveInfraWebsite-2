@@ -30,6 +30,11 @@ check() {
 
 env_val() { sed -n "s/^$1=//p" "$REPO_ROOT/.env.local"; }
 
+# Login attempts are rate limited per client IP for fifteen minutes. Without a
+# distinct address, running this suite alongside the other login-touching suites
+# exhausts the shared bucket and the sign-in below fails for the wrong reason.
+CLIENT_IP="192.0.2.$(( RANDOM % 200 + 20 ))"
+
 SERVICE_KEY="$(env_val SUPABASE_SERVICE_ROLE_KEY)"
 SUPABASE_URL="$(env_val NEXT_PUBLIC_SUPABASE_URL)"
 
@@ -39,6 +44,7 @@ admin_post() {
   curl -s -o /tmp/admin_projects_body -w '%{http_code}' \
     -X POST "$BASE$path" \
     -H 'Content-Type: application/json' \
+    -H "X-Forwarded-For: $CLIENT_IP" \
     -b "$COOKIE_JAR" \
     -d "$payload"
 }
@@ -52,6 +58,7 @@ echo
 echo "-- Sign in ------------------------------------------------------"
 login_status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/admin/login" \
   -c "$COOKIE_JAR" \
+  -H "X-Forwarded-For: $CLIENT_IP" \
   --data-urlencode "username=$(env_val ADMIN_USERNAME)" \
   --data-urlencode "password=$(env_val ADMIN_PASSWORD)")
 check "login redirects" 307 "$login_status"
