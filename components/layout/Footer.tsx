@@ -98,6 +98,14 @@ export default function Footer() {
         {/* Bottom */}
         <div className="py-6 border-t border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-custom">
           <span>© {new Date().getFullYear()} Groove Infra. All rights reserved.</span>
+          <nav aria-label="Legal" className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-primary transition-colors duration-200">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-primary transition-colors duration-200">
+              Terms &amp; Conditions
+            </Link>
+          </nav>
           <span>Crafted with precision in Delhi, India.</span>
         </div>
       </div>
