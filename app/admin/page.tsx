@@ -24,6 +24,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   await requireAdmin()
 
   const [projects, enquiries] = await Promise.all([getAllProjects(), getAllEnquiries()])
+  // Which projects are still showing a drawn plate rather than the client's own
+  // photography. Without this the swap is invisible from the admin panel and the
+  // only way to audit it is to open every project page.
+  const awaitingPhotography = projects.filter((p) => !p.imagery.hasOwnPhotography)
   const successSlug = searchParams?.success === '1' ? searchParams.slug : undefined
   const deletedSlug = searchParams?.deleted === '1' ? searchParams.slug : undefined
   const error = searchParams?.error
@@ -94,6 +98,20 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             <h2 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-4">
               Existing projects
             </h2>
+
+            {awaitingPhotography.length > 0 && (
+              <p
+                data-testid="awaiting-photography-summary"
+                className="mb-4 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+              >
+                <span className="font-semibold">
+                  {awaitingPhotography.length} of {projects.length} projects
+                </span>{' '}
+                have no uploaded photography and are showing a generated plate. Upload images to a
+                project and it takes over automatically — nothing else needs changing.
+              </p>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {projects.map((project) => (
                 <div
@@ -102,6 +120,22 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 >
                   <div className="font-semibold text-primary">{project.title}</div>
                   <div className="text-xs mt-1 text-muted-custom">/{project.slug}</div>
+                  <div className="mt-3">
+                    {project.imagery.hasOwnPhotography ? (
+                      <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-100">
+                        {`${project.imagery.ownedCount} ${
+                          project.imagery.ownedCount === 1 ? 'photo' : 'photos'
+                        }`}
+                      </span>
+                    ) : (
+                      <span
+                        data-testid="placeholder-badge"
+                        className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-100"
+                      >
+                        Generated plate
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <Link
                       href={`/projects/${project.slug}`}

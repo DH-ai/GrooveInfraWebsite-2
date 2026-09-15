@@ -65,7 +65,14 @@ export const createProjectSchema = z.object({
   area: optionalText(80),
   year: yearSchema.optional(),
   cover_image: imageUrlSchema.nullish(),
-  images: z.array(imageUrlSchema).min(1, 'At least one image is required').max(MAX_GALLERY_IMAGES),
+  /*
+   * Optional, where it previously demanded at least one image. The client is
+   * publishing projects before their photography is ready, and blocking creation
+   * on an upload forced the old workaround: paste a stock URL in to get past the
+   * form. Projects with no images now render generated plates via
+   * lib/project-images.ts, and uploading later supersedes them.
+   */
+  images: z.array(imageUrlSchema).max(MAX_GALLERY_IMAGES).default([]),
 })
 
 export const updateProjectSchema = z.object({
