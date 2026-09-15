@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
+import { getAllEnquiries } from '@/lib/enquiries'
 import { getAllProjects } from '@/lib/projects'
 import DeleteProjectForm from '@/components/admin/DeleteProjectForm'
 import CreateProjectForm from '@/components/admin/CreateProjectForm'
+import EnquiryList from '@/components/admin/EnquiryList'
 
 export const metadata: Metadata = {
   title: 'Admin',
@@ -21,7 +23,7 @@ interface AdminPageProps {
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   await requireAdmin()
 
-  const projects = await getAllProjects()
+  const [projects, enquiries] = await Promise.all([getAllProjects(), getAllEnquiries()])
   const successSlug = searchParams?.success === '1' ? searchParams.slug : undefined
   const deletedSlug = searchParams?.deleted === '1' ? searchParams.slug : undefined
   const error = searchParams?.error
@@ -79,6 +81,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         )}
 
         <CreateProjectForm />
+
+        <div className="mt-12">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-4">
+            Enquiries {enquiries.length > 0 && `(${enquiries.length})`}
+          </h2>
+          <EnquiryList enquiries={enquiries} />
+        </div>
 
         {projects.length > 0 && (
           <div className="mt-12">
