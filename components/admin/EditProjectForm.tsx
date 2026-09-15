@@ -137,7 +137,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
       className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
     >
       {errorMsg && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
           {errorMsg}
         </div>
       )}

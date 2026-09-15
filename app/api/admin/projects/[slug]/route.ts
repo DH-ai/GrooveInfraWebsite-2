@@ -3,34 +3,9 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { revalidateProjectSurfaces } from '@/lib/revalidate'
-import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
-
-interface UpdateProjectBody {
-  _action?: string
-  title?: string
-  category?: string
-  location?: string
-  client_name?: string
-  basic_description?: string
-  description?: string
-  duration?: string
-  area?: string
-  year?: string | number | null
-  cover_image?: string | null
-  images?: string[]
-  remove_cover?: boolean
-  replace_gallery?: boolean
-}
-
-function getPublicUrlPrefix(): string {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  return `${base.replace(/\/$/, '')}/storage/v1/object/public/${PROJECTS_BUCKET}/`
-}
-
-function isAllowedImageUrl(url: string): boolean {
-  if (!url) return false
-  return url.startsWith(getPublicUrlPrefix())
-}
+import { getPublicUrlPrefix, isAllowedImageUrl } from '@/lib/supabase-storage'
+import { sanitizeSlug } from '@/lib/upload-constants'
+import { firstIssueMessage, updateProjectSchema } from '@/lib/validation'
 
 async function listStorageFiles(slug: string): Promise<string[]> {
   const supabase = getSupabaseAdmin()
@@ -91,14 +66,14 @@ export async function POST(
     return NextResponse.json({ error: 'invalid-slug' }, { status: 400 })
   }
 
-  let body: UpdateProjectBody
+  let raw: unknown
   try {
-    body = (await request.json()) as UpdateProjectBody
+    raw = await request.json()
   } catch {
     return NextResponse.json({ error: 'invalid-json' }, { status: 400 })
   }
 
-  if (body._action === 'delete') {
+  if ((raw as { _action?: string } | null)?._action === 'delete') {
     try {
       await deleteProjectEverywhere(slug)
       revalidateProjectSurfaces(slug)
@@ -108,6 +83,15 @@ export async function POST(
       return NextResponse.json({ error: 'delete-failed' }, { status: 500 })
     }
   }
+
+  const parsed = updateProjectSchema.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'invalid', detail: firstIssueMessage(parsed.error) },
+      { status: 400 }
+    )
+  }
+  const body = parsed.data
 
   const supabase = getSupabaseAdmin()
   const { data: existing, error: existingError } = await supabase
@@ -120,46 +104,19 @@ export async function POST(
     return NextResponse.json({ error: 'not-found' }, { status: 404 })
   }
 
-  const title = String(body.title ?? '').trim()
-  const category = String(body.category ?? '').trim()
-  const location = String(body.location ?? '').trim()
-  const clientName = String(body.client_name ?? '').trim()
-  const basicDescription = String(body.basic_description ?? '').trim()
-  const description = String(body.description ?? '').trim()
-  const duration = String(body.duration ?? '').trim()
-  const area = String(body.area ?? '').trim()
-  const yearRaw = body.year == null ? '' : String(body.year).trim()
-  const coverImageRaw = body.cover_image == null ? '' : String(body.cover_image).trim()
-  const removeCover = Boolean(body.remove_cover)
-  const replaceGallery = Boolean(body.replace_gallery)
-  const images = Array.isArray(body.images) ? body.images.map((v) => String(v).trim()) : []
-
-  if (!title || !category || !location || !clientName || !basicDescription || !description || !duration) {
-    return NextResponse.json({ error: 'invalid' }, { status: 400 })
-  }
-
-  if (!CATEGORY_OPTIONS.has(category)) {
-    return NextResponse.json({ error: 'invalid-category' }, { status: 400 })
-  }
-
-  let year: number | undefined
-  if (yearRaw) {
-    const parsed = Number(yearRaw)
-    if (!Number.isFinite(parsed)) {
-      return NextResponse.json({ error: 'invalid-year' }, { status: 400 })
-    }
-    year = parsed
-  }
+  const removeCover = body.remove_cover ?? false
+  const replaceGallery = body.replace_gallery ?? false
+  const images = body.images ?? []
 
   let coverImage: string | null = (existing.cover_image as string | null) ?? null
   if (removeCover) {
     coverImage = null
   }
-  if (coverImageRaw) {
-    if (!isAllowedImageUrl(coverImageRaw)) {
+  if (body.cover_image) {
+    if (!isAllowedImageUrl(body.cover_image)) {
       return NextResponse.json({ error: 'invalid-cover-url' }, { status: 400 })
     }
-    coverImage = coverImageRaw
+    coverImage = body.cover_image
   }
 
   let finalImages: string[]
@@ -179,7 +136,7 @@ export async function POST(
   }
 
   try {
-    if (removeCover || coverImageRaw) {
+    if (removeCover || body.cover_image) {
       await removeCoverInStorage(slug)
     }
     if (replaceGallery) {
@@ -187,16 +144,16 @@ export async function POST(
     }
 
     const updated: Record<string, unknown> = {
-      title,
-      category,
-      location,
-      client_name: clientName,
-      basic_description: basicDescription,
-      description,
-      duration,
+      title: body.title,
+      category: body.category,
+      location: body.location,
+      client_name: body.client_name,
+      basic_description: body.basic_description,
+      description: body.description,
+      duration: body.duration,
       images: finalImages,
-      year: year ?? null,
-      area: area || null,
+      year: body.year ?? null,
+      area: body.area ?? null,
       cover_image: coverImage,
     }
 

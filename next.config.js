@@ -13,15 +13,20 @@ const supabaseOrigin = (() => {
   }
 })()
 
+// Cloudflare Turnstile loads its script from, and renders its challenge in an
+// iframe served by, this origin.
+const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com'
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js ships inline bootstrap scripts, and the theme script in the root
   // layout must run before paint to avoid a flash of the wrong theme.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${TURNSTILE_ORIGIN} https://va.vercel-scripts.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  `connect-src 'self' ${supabaseOrigin} https://vitals.vercel-insights.com`.trim(),
+  `connect-src 'self' ${supabaseOrigin} ${TURNSTILE_ORIGIN} https://vitals.vercel-insights.com`.trim(),
+  `frame-src 'self' ${TURNSTILE_ORIGIN}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

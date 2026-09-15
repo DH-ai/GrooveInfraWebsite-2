@@ -6,10 +6,7 @@ import {
   getExtension,
   sanitizeSlug,
 } from '@/lib/upload-constants'
-
-interface SignUploadRequest {
-  paths?: unknown
-}
+import { firstIssueMessage, signUploadSchema } from '@/lib/validation'
 
 function isValidPath(path: string): boolean {
   if (!path || path.includes('..') || path.startsWith('/')) return false
@@ -29,24 +26,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: auth.reason }, { status: 401 })
   }
 
-  let body: SignUploadRequest
+  let raw: unknown
   try {
-    body = (await request.json()) as SignUploadRequest
+    raw = await request.json()
   } catch {
     return NextResponse.json({ error: 'invalid-json' }, { status: 400 })
   }
 
-  const rawPaths = body.paths
-  if (!Array.isArray(rawPaths) || rawPaths.length === 0) {
-    return NextResponse.json({ error: 'paths-required' }, { status: 400 })
+  const parsed = signUploadSchema.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'paths-required', detail: firstIssueMessage(parsed.error) },
+      { status: 400 }
+    )
   }
 
-  const paths: string[] = []
-  for (const entry of rawPaths) {
-    if (typeof entry !== 'string' || !isValidPath(entry)) {
+  const paths = parsed.data.paths
+  for (const entry of paths) {
+    if (!isValidPath(entry)) {
       return NextResponse.json({ error: 'invalid-path', path: entry }, { status: 400 })
     }
-    paths.push(entry)
   }
 
   const supabase = getSupabaseAdmin()

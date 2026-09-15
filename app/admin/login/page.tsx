@@ -28,6 +28,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
   const error = searchParams?.error
   const isMissingConfig = error === 'missing-config'
   const isExpired = error === 'expired'
+  const isRateLimited = error === 'rate-limited'
   const nextPath = safeNextPath(searchParams?.next)
 
   return (
@@ -39,20 +40,26 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
         <h1 className="font-display text-3xl font-bold text-primary mt-3">Sign in</h1>
 
         {isMissingConfig && (
-          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
             Admin environment variables are missing. Set ADMIN_USERNAME, ADMIN_PASSWORD, and
             ADMIN_SESSION_SECRET (or ADMIN_TOKEN) in .env.local.
           </div>
         )}
 
         {isExpired && (
-          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
             Your session expired. Please sign in again.
           </div>
         )}
 
-        {error && !isMissingConfig && !isExpired && (
-          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        {isRateLimited && (
+          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+            Too many sign-in attempts. Please wait a few minutes and try again.
+          </div>
+        )}
+
+        {error && !isMissingConfig && !isExpired && !isRateLimited && (
+          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
             Invalid username or password.
           </div>
         )}
