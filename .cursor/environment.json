@@ -1,0 +1,17 @@
+{
+  "name": "Groove Infra (local Supabase)",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "terminals": [
+    {
+      "name": "next-dev",
+      "command": "bash .cursor/dev.sh",
+      "description": "Next.js dev server on http://localhost:3000 (uses the local Supabase stack via .env.local)."
+    }
+  ],
+  "ports": [
+    { "name": "Next.js dev server", "port": 3000 },
+    { "name": "Supabase API", "port": 54321 },
+    { "name": "Supabase Studio", "port": 54323 }
+  ]
+}
