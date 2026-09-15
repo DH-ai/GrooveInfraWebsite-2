@@ -29,6 +29,8 @@ create table if not exists public.projects (
 
 create index if not exists projects_category_idx on public.projects (category);
 create index if not exists projects_featured_idx on public.projects (featured);
+-- Every read orders by created_at desc.
+create index if not exists projects_created_at_idx on public.projects (created_at desc);
 
 -- updated_at trigger
 create or replace function public.set_updated_at()
@@ -45,8 +47,9 @@ create trigger projects_set_updated_at
   for each row execute function public.set_updated_at();
 
 -- 2) RLS ---------------------------------------------------------------------
--- Reads happen from the server using either the anon or service-role key.
--- Writes happen only from the server using the service-role key (bypasses RLS).
+-- Public page reads use the anon key, so they are governed by the select policy
+-- below. Writes happen only from server API routes using the service-role key,
+-- which bypasses RLS, so no write policies are needed.
 alter table public.projects enable row level security;
 
 drop policy if exists "projects_public_read" on public.projects;
