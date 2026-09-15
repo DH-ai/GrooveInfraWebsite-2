@@ -33,9 +33,32 @@ check() {
   fi
 }
 
+# Cloudflare's documented always-pass test secret. Any response string verifies
+# against it, so with these keys configured the suite can mint its own tokens.
+# A real secret cannot be satisfied without a browser, so the Turnstile-dependent
+# cases are skipped instead of reported as failures.
+TURNSTILE_TEST_SECRET='1x0000000000000000000000000000000AA'
+CONFIGURED_SECRET="$(sed -n 's/^TURNSTILE_SECRET_KEY=//p' "$REPO_ROOT/.env.local" 2>/dev/null)"
+
+if [[ -z "$CONFIGURED_SECRET" ]]; then
+  TURNSTILE_MODE=off
+  TT_TOKEN=''
+elif [[ "$CONFIGURED_SECRET" == "$TURNSTILE_TEST_SECRET" ]]; then
+  TURNSTILE_MODE=test-keys
+  TT_TOKEN='suite-generated-token'
+else
+  TURNSTILE_MODE=real-keys
+  TT_TOKEN=''
+fi
+
 # post <ip> <json> -> prints "STATUS<TAB>BODY"
+# Splices in a CAPTCHA token when one is available, so the same payloads work
+# whether or not Turnstile is switched on.
 post() {
   local ip="$1" body="$2"
+  if [[ -n "$TT_TOKEN" && "$body" == '{'* && "$body" != *turnstileToken* ]]; then
+    body="{\"turnstileToken\":\"$TT_TOKEN\",${body#\{}"
+  fi
   curl -s -o /tmp/contact_form_body -w '%{http_code}' \
     -X POST "$BASE/api/contact" \
     -H 'Content-Type: application/json' \
@@ -61,6 +84,7 @@ ip() { echo "10.$RUN_BLOCK.$1"; }
 echo "=============================================================="
 echo "Enquiry form — validation / spam / persistence / rate limiting"
 echo "base: $BASE"
+echo "turnstile: $TURNSTILE_MODE"
 echo "=============================================================="
 
 echo
@@ -157,6 +181,32 @@ check "throttled response carries Retry-After" 1 "$([[ -n "$ra" && "$ra" -gt 0 ]
 
 check "a different IP is unaffected" 200 \
   "$(status "$(post "$(ip 42)" "{\"name\":\"Other IP\",\"email\":\"other@example.com\",\"message\":\"separate bucket probe\",\"renderedAt\":$(human_ts)}")")"
+
+echo
+echo "-- Turnstile ----------------------------------------------------"
+case "$TURNSTILE_MODE" in
+  off)
+    # No keys configured is a supported setup: the CAPTCHA is skipped so the form
+    # keeps working, which the passing cases above already demonstrate.
+    echo "  SKIP  no keys configured; verification is bypassed by design"
+    ;;
+  real-keys)
+    echo "  SKIP  a real secret is configured; tokens need a browser"
+    ;;
+  test-keys)
+    r=$(curl -s -o /tmp/contact_form_body -w '%{http_code}' -X POST "$BASE/api/contact" \
+      -H 'Content-Type: application/json' -H "X-Forwarded-For: $(ip 51)" \
+      -d "{\"name\":\"No Token\",\"email\":\"notoken@example.com\",\"message\":\"submitted with no captcha token at all\",\"renderedAt\":$(human_ts)}")
+    check "missing token rejected when configured" 400 "$r"
+    check "  no row persisted for the rejected attempt" 0 \
+      "$(psql_q "select count(*) from public.enquiries where email='notoken@example.com'")"
+
+    tok_email="turnstile-$(date +%s)@example.com"
+    r=$(post "$(ip 52)" "{\"name\":\"With Token\",\"email\":\"$tok_email\",\"message\":\"submitted with a verified captcha token\",\"renderedAt\":$(human_ts)}")
+    check "verified token accepted" 200 "$(status "$r")"
+    check "  row persisted" 1 "$(psql_q "select count(*) from public.enquiries where email='$tok_email'")"
+    ;;
+esac
 
 echo
 echo "-- Enquiries RLS ------------------------------------------------"
