@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 import ContactForm from '@/components/contact/ContactForm'
 import FaqAccordion from '@/components/contact/FaqAccordion'
+import { CONTACT_EMAIL } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -11,13 +12,12 @@ export const metadata: Metadata = {
   alternates: { canonical: '/contact' },
 }
 
+// The published address comes from PUBLIC_CONTACT_EMAIL; the row is dropped
+// rather than rendered with a placeholder when that is not configured.
 const contactInfo = [
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'contactus@grooveinfra.in',
-    href: 'mailto:contactus@grooveinfra.in',
-  },
+  ...(CONTACT_EMAIL
+    ? [{ icon: Mail, label: 'Email', value: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` }]
+    : []),
   { icon: Phone, label: 'Phone', value: '+91 88003 85198', href: 'tel:+918800385198' },
   {
     icon: MapPin,

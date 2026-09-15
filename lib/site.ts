@@ -39,6 +39,16 @@ export const SITE_LOCALE = 'en_IN'
 /** Where the business physically operates, used in the organisation markup. */
 export const SITE_REGIONS = ['Delhi', 'Gurgaon', 'Noida', 'NCR']
 
+/**
+ * The address the site publishes for enquiries, read from the environment rather
+ * than written into the source so the enquiry inbox is configured in one place
+ * and cannot drift between the footer, the contact page and the JSON-LD.
+ *
+ * Null when unset, and callers omit the row entirely rather than rendering a
+ * placeholder: a dead mailto: link is worse than no link.
+ */
+export const CONTACT_EMAIL = process.env.PUBLIC_CONTACT_EMAIL ?? null
+
 export function absoluteUrl(path = '/'): string {
   return new URL(path, SITE_URL).toString()
 }

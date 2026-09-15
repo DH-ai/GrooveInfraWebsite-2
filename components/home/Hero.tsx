@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
+
+const SLIDE_DURATION_MS = 5500
 
 const slides = [
   {
@@ -39,24 +41,44 @@ const slides = [
 
 export default function Hero() {
   const [current, setCurrent] = useState(0)
-  const [paused, setPaused] = useState(false)
+  // Hovering or tabbing into the hero suspends rotation; the explicit control
+  // below stops it for good. They are tracked separately so moving the mouse
+  // away does not silently restart a carousel the user asked to stop.
+  const [suspended, setSuspended] = useState(false)
+  const [stopped, setStopped] = useState(false)
+  const reduceMotion = useReducedMotion()
+
+  // WCAG 2.2.2: content that moves by itself for more than five seconds needs a
+  // mechanism to pause it. Hover alone is not one — it is unavailable to keyboard
+  // and touch users.
+  const rotating = !stopped && !suspended && !reduceMotion
 
   const next = useCallback(() => setCurrent((c) => (c + 1) % slides.length), [])
   const prev = useCallback(() => setCurrent((c) => (c - 1 + slides.length) % slides.length), [])
 
   useEffect(() => {
-    if (paused) return
-    const id = setInterval(next, 5500)
+    if (!rotating) return
+    const id = setInterval(next, SLIDE_DURATION_MS)
     return () => clearInterval(id)
-  }, [paused, next])
+  }, [rotating, next])
+
+  const slide = slides[current]
 
   return (
     <section
-      className="relative min-h-screen overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      aria-roledescription="carousel"
+      aria-label="Sectors we build for"
+      /*
+       * 100svh rather than 100vh: on mobile browsers 100vh is measured against
+       * the viewport with the URL bar retracted, so a full-height hero has its
+       * bottom edge — the slide controls — cut off on first paint.
+       */
+      className="relative min-h-[100svh] overflow-hidden"
+      onMouseEnter={() => setSuspended(true)}
+      onMouseLeave={() => setSuspended(false)}
+      onFocus={() => setSuspended(true)}
+      onBlur={() => setSuspended(false)}
     >
-      {/* Background slide images */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`bg-${current}`}
@@ -67,8 +89,8 @@ export default function Hero() {
           transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
         >
           <Image
-            src={slides[current].image}
-            alt={slides[current].tag}
+            src={slide.image}
+            alt=""
             fill
             priority={current === 0}
             className="object-cover"
@@ -77,53 +99,66 @@ export default function Hero() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Blur + dark overlays */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/20 to-black/75" />
+      <div aria-hidden="true" className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/20 to-black/75"
+      />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-screen flex flex-col justify-center pt-20">
+      {/*
+        Only the active slide is in the DOM, so announcing changes while the
+        carousel rotates on its own would interrupt a screen-reader user every
+        five seconds. Announcements are enabled only once rotation has stopped,
+        which is what the APG carousel pattern prescribes.
+      */}
+      <div
+        className="relative z-10 mx-auto flex h-[100svh] max-w-7xl flex-col justify-center px-4 pt-20 sm:px-6 lg:px-8"
+        aria-live={rotating ? 'off' : 'polite'}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={`content-${current}`}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${slide.tag} — slide ${current + 1} of ${slides.length}`}
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
             className="max-w-3xl"
           >
-            {/* Tag */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-px w-12 bg-groove-gold" />
-              <span className="text-groove-gold text-xs font-medium tracking-[0.22em] uppercase">
-                {slides[current].tag}
+            <div className="mb-6 flex items-center gap-3">
+              <span aria-hidden="true" className="h-px w-12 bg-groove-gold" />
+              <span className="text-xs font-medium uppercase tracking-[0.22em] text-groove-gold">
+                {slide.tag}
               </span>
             </div>
 
-            {/* Heading */}
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.04] tracking-tight mb-6">
-              {slides[current].heading[0]}
+            <h1 className="mb-6 font-display text-5xl font-bold leading-[1.04] tracking-tight text-white sm:text-6xl md:text-7xl lg:text-8xl">
+              {slide.heading[0]}
               <br />
-              <span className="text-gradient-gold">{slides[current].heading[1]}</span>
+              <span className="text-gradient-gold">{slide.heading[1]}</span>
             </h1>
 
-            {/* Subheading */}
-            <p className="text-white/65 text-lg sm:text-xl max-w-md mb-10 leading-relaxed">
-              {slides[current].sub}
+            <p className="mb-10 max-w-md text-lg leading-relaxed text-white/80 sm:text-xl">
+              {slide.sub}
             </p>
 
-            {/* CTAs */}
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/projects"
-                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold-hover transition-all duration-300 hover:scale-105"
+                className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-groove-gold px-7 py-3.5 text-sm font-medium text-black transition-all duration-300 hover:scale-105 hover:shadow-gold-hover"
               >
                 View Our Work
-                <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+                <ArrowRight
+                  size={15}
+                  aria-hidden="true"
+                  className="transition-transform group-hover:translate-x-1"
+                />
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-white/25 text-white text-sm font-medium hover:border-white/50 hover:bg-white/5 transition-all duration-300"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/40 px-7 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:border-white hover:bg-white/10"
               >
                 Start a Project
               </Link>
@@ -131,56 +166,81 @@ export default function Hero() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Slide counter */}
-        <div className="absolute bottom-12 right-6 sm:right-10 flex items-center gap-3">
-          <span className="font-display text-5xl font-bold text-white/20 tabular-nums leading-none">
+        <p
+          aria-hidden="true"
+          className="absolute bottom-12 right-6 flex items-baseline gap-3 sm:right-10"
+        >
+          <span className="font-display text-5xl font-bold leading-none tabular-nums text-white/45">
             0{current + 1}
           </span>
-          <span className="text-white/30 text-sm">/ 0{slides.length}</span>
-        </div>
+          <span className="text-sm text-white/60">/ 0{slides.length}</span>
+        </p>
       </div>
 
-      {/* Arrow navigation */}
+      {/*
+        Every control below is at least 44px in both directions. The dots were
+        previously 6px squares, which is under even the 24px WCAG 2.5.8 minimum;
+        the visible dot is now decoration inside a full-size hit area.
+      */}
       <button
+        type="button"
         onClick={prev}
-        className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all duration-200"
+        className="absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:left-6"
         aria-label="Previous slide"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={18} aria-hidden="true" />
       </button>
       <button
+        type="button"
         onClick={next}
-        className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all duration-200"
+        className="absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:right-6"
         aria-label="Next slide"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={18} aria-hidden="true" />
       </button>
 
-      {/* Dot navigation */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {slides.map((_, i) => (
+      <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center">
+        {!reduceMotion && (
           <button
-            key={i}
+            type="button"
+            onClick={() => setStopped((prev) => !prev)}
+            aria-pressed={stopped}
+            aria-label={stopped ? 'Start automatic slide changes' : 'Stop automatic slide changes'}
+            className="flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white"
+          >
+            {stopped ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
+          </button>
+        )}
+
+        {slides.map((s, i) => (
+          <button
+            key={s.tag}
+            type="button"
             onClick={() => setCurrent(i)}
-            aria-label={`Slide ${i + 1}`}
-            className={`rounded-full transition-all duration-400 ${
-              i === current
-                ? 'w-7 h-1.5 bg-groove-gold'
-                : 'w-1.5 h-1.5 bg-white/35 hover:bg-white/60'
-            }`}
-          />
+            aria-current={i === current}
+            aria-label={`Show slide ${i + 1}: ${s.tag}`}
+            className="group flex h-11 w-6 items-center justify-center"
+          >
+            <span
+              aria-hidden="true"
+              className={`rounded-full transition-all duration-300 ${
+                i === current
+                  ? 'h-1.5 w-5 bg-groove-gold'
+                  : 'h-1.5 w-1.5 bg-white/50 group-hover:bg-white/80'
+              }`}
+            />
+          </button>
         ))}
       </div>
 
-      {/* Auto-play progress bar */}
-      {!paused && (
+      {rotating && (
         <motion.div
           key={`progress-${current}`}
-          className="absolute bottom-0 left-0 h-[2px] bg-groove-gold/60 origin-left"
+          aria-hidden="true"
+          className="absolute bottom-0 left-0 h-[2px] w-full origin-left bg-groove-gold/60"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 5.5, ease: 'linear' }}
-          style={{ width: '100%' }}
+          transition={{ duration: SLIDE_DURATION_MS / 1000, ease: 'linear' }}
         />
       )}
     </section>

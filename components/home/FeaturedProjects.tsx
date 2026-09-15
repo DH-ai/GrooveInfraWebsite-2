@@ -73,7 +73,7 @@ function ProjectCard({
 
           {/* Content */}
           <div className="absolute bottom-0 left-0 right-0 p-5">
-            <div className="flex items-center gap-1.5 text-white/50 text-xs mb-1.5">
+            <div className="flex items-center gap-1.5 text-white/70 text-xs mb-1.5">
               <MapPin size={10} />
               <span>{project.location}</span>
               {project.year && <><span>·</span><span>{project.year}</span></>}

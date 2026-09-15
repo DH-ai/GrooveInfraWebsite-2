@@ -40,26 +40,26 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
         <h1 className="font-display text-3xl font-bold text-primary mt-3">Sign in</h1>
 
         {isMissingConfig && (
-          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
+          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
             Admin environment variables are missing. Set ADMIN_USERNAME, ADMIN_PASSWORD, and
             ADMIN_SESSION_SECRET (or ADMIN_TOKEN) in .env.local.
           </div>
         )}
 
         {isExpired && (
-          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-100">
+          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
             Your session expired. Please sign in again.
           </div>
         )}
 
         {isRateLimited && (
-          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
             Too many sign-in attempts. Please wait a few minutes and try again.
           </div>
         )}
 
         {error && !isMissingConfig && !isExpired && !isRateLimited && (
-          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
             Invalid username or password.
           </div>
         )}
@@ -75,7 +75,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
             <input
               name="username"
               required
-              className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+              className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
               placeholder="admin"
             />
           </label>
@@ -85,7 +85,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
               name="password"
               type="password"
               required
-              className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+              className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             />
           </label>
           <button

@@ -12,7 +12,7 @@ export default function CallToAction() {
         <AnimatedSection>
           <div className="relative rounded-3xl overflow-hidden">
             {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-groove-dark via-groove-black to-groove-black dark:from-groove-dark dark:to-groove-black" />
+            <div className="absolute inset-0 bg-gradient-to-br from-groove-dark via-groove-black to-groove-black" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,76,0.12),transparent_60%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(201,168,76,0.06),transparent_60%)]" />
 
@@ -46,7 +46,7 @@ export default function CallToAction() {
                 <span className="text-gradient-gold">Transform?</span>
               </h2>
 
-              <p className="text-white/60 text-lg max-w-md mx-auto mb-10">
+              <p className="text-white/75 text-lg max-w-md mx-auto mb-10">
                 Share your vision and we&apos;ll handle everything — from design to delivery.
               </p>
 
