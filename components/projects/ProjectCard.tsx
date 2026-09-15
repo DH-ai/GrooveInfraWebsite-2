@@ -1,19 +1,18 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { MapPin, ArrowUpRight } from 'lucide-react'
-import type { Project } from '@/types/project'
-import { formatCategory, getCoverImage } from '@/lib/utils'
+import type { ProjectCardData } from '@/types/project'
+import { formatCategory } from '@/lib/utils'
+import ProjectImage from '@/components/ui/ProjectImage'
 
 interface ProjectCardProps {
-  project: Project
+  project: ProjectCardData
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const cover = getCoverImage(project)
-  const summary = project.basic_description ?? project.description
+  const { summary } = project
 
   return (
     <motion.article
@@ -29,19 +28,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               whileHover={{ scale: 1.06 }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
             >
-              {cover ? (
-                <Image
-                  src={cover}
-                  alt={project.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-              ) : (
-                <motion.div className="absolute inset-0 bg-surface flex items-center justify-center p-6">
-                  <span className="font-display text-lg text-muted-custom text-center">{project.title}</span>
-                </motion.div>
-              )}
+              <ProjectImage
+                image={project.imagery.cover}
+                alt={project.title}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+              {/*
+                No caption on the plate here: the card already prints the title
+                and the category, so a label inside the frame would only repeat
+                them.
+              */}
             </motion.div>
 
             {/* Overlay */}

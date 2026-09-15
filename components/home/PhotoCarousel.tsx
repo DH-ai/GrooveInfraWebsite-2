@@ -5,15 +5,19 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Pause, Play } from 'lucide-react'
-import type { Project } from '@/types/project'
-import { getCoverImage } from '@/lib/utils'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
-interface PhotoCarouselProps {
-  projects: Project[]
-}
+export type CarouselItem = { src: string; href: string; title: string; category: string }
 
-type CarouselItem = { src: string; href: string; title: string; category: string }
+interface PhotoCarouselProps {
+  /**
+   * Built on the server rather than derived from whole projects here: this is a
+   * client component, so anything it receives is serialised into the page, and
+   * a strip of a dozen thumbnails does not need the descriptions or the raw
+   * storage URLs of every project to render.
+   */
+  items: CarouselItem[]
+}
 
 function CarouselRow({
   items,
@@ -80,7 +84,7 @@ function CarouselRow({
   )
 }
 
-export default function PhotoCarousel({ projects }: PhotoCarouselProps) {
+export default function PhotoCarousel({ items }: PhotoCarouselProps) {
   const [paused, setPaused] = useState(false)
   const reduceMotion = useReducedMotion()
 
@@ -88,19 +92,6 @@ export default function PhotoCarousel({ projects }: PhotoCarouselProps) {
   // for more than five seconds; this strip runs indefinitely. Reduced-motion
   // users get it stopped without having to ask.
   const running = !paused && !reduceMotion
-
-  const items = projects
-    .map((p) => {
-      const src = getCoverImage(p)
-      if (!src) return null
-      return {
-        src,
-        href: `/projects/${p.slug}`,
-        title: p.title,
-        category: p.category,
-      }
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null)
 
   if (!items.length) return null
 

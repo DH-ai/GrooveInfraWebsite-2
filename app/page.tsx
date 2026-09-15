@@ -16,12 +16,28 @@ export default async function HomePage() {
     getAllTestimonials(),
   ])
 
+  /*
+   * `getProjectsForCarousel` has already excluded anything without owned
+   * photography, so every cover has a `src`. The filter keeps the type honest
+   * rather than asserting it.
+   */
+  const carouselItems = projects.flatMap((p) =>
+    p.imagery.cover.src
+      ? [{ src: p.imagery.cover.src, href: `/projects/${p.slug}`, title: p.title, category: p.category }]
+      : []
+  )
+
   return (
     <>
-      <Hero />
+      {/*
+        The carousel query already returns only projects with owned photography,
+        so the hero fills itself with the client's real work as soon as any is
+        uploaded and draws plates until then.
+      */}
+      <Hero backdrops={projects.map((p) => p.imagery.cover)} />
       <Stats />
       <Services />
-      <PhotoCarousel projects={projects} />
+      <PhotoCarousel items={carouselItems} />
       <Testimonials testimonials={testimonials} />
       <CallToAction />
     </>
