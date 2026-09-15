@@ -6,6 +6,7 @@ import { ArrowLeft, MapPin, Calendar, Maximize2, Clock, Quote } from 'lucide-rea
 import ProjectGallery from '@/components/projects/ProjectGallery'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 import { getAllProjects, getProjectBySlug } from '@/lib/projects'
+import { absoluteUrl } from '@/lib/site'
 import { formatCategory, getCoverImage } from '@/lib/utils'
 
 interface PageProps {
@@ -30,9 +31,32 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const project = await getProjectBySlug(params.slug)
   if (!project) return {}
+
+  const description = project.basic_description ?? project.description
+  const canonical = `/projects/${project.slug}`
+
+  // Prefer the project's own photograph for the social card. getCoverImage skips
+  // stock placeholder hosts, so a project without owned imagery falls through to
+  // the site-wide generated card rather than sharing someone else's stock photo.
+  const cover = getCoverImage(project)
+
   return {
     title: project.title,
-    description: project.basic_description ?? project.description,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title: project.title,
+      description,
+      url: absoluteUrl(canonical),
+      ...(cover ? { images: [{ url: cover, alt: project.title }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: project.title,
+      description,
+      ...(cover ? { images: [cover] } : {}),
+    },
   }
 }
 
