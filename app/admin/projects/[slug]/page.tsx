@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { requireAdmin } from '@/lib/admin-auth'
 import { getProjectBySlug } from '@/lib/projects'
 import DeleteProjectForm from '@/components/admin/DeleteProjectForm'
 import EditProjectForm from '@/components/admin/EditProjectForm'
@@ -19,15 +19,7 @@ interface AdminEditPageProps {
 }
 
 export default async function AdminEditPage({ params, searchParams }: AdminEditPageProps) {
-  const adminToken = process.env.ADMIN_TOKEN
-  if (!adminToken) {
-    redirect('/admin/login?error=missing-config')
-  }
-
-  const token = cookies().get('admin_auth')?.value
-  if (!token || token !== adminToken) {
-    redirect('/admin/login')
-  }
+  await requireAdmin()
 
   const project = await getProjectBySlug(params.slug)
   if (!project) {

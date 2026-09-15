@@ -80,7 +80,7 @@ export async function POST(
   request: Request,
   { params }: { params: { slug: string } }
 ) {
-  const auth = checkAdminAuth()
+  const auth = await checkAdminAuth()
   if (!auth.ok) {
     return NextResponse.json({ error: auth.reason }, { status: 401 })
   }
