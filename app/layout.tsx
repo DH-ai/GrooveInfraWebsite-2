@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import Header from '@/components/layout/Header'
@@ -55,6 +57,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
         </ThemeProvider>
+        {/* Both are no-ops outside Vercel, so local development is unaffected. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
