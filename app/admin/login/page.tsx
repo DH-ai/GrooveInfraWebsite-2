@@ -28,6 +28,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
   const error = searchParams?.error
   const isMissingConfig = error === 'missing-config'
   const isExpired = error === 'expired'
+  const isRateLimited = error === 'rate-limited'
   const nextPath = safeNextPath(searchParams?.next)
 
   return (
@@ -51,7 +52,13 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginProps) 
           </div>
         )}
 
-        {error && !isMissingConfig && !isExpired && (
+        {isRateLimited && (
+          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            Too many sign-in attempts. Please wait a few minutes and try again.
+          </div>
+        )}
+
+        {error && !isMissingConfig && !isExpired && !isRateLimited && (
           <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
             Invalid username or password.
           </div>
