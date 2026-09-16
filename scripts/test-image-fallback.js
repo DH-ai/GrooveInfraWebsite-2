@@ -93,6 +93,49 @@ async function deleteRow(slug) {
   })
 }
 
+/** An 8x8 JPEG. Real bytes, because the point is that a real file survives. */
+const TINY_JPEG = Buffer.from(
+  '/9j/4AAQSkZJRgABAgAAAQABAAD//gAQTGF2YzYwLjMxLjEwMgD/2wBDAAgEBAQEBAUFBQUFBQYGBgYGBgYGBgYGBgYHBwcICAgHBwcGBgcHCAgICAkJCQgICAgJCQoKCgwMCwsODg4RERT/xABLAAEBAAAAAAAAAAAAAAAAAAAABwEBAAAAAAAAAAAAAAAAAAAAABABAAAAAAAAAAAAAAAAAAAAABEBAAAAAAAAAAAAAAAAAAAAAP/AABEIAAgACAMBIgACEQADEQD/2gAMAwEAAhEDEQA/AIyAD//Z',
+  'base64'
+)
+
+async function putObject(path, bytes) {
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/project-images/${path}`, {
+    method: 'POST',
+    headers: {
+      apikey: SERVICE_KEY,
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      'Content-Type': 'image/jpeg',
+      'x-upsert': 'true',
+    },
+    body: bytes,
+  })
+  if (!res.ok) throw new Error(`upload ${path} failed: ${res.status} ${await res.text()}`)
+}
+
+async function objectExists(path) {
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/project-images/${path}`, {
+    method: 'HEAD',
+  })
+  return res.ok
+}
+
+async function removeObjects(prefix) {
+  const list = await fetch(`${SUPABASE_URL}/storage/v1/object/list/project-images`, {
+    method: 'POST',
+    headers: restHeaders,
+    body: JSON.stringify({ prefix, limit: 100 }),
+  })
+  if (!list.ok) return
+  const names = (await list.json()).map((entry) => `${prefix}/${entry.name}`)
+  if (names.length === 0) return
+  await fetch(`${SUPABASE_URL}/storage/v1/object/project-images`, {
+    method: 'DELETE',
+    headers: restHeaders,
+    body: JSON.stringify({ prefixes: names }),
+  })
+}
+
 /**
  * Signs in with the admin credentials and returns the session cookie header. The
  * login route takes a form post and answers with a redirect, so the redirect is
@@ -145,6 +188,7 @@ async function main() {
   const emptySlug = `fallback-empty-${RUN_ID}`
   const stockSlug = `fallback-stock-${RUN_ID}`
   const created = []
+  const uploadedPrefixes = []
 
   try {
     // ---------------------------------------------------------------- fixtures
@@ -242,6 +286,49 @@ async function main() {
       'once the work is photographed the card should show it'
     )
 
+    // ------------------------------------- the new cover survives its own save
+    /*
+     * The browser uploads to the bucket first and submits the resulting URL
+     * second, and the replacement is named cover.<ext> exactly like the file it
+     * replaces. So the sweep that clears the old cover has to exclude the new
+     * one by name. When it did not, every cover uploaded through the admin form
+     * was deleted by the request that recorded it, and the project fell back to
+     * a plate with a broken image behind it.
+     */
+    console.log('\nReplacing a cover keeps the file it was handed')
+    const coverSlug = `fallback-cover-${RUN_ID}`
+    await insertRow({ ...baseRow(coverSlug, 'Fallback Cover Fixture'), images: [] })
+    created.push(coverSlug)
+    uploadedPrefixes.push(coverSlug)
+
+    await putObject(`${coverSlug}/cover.jpg`, TINY_JPEG)
+    check('the cover file is in the bucket before saving', await objectExists(`${coverSlug}/cover.jpg`))
+
+    const coverUrl = `${STORAGE_PREFIX}${coverSlug}/cover.jpg`
+    const coverSave = await fetch(`${BASE}/api/admin/projects/${coverSlug}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', cookie, 'X-Forwarded-For': nextIp() },
+      body: JSON.stringify({
+        ...baseRow(coverSlug, 'Fallback Cover Fixture'),
+        images: [coverUrl],
+        cover_image: coverUrl,
+        replace_gallery: true,
+      }),
+    })
+    check('admin save accepted', coverSave.ok, `status ${coverSave.status}`)
+    check(
+      'the cover file is still in the bucket after saving',
+      await objectExists(`${coverSlug}/cover.jpg`),
+      'the sweep of superseded covers deleted the replacement it was given'
+    )
+
+    const coverPage = await getHtml(`/projects/${coverSlug}`)
+    check(
+      'the detail page shows the cover, not a plate',
+      !coverPage.html.includes('data-placeholder="true"'),
+      'a recorded cover whose file no longer exists is worse than a plate'
+    )
+
     // ------------------------------------------- placeholders stay out of proof
     console.log('\nSurfaces that must never show a placeholder')
     const home = await getHtml('/')
@@ -296,6 +383,7 @@ async function main() {
     )
   } finally {
     for (const slug of created) await deleteRow(slug)
+    for (const prefix of uploadedPrefixes) await removeObjects(prefix)
     console.log(`\nremoved ${created.length} fixture project(s)`)
   }
 
