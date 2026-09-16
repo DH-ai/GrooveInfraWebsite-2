@@ -104,10 +104,8 @@ export default async function ProjectPage({ params }: PageProps) {
         <div className="absolute inset-0">
           <ProjectImage image={imagery.cover} alt={project.title} sizes="100vw" priority />
         </div>
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--bg))] via-black/40 to-black/25"
-        />
+        <div aria-hidden="true" className="hero-scrim absolute inset-0" />
+        <div aria-hidden="true" className="hero-wash absolute inset-0" />
 
         <div className="relative z-10 gutter pb-14 pt-32">
           <div className="mx-auto w-full max-w-[100rem]">
