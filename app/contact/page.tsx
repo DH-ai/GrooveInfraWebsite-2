@@ -91,7 +91,7 @@ export default function ContactPage() {
                   href={MAPS_HREF}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-flex min-h-11 items-center border-b border-strong pb-0.5 text-micro uppercase tracking-eyebrow text-muted-custom transition-colors hover:border-groove-gold hover:text-accent-gold"
+                  className="mt-2 inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-micro uppercase tracking-eyebrow text-muted-custom transition-colors hover:decoration-groove-gold hover:text-accent-gold"
                 >
                   Open in maps
                 </a>

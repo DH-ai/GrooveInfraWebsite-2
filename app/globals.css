@@ -158,6 +158,22 @@
     border-color: rgb(var(--border-strong));
   }
 
+  /*
+   * For ruled labels, which are underlines rather than bottom borders.
+   *
+   * A 44px tap target with `border-b` puts the rule at the bottom edge of the
+   * target, roughly 12px clear of the text, so it reads as a stray hairline
+   * rather than as an underline. A real underline hugs the text and only spans
+   * its width, and the target stays 44px tall.
+   */
+  .decoration-strong {
+    text-decoration-color: rgb(var(--border-strong));
+  }
+
+  .decoration-subtle {
+    text-decoration-color: rgb(var(--border));
+  }
+
   .text-primary {
     color: rgb(var(--text-primary));
   }

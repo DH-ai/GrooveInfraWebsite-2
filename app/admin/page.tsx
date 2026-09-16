@@ -139,7 +139,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               {projects.map((project) => (
                 <li
                   key={project.slug}
-                  className="grid grid-cols-1 items-baseline gap-x-8 gap-y-4 border-t border-subtle py-6 lg:grid-cols-[minmax(0,1fr)_11rem_auto]"
+                  className="grid grid-cols-1 items-baseline gap-x-8 gap-y-4 border-t border-subtle py-6 lg:grid-cols-[minmax(0,1fr)_13rem_auto]"
                 >
                   <div>
                     <div className="font-display text-lede font-semibold text-primary">
@@ -150,7 +150,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
                   <div>
                     {project.imagery.hasOwnPhotography ? (
-                      <span className="inline-flex items-center border-l-2 border-emerald-400 bg-emerald-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-emerald-100">
+                      <span className="inline-flex items-center whitespace-nowrap border-l-2 border-emerald-400 bg-emerald-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-emerald-100">
                         {`${project.imagery.ownedCount} ${
                           project.imagery.ownedCount === 1 ? 'photo' : 'photos'
                         }`}
@@ -158,7 +158,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     ) : (
                       <span
                         data-testid="placeholder-badge"
-                        className="inline-flex items-center border-l-2 border-amber-400 bg-amber-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-amber-100"
+                        className="inline-flex items-center whitespace-nowrap border-l-2 border-amber-400 bg-amber-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-amber-100"
                       >
                         Generated plate
                       </span>

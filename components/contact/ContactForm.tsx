@@ -154,7 +154,7 @@ export default function ContactForm() {
         <button
           type="button"
           onClick={resetForm}
-          className="mt-8 inline-flex min-h-11 items-center border-b border-strong pb-1 text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:border-groove-gold hover:text-accent-gold"
+          className="mt-8 inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:decoration-groove-gold hover:text-accent-gold"
         >
           Send another
         </button>

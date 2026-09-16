@@ -252,7 +252,7 @@ export default function AboutPage() {
           </Link>
           <Link
             href="/projects"
-            className="inline-flex min-h-11 items-center border-b border-strong pb-1 text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:border-groove-gold hover:text-accent-gold"
+            className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:decoration-groove-gold hover:text-accent-gold"
           >
             See the work
           </Link>

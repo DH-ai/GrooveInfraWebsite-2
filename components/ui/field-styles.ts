@@ -40,7 +40,7 @@ export const primaryButtonClass =
 
 /** The secondary action: a ruled label, the same device the header uses. */
 export const quietButtonClass =
-  'inline-flex min-h-11 items-center border-b border-strong pb-1 text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:border-groove-gold hover:text-accent-gold disabled:cursor-not-allowed disabled:opacity-60'
+  'inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:decoration-groove-gold hover:text-accent-gold disabled:cursor-not-allowed disabled:opacity-60'
 
 /** For the dense rows of actions in the CMS, where a full-size button would not fit. */
 export const chipButtonClass =

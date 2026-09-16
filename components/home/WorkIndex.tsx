@@ -119,7 +119,7 @@ export default function WorkIndex({ entries }: WorkIndexProps) {
         <AnimatedSection className="mt-10">
           <Link
             href="/projects"
-            className="group inline-flex min-h-11 items-center gap-3 border-b border-strong pb-1 text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:border-groove-gold hover:text-accent-gold"
+            className="group inline-flex min-h-11 items-center gap-3 underline decoration-1 underline-offset-[7px] decoration-strong text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:decoration-groove-gold hover:text-accent-gold"
           >
             The full portfolio
             <ArrowUpRight
