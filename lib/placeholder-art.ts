@@ -49,12 +49,12 @@ function pick(h: number, shift: number, modulo: number): number {
  * umbers and cool slates alternate — so a grid of plates does not look flat.
  */
 const TONES: ReadonlyArray<{ from: string; to: string }> = [
-  { from: '#0b0b0c', to: '#191713' },
-  { from: '#0a0b0c', to: '#15181b' },
-  { from: '#0c0a08', to: '#1c1710' },
-  { from: '#090a0a', to: '#141719' },
-  { from: '#0b0908', to: '#1a1512' },
-  { from: '#0a0a0b', to: '#171514' },
+  { from: '#1a1816', to: '#2c2822' },
+  { from: '#18191b', to: '#262a2e' },
+  { from: '#1c1914', to: '#302a22' },
+  { from: '#171819', to: '#24282b' },
+  { from: '#1b1816', to: '#2d2621' },
+  { from: '#191817', to: '#282422' },
 ]
 
 export type PlaceholderMotif = 'plan' | 'section' | 'hatch' | 'reveal'

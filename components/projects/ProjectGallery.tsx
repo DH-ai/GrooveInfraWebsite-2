@@ -80,7 +80,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
         distinction and makes twelve photographs of one job look like twelve
         unrelated thumbnails.
       */}
-      <ul className="grid list-none grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
+      <ul className="grid list-none grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2">
         {images.map((image, i) => {
           const wide = widths[i]
           return (
@@ -89,7 +89,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
                 type="button"
                 onClick={() => setLightbox(i)}
                 className={`group relative block w-full cursor-zoom-in overflow-hidden bg-surface-2 ${
-                  wide ? 'aspect-[16/9]' : 'aspect-[4/5]'
+                  wide ? 'aspect-[3/2]' : 'aspect-[4/5]'
                 }`}
                 whileHover={{ scale: 1.005 }}
                 transition={{ duration: 0.25 }}
@@ -103,7 +103,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
                   <ProjectImage
                     image={image}
                     alt={`${title} — image ${i + 1}`}
-                    sizes={wide ? '(max-width: 640px) 100vw, 60rem' : '(max-width: 640px) 100vw, 30rem'}
+                    sizes={wide ? '(max-width: 640px) 100vw, 64rem' : '(max-width: 640px) 100vw, 32rem'}
                   />
                 </motion.span>
                 <span
@@ -135,7 +135,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-[rgb(var(--bg)/0.96)] backdrop-blur-sm"
             onClick={onBackdropClick}
           >
             <div

@@ -96,11 +96,12 @@ export default async function ProjectPage({ params }: PageProps) {
   return (
     <article className="bg-base">
       {/*
-        Full bleed and full height. A fit-out is sold on the finished room, so the
-        photograph gets the screen before anything else competes with it — the
-        title sits over its lower edge where the scrim is darkest.
+        Full bleed, but not a second homepage. 82svh left a single photograph
+        filling most of the screen before the brief even started, which made
+        the case study feel like a slideshow. The cover still leads; it just
+        hands the page to the writing sooner.
       */}
-      <header className="relative flex min-h-[82svh] flex-col justify-end overflow-hidden bg-surface">
+      <header className="relative flex h-[min(56svh,32rem)] min-h-[20rem] flex-col justify-end overflow-hidden bg-surface">
         <div className="absolute inset-0">
           <ProjectImage image={imagery.cover} alt={project.title} sizes="100vw" priority />
         </div>
@@ -201,7 +202,7 @@ export default async function ProjectPage({ params }: PageProps) {
             something to show.
           */}
           {imagery.hasOwnPhotography && sequence.length > 0 && (
-            <AnimatedSection className="mt-24">
+            <AnimatedSection className="mx-auto mt-24 w-full max-w-[64rem]">
               <div className="flex items-baseline justify-between gap-6 border-t border-strong pt-4">
                 <h2 className="text-micro uppercase tracking-eyebrow text-accent-gold">
                   Gallery
