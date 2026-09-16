@@ -28,6 +28,28 @@
     --accent: 201 168 76;
     --accent-light: 232 213 183;
     --focus-ring: 201 168 76;
+
+    /*
+     * Two ratios, not one. Body copy barely grows as the viewport widens — past
+     * about 17px it costs legibility rather than gaining it — while display sizes
+     * grow steeply. That gap is what makes a wide screen read as a printed
+     * spread instead of a scaled-up phone layout.
+     */
+    --step-000: clamp(0.75rem, 0.74rem + 0.05vw, 0.8125rem);
+    --step-00: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+    --step-0: clamp(1rem, 0.98rem + 0.1vw, 1.0625rem);
+    --step-1: clamp(1.125rem, 1.08rem + 0.2vw, 1.25rem);
+    --step-2: clamp(1.375rem, 1.28rem + 0.4vw, 1.625rem);
+    --step-3: clamp(1.75rem, 1.55rem + 0.9vw, 2.375rem);
+    --step-4: clamp(2.25rem, 1.85rem + 1.8vw, 3.5rem);
+    --step-5: clamp(2.75rem, 1.9rem + 3.6vw, 5rem);
+    --step-6: clamp(3.25rem, 1.6rem + 7vw, 7.5rem);
+
+    /* Measure is in ch so it tracks the font, not the viewport. */
+    --measure: 66ch;
+    --measure-tight: 46ch;
+    --gutter: clamp(1.25rem, 4vw, 4rem);
+    --section-y: clamp(4.5rem, 9vw, 9rem);
   }
 
   * {
@@ -152,15 +174,37 @@
     color: rgb(var(--accent));
   }
 
-  .text-gradient-gold {
-    background: linear-gradient(
-      135deg,
-      rgb(var(--accent)) 0%,
-      rgb(var(--accent-light)) 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /*
+   * Line length caps. Body copy set across a full 1440px column is unreadable
+   * however good the type is, and no amount of leading fixes it.
+   */
+  .measure {
+    max-width: var(--measure);
+  }
+
+  .measure-tight {
+    max-width: var(--measure-tight);
+  }
+
+  /* Horizontal padding and vertical rhythm, so sections cannot drift apart. */
+  .gutter {
+    padding-left: var(--gutter);
+    padding-right: var(--gutter);
+  }
+
+  .section-y {
+    padding-top: var(--section-y);
+    padding-bottom: var(--section-y);
+  }
+
+  /*
+   * Figures in a column — years, areas, counts — must not shuffle sideways as
+   * digits change width. Everything else keeps proportional figures, which set
+   * better inside a sentence.
+   */
+  .nums-tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 
   .glass {
