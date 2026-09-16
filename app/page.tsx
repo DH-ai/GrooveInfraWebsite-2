@@ -10,6 +10,9 @@ import { getPhotographedProjects, getAllTestimonials } from '@/lib/projects'
 // interval is only a safety net for edits made directly in the database.
 export const revalidate = 300
 
+/** The homepage shows a readable index, not the whole portfolio. */
+const MAX_INDEX_ENTRIES = 6
+
 export default async function HomePage() {
   const [projects, testimonials] = await Promise.all([
     getPhotographedProjects(),

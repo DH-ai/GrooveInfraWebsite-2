@@ -2,22 +2,9 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { revalidateProjectSurfaces } from '@/lib/revalidate'
-import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
-
-interface CreateProjectBody {
-  title?: string
-  slug?: string
-  category?: string
-  location?: string
-  client_name?: string
-  basic_description?: string
-  description?: string
-  duration?: string
-  area?: string
-  year?: string | number
-  cover_image?: string | null
-  images?: string[]
-}
+import { isAllowedImageUrl } from '@/lib/supabase-storage'
+import { sanitizeSlug } from '@/lib/upload-constants'
+import { createProjectSchema, firstIssueMessage } from '@/lib/validation'
 
 const DEFAULT_CATEGORY = 'commercial'
 

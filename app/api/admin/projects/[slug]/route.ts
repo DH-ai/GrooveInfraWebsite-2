@@ -3,34 +3,9 @@ import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { revalidateProjectSurfaces } from '@/lib/revalidate'
-import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
-
-interface UpdateProjectBody {
-  _action?: string
-  title?: string
-  category?: string
-  location?: string
-  client_name?: string
-  basic_description?: string
-  description?: string
-  duration?: string
-  area?: string
-  year?: string | number | null
-  cover_image?: string | null
-  images?: string[]
-  remove_cover?: boolean
-  replace_gallery?: boolean
-}
-
-function getPublicUrlPrefix(): string {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  return `${base.replace(/\/$/, '')}/storage/v1/object/public/${PROJECTS_BUCKET}/`
-}
-
-function isAllowedImageUrl(url: string): boolean {
-  if (!url) return false
-  return url.startsWith(getPublicUrlPrefix())
-}
+import { getPublicUrlPrefix, isAllowedImageUrl } from '@/lib/supabase-storage'
+import { sanitizeSlug } from '@/lib/upload-constants'
+import { firstIssueMessage, updateProjectSchema } from '@/lib/validation'
 
 async function listStorageFiles(slug: string): Promise<string[]> {
   const supabase = getSupabaseAdmin()
