@@ -1,86 +1,85 @@
-'use client'
-
-import { ShoppingBag, Building2, Utensils, Home } from 'lucide-react'
+import SectionHead from '@/components/ui/SectionHead'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 
 const services = [
   {
-    icon: ShoppingBag,
-    title: 'Retail Rollouts',
+    title: 'Retail rollouts',
     description:
-      'End-to-end store fit-outs for retail brands at any scale — from single flagships to nationwide rollouts. POS counters, display fixtures, lighting, and more.',
-    number: '01',
+      'Single flagships through to nationwide programmes. Shopfronts, POS counters, display systems, lighting and the services behind them, sequenced so each store opens on its own date.',
+    detail: 'Flagships · Mall units · Multi-city rollouts',
   },
   {
-    icon: Utensils,
-    title: 'Hospitality & Clubs',
+    title: 'Hospitality and clubs',
     description:
-      'Hotels, restaurants, lounges, nightclubs, and spas. We create atmospheric spaces that turn first-time visitors into returning guests.',
-    number: '02',
+      'Hotels, restaurants, lounges and spas, where the finish is the product. Acoustic separation, kitchen and bar services, and joinery held to a tolerance guests will run their hand along.',
+    detail: 'F&B · Hotels · Lounges · Spas',
   },
   {
-    icon: Building2,
-    title: 'Commercial Renovation',
+    title: 'Workplace and commercial',
     description:
-      'Office headquarters, co-working spaces, clinics, and showrooms. Modern commercial interiors built for performance and lasting brand identity.',
-    number: '03',
+      'Headquarters, co-working floors, clinics and showrooms. Built around the client staying operational, which usually means night shifts, phased handovers and a live building next door.',
+    detail: 'HQ fit-outs · Co-working · Clinics · Showrooms',
   },
   {
-    icon: Home,
-    title: 'Residential Makeovers',
+    title: 'Residential',
     description:
-      'Premium apartments, penthouses, and villas crafted to reflect personal taste. Precision joinery, bespoke furniture, and smart home integration.',
-    number: '04',
+      'Apartments, penthouses and villas. Bespoke joinery, stone and metalwork detailed in-house, with one site team accountable from setting out to snag-free handover.',
+    detail: 'Apartments · Penthouses · Villas',
   },
 ]
 
+/**
+ * What the firm does, as a list rather than a card wall.
+ *
+ * The previous version put each service in a bordered tile with an icon in a
+ * rounded chip — a pattern that reads as a software pricing page and that forces
+ * every description down to the length of the shortest one. Setting them as
+ * ruled rows lets the copy say something specific about how the work is actually
+ * run, which is what a client is buying.
+ */
 export default function Services() {
   return (
-    <section className="py-28 bg-base">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <AnimatedSection className="mb-16">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-px w-12 bg-groove-gold" />
-            <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-              What We Do
-            </span>
-          </div>
-          <div className="flex flex-col lg:flex-row lg:items-end gap-8">
-            <h2 className="font-display text-4xl sm:text-5xl font-bold text-primary leading-tight flex-1 max-w-md">
-              Comprehensive
-              <br />
-              Interior Solutions
-            </h2>
-            <p className="text-secondary text-sm leading-relaxed max-w-xs lg:pb-1">
-              From a single store to a 100-city rollout — we deliver interiors that work
-              beautifully and last for years.
-            </p>
-          </div>
-        </AnimatedSection>
+    <section className="section-y gutter bg-base">
+      <div className="mx-auto w-full max-w-[100rem]">
+        <SectionHead
+          index="02"
+          label="Capability"
+          title="Four sectors, one site team."
+          intro="The trades are ours, the programme is ours, and the person who priced the job is the person who hands it over."
+        />
 
-        {/* Services grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-subtle">
-          {services.map((service, i) => {
-            const Icon = service.icon
-            return (
-              <AnimatedSection
-                key={service.title}
-                delay={i * 0.07}
-                className="bg-base p-8 group hover:bg-surface-2 transition-colors duration-300"
-              >
-                <div className="text-xs font-mono text-muted-custom mb-8">{service.number}</div>
-                <div className="w-9 h-9 rounded-lg bg-groove-gold/10 flex items-center justify-center mb-6 group-hover:bg-groove-gold/20 transition-colors duration-300">
-                  <Icon size={17} className="text-accent-gold" strokeWidth={1.5} />
-                </div>
-                <h3 className="font-display font-semibold text-primary text-lg mb-3 group-hover:text-accent-gold transition-colors duration-300">
+        {/*
+          A `dl` may only contain `dt`, `dd` and a single layer of `div` grouping
+          them, so the scroll-reveal wrapper *is* the group rather than sitting
+          outside it, and the sheet number lives inside the `dt` instead of
+          floating between the two as a stray span.
+        */}
+        <dl className="mt-14 border-b border-subtle">
+          {services.map((service, i) => (
+            <AnimatedSection
+              key={service.title}
+              delay={Math.min(i * 0.06, 0.24)}
+              className="grid grid-cols-1 gap-x-12 gap-y-4 border-t border-subtle py-9 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]"
+            >
+              <dt>
+                <span
+                  aria-hidden="true"
+                  className="nums-tabular mb-4 block text-micro text-muted-custom"
+                >
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="block font-display text-h3 font-semibold text-primary">
                   {service.title}
-                </h3>
-                <p className="text-sm text-secondary leading-relaxed">{service.description}</p>
-              </AnimatedSection>
-            )
-          })}
-        </div>
+                </span>
+                <span className="mt-3 block text-micro uppercase tracking-eyebrow text-muted-custom">
+                  {service.detail}
+                </span>
+              </dt>
+
+              <dd className="measure text-body text-secondary lg:pt-9">{service.description}</dd>
+            </AnimatedSection>
+          ))}
+        </dl>
       </div>
     </section>
   )
