@@ -12,6 +12,16 @@ interface PageProps {
   params: { slug: string }
 }
 
+// Without a revalidate window these pages are prerendered once and cached
+// forever, which bakes in a 404 for any project that did not exist at build
+// time and leaves renamed projects permanently stale. Admin mutations also flush
+// the affected slug via revalidateProjectSurfaces.
+export const revalidate = 300
+
+// Projects added after a deploy are not in generateStaticParams, so they must be
+// allowed to render on demand rather than 404.
+export const dynamicParams = true
+
 export async function generateStaticParams() {
   const all = await getAllProjects()
   return all.map((p) => ({ slug: p.slug }))
