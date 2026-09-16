@@ -198,6 +198,64 @@
   }
 
   /*
+   * The scrim that keeps white type legible over a full-bleed photograph.
+   *
+   * The photograph is whichever cover the client uploaded, so the overlay cannot
+   * be tuned to one image — it has to hold for a bright shopfront as well as a
+   * dark restaurant. Two flat overlays did not: measured against the actual
+   * rendered pixels, the headline crossed a window at 2.9:1, well under the
+   * 4.5:1 AA needs.
+   *
+   * Hence explicit stops rather than a linear fade. The band the copy occupies —
+   * the bottom 45% — is held near opaque, and the fade only opens up above it
+   * where nothing is set. That keeps the top two thirds of the image close to
+   * untouched while giving the type a floor that does not depend on the photo.
+   */
+  .hero-scrim {
+    background-image: linear-gradient(
+      to top,
+      rgb(var(--bg)) 0%,
+      rgb(var(--bg) / 0.95) 22%,
+      rgb(var(--bg) / 0.85) 38%,
+      rgb(var(--bg) / 0.6) 52%,
+      rgb(var(--bg) / 0.28) 70%,
+      rgb(var(--bg) / 0.08) 86%,
+      transparent 100%
+    );
+  }
+
+  /*
+   * A phone gives the same headline a third of the width, so it sets to four or
+   * five lines and climbs to roughly two thirds of the hero — well above where
+   * the desktop curve has opened up. Measured on the brightest cover in the set,
+   * the top line came out at 3.3:1. The band therefore holds higher on narrow
+   * viewports.
+   */
+  @media (max-width: 640px) {
+    .hero-scrim {
+      background-image: linear-gradient(
+        to top,
+        rgb(var(--bg)) 0%,
+        rgb(var(--bg) / 0.96) 30%,
+        rgb(var(--bg) / 0.9) 52%,
+        rgb(var(--bg) / 0.72) 68%,
+        rgb(var(--bg) / 0.34) 84%,
+        transparent 100%
+      );
+    }
+  }
+
+  /* Darkens the leading edge, where every line of hero type starts. */
+  .hero-wash {
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--bg) / 0.55) 0%,
+      rgb(var(--bg) / 0.2) 45%,
+      transparent 72%
+    );
+  }
+
+  /*
    * Figures in a column — years, areas, counts — must not shuffle sideways as
    * digits change width. Everything else keeps proportional figures, which set
    * better inside a sentence.

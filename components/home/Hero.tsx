@@ -46,19 +46,8 @@ export default function Hero({ feature = null }: HeroProps) {
         <ProjectImage image={backdrop} alt="" priority sizes="100vw" />
       </div>
 
-      {/*
-        Two scrims, not one. A single flat overlay either washes the photograph
-        out or leaves the type unreadable where the image happens to be bright;
-        a vertical gradient plus a corner wash darkens only where the words are.
-      */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--bg))] via-black/45 to-black/25"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"
-      />
+      <div aria-hidden="true" className="hero-scrim absolute inset-0" />
+      <div aria-hidden="true" className="hero-wash absolute inset-0" />
 
       <div className="relative z-10 gutter pb-16 pt-32 sm:pb-20">
         <div className="mx-auto w-full max-w-[100rem]">
