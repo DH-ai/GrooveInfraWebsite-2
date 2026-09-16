@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ProjectCard from './ProjectCard'
 import ProjectFilter from './ProjectFilter'
-import type { Project } from '@/types/project'
+import type { ProjectCardData } from '@/types/project'
 import { formatCategory } from '@/lib/utils'
 
 interface ProjectGridProps {
-  projects: Project[]
+  projects: ProjectCardData[]
   categories: string[]
 }
 

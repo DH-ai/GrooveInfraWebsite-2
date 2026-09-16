@@ -23,7 +23,10 @@ const contentSecurityPolicy = [
   // layout must run before paint to avoid a flash of the wrong theme.
   `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${TURNSTILE_ORIGIN} https://va.vercel-scripts.com`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  // Narrowed from `https:`, which permitted any host on the web. Every image the
+  // site renders is now either our own storage, a file in public/, or drawn from
+  // CSS, so there is nothing left that needs a third-party host.
+  `img-src 'self' data: blob: ${supabaseOrigin}`.trim(),
   "font-src 'self' data:",
   `connect-src 'self' ${supabaseOrigin} ${TURNSTILE_ORIGIN} https://vitals.vercel-insights.com`.trim(),
   `frame-src 'self' ${TURNSTILE_ORIGIN}`,
@@ -49,18 +52,18 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false,
   images: {
+    /*
+     * Our own storage only. The stock hosts that used to be listed here
+     * (images.unsplash.com, plus.unsplash.com, picsum.photos) and the hotlinked
+     * LinkedIn CDN are gone: unphotographed projects are filled by
+     * lib/placeholder-art.ts, which draws from CSS and fetches nothing. Keeping
+     * this list to storage means an image URL that is not ours cannot render,
+     * which makes the allowlist a second line of defence behind
+     * isAllowedImageUrl on the write path.
+     */
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },
-      // Temporary stock placeholders, used only until real project photography is
-      // uploaded. getCoverImage() in lib/utils.ts treats these hosts as
-      // placeholders so they never stand in for owned work.
-      { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'plus.unsplash.com' },
-      { protocol: 'https', hostname: 'picsum.photos' },
-      // Team headshot on /about is hotlinked from the LinkedIn CDN. Those URLs
-      // carry an expiry parameter, so it should be self-hosted instead.
-      { protocol: 'https', hostname: 'media.licdn.com' },
       // Local Supabase stack (development)
       { protocol: 'http', hostname: '127.0.0.1', port: '54321' },
       { protocol: 'http', hostname: 'localhost', port: '54321' },

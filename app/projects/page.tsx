@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 import ProjectGrid from '@/components/projects/ProjectGrid'
 import { getAllProjects, getProjectCategories } from '@/lib/projects'
+import { toProjectCardData } from '@/types/project'
 
 export const metadata: Metadata = {
   title: 'Portfolio',
@@ -38,8 +39,12 @@ export default async function ProjectsPage() {
           </p>
         </AnimatedSection>
 
-        {/* Grid with filter */}
-        <ProjectGrid projects={projects} categories={categories} />
+        {/*
+          Projected down to card fields before crossing into the client
+          component, so the raw storage URLs and full descriptions stay on the
+          server.
+        */}
+        <ProjectGrid projects={projects.map(toProjectCardData)} categories={categories} />
       </div>
     </div>
   )

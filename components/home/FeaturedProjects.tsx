@@ -1,12 +1,12 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, MapPin } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
+import ProjectImage from '@/components/ui/ProjectImage'
 import type { Project } from '@/types/project'
-import { formatCategory, getCoverImage } from '@/lib/utils'
+import { formatCategory } from '@/lib/utils'
 
 interface FeaturedProjectsProps {
   projects: Project[]
@@ -23,8 +23,6 @@ function ProjectCard({
   imageClassName?: string
   index: number
 }) {
-  const cover = getCoverImage(project)
-
   return (
     <AnimatedSection delay={index * 0.08} className={className}>
       <Link href={`/projects/${project.slug}`} className="block group h-full">
@@ -35,15 +33,11 @@ function ProjectCard({
             whileHover={{ scale: 1.04 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            {cover && (
-              <Image
-                src={cover}
-                alt={project.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            )}
+            <ProjectImage
+              image={project.imagery.cover}
+              alt={project.title}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
           </motion.div>
 
           {/* Gradients */}

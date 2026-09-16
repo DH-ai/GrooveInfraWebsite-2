@@ -1,13 +1,15 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 import { useBackdropClose, useDialog } from '@/lib/hooks/use-dialog'
+import type { ResolvedImage } from '@/lib/project-images'
+import ProjectImage from '@/components/ui/ProjectImage'
 
 interface ProjectGalleryProps {
-  images: string[]
+  /** Resolved by the data layer, so entries may be drawn plates rather than photographs. */
+  images: ResolvedImage[]
   title: string
 }
 
@@ -56,9 +58,9 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
   return (
     <>
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 list-none">
-        {images.map((src, i) => (
+        {images.map((image, i) => (
           <li
-            key={src}
+            key={image.src ?? image.seed}
             className={i === 0 ? 'col-span-2 md:col-span-2' : undefined}
           >
             <motion.button
@@ -76,11 +78,9 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.4 }}
               >
-                <Image
-                  src={src}
+                <ProjectImage
+                  image={image}
                   alt={`${title} — image ${i + 1}`}
-                  fill
-                  className="object-cover"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
               </motion.span>
@@ -168,13 +168,12 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
                   transition={{ duration: 0.25 }}
                   className="relative mx-6 aspect-video w-full max-w-4xl"
                 >
-                  <Image
-                    src={images[lightbox]}
+                  <ProjectImage
+                    image={images[lightbox]}
                     alt={`${title} — image ${lightbox + 1} of ${images.length}`}
-                    fill
-                    className="object-contain"
                     sizes="(max-width: 1200px) 100vw, 900px"
                     priority
+                    className="object-contain"
                   />
                 </motion.div>
               </AnimatePresence>

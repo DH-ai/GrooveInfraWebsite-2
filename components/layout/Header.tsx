@@ -41,6 +41,11 @@ export default function Header() {
   return (
     <>
       <motion.header
+        // Same marker the scroll-reveal sections carry, for the same two reasons:
+        // the <noscript> rule in the root layout has to force it visible, and the
+        // accessibility suite has to wait for its entrance to finish before
+        // judging contrast — a half-faded gold button reports as a violation.
+        data-animated-section=""
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
