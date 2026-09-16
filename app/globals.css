@@ -7,24 +7,29 @@
    * The site is dark-only. There is one token set, applied unconditionally, so
    * there is no theme to hydrate and therefore no flash of the wrong palette.
    *
+   * Warm charcoal rather than OLED black. rgb(8 8 8) with 245-white type
+   * read as a void: high contrast, no atmosphere. These tokens sit in the
+   * umber range interiors actually photograph in, so the page recedes behind
+   * the work instead of competing with it.
+   *
    * Every text token below is checked against --bg for WCAG contrast:
-   *   primary   245 → 18.4:1   secondary 200 → 12.0:1   muted 138 → 5.8:1
-   *   accent    C9A84C →  8.8:1
-   * --border is decorative only (1.3:1). Anything that forms the visible
+   *   primary   236 231 222 → 14.4:1   secondary 198 191 178 → 9.7:1
+   *   muted     156 149 136 →  6.0:1   accent    C9A84C      → 7.8:1
+   * --border is decorative only (~1.5:1). Anything that forms the visible
    * boundary of a control uses --border-strong, which clears the 3:1 that
-   * WCAG 1.4.11 requires of non-text UI.
+   * WCAG 1.4.11 requires of non-text UI (3.8:1 here).
    */
   :root {
     color-scheme: dark;
 
-    --bg: 8 8 8;
-    --surface: 17 17 17;
-    --surface-2: 24 24 24;
-    --border: 38 38 38;
-    --border-strong: 96 96 96;
-    --text-primary: 245 245 245;
-    --text-secondary: 200 200 200;
-    --text-muted: 138 138 138;
+    --bg: 26 24 22;
+    --surface: 34 32 29;
+    --surface-2: 44 41 37;
+    --border: 60 56 50;
+    --border-strong: 122 116 106;
+    --text-primary: 236 231 222;
+    --text-secondary: 198 191 178;
+    --text-muted: 156 149 136;
     --accent: 201 168 76;
     --accent-light: 232 213 183;
     --focus-ring: 201 168 76;

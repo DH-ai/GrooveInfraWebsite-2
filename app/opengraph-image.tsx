@@ -15,7 +15,7 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 const GOLD = '#C9A84C'
-const INK = '#080808'
+const INK = '#1a1816'
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -54,7 +54,7 @@ export default function OpengraphImage() {
               fontSize: 82,
               fontWeight: 700,
               lineHeight: 1.05,
-              color: '#F5F5F5',
+              color: '#ECE7DE',
             }}
           >
             {SITE_TAGLINE}

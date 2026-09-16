@@ -3,10 +3,10 @@ import { avatarImgHtml } from './avatar'
 
 const GOLD = '#C9A84C'
 const GOLD_DARK = '#A8873A'
-const SURFACE = '#111111'
-const BORDER = '#2a2a2a'
-const TEXT = '#f5f5f5'
-const MUTED = '#a3a3a3'
+const SURFACE = '#22201d'
+const BORDER = '#3c3832'
+const TEXT = '#ece7de'
+const MUTED = '#9c968a'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://grooveinfra.in'
 
 function emailFooter(): string {
