@@ -13,6 +13,19 @@ interface ProjectGalleryProps {
   title: string
 }
 
+/**
+ * Which frames run the full width: one wide, then two paired, repeating.
+ *
+ * The last frame is widened when it would otherwise sit alone in a two-up row.
+ * A single portrait with an empty half-column beside it reads as a photograph
+ * that failed to load rather than as a composition.
+ */
+function frameWidths(count: number): boolean[] {
+  const widths = Array.from({ length: count }, (_, i) => i % 3 === 0)
+  if (count % 3 === 2) widths[count - 1] = true
+  return widths
+}
+
 export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
   const [lightbox, setLightbox] = useState<number | null>(null)
   const isOpen = lightbox !== null
@@ -52,50 +65,67 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
 
   if (!images.length) return null
 
+  const widths = frameWidths(images.length)
+
   const controlClass =
     'inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20'
 
   return (
     <>
-      <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 list-none">
-        {images.map((image, i) => (
-          <li
-            key={image.src ?? image.seed}
-            className={i === 0 ? 'col-span-2 md:col-span-2' : undefined}
-          >
-            <motion.button
-              type="button"
-              onClick={() => setLightbox(i)}
-              className={`group relative block w-full overflow-hidden rounded-xl bg-surface-2 cursor-zoom-in ${
-                i === 0 ? 'aspect-[16/9]' : 'aspect-square'
-              }`}
-              whileHover={{ scale: 1.01 }}
-              transition={{ duration: 0.25 }}
-              aria-label={`Enlarge image ${i + 1} of ${images.length}`}
-            >
-              <motion.span
-                className="absolute inset-0 block"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.4 }}
+      {/*
+        A sequence rather than a uniform grid. Every third frame runs the full
+        width of the column and the rest pair up, which is how a set of interior
+        photographs is laid out in print: the wide shot establishes the room, the
+        pair beside it are details. A grid of identical squares flattens that
+        distinction and makes twelve photographs of one job look like twelve
+        unrelated thumbnails.
+      */}
+      <ul className="grid list-none grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
+        {images.map((image, i) => {
+          const wide = widths[i]
+          return (
+            <li key={image.src ?? image.seed} className={wide ? 'sm:col-span-2' : undefined}>
+              <motion.button
+                type="button"
+                onClick={() => setLightbox(i)}
+                className={`group relative block w-full cursor-zoom-in overflow-hidden bg-surface-2 ${
+                  wide ? 'aspect-[16/9]' : 'aspect-[4/5]'
+                }`}
+                whileHover={{ scale: 1.005 }}
+                transition={{ duration: 0.25 }}
+                aria-label={`Enlarge image ${i + 1} of ${images.length}`}
               >
-                <ProjectImage
-                  image={image}
-                  alt={`${title} — image ${i + 1}`}
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                />
-              </motion.span>
-              <span
+                <motion.span
+                  className="absolute inset-0 block"
+                  whileHover={{ scale: 1.04 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <ProjectImage
+                    image={image}
+                    alt={`${title} — image ${i + 1}`}
+                    sizes={wide ? '(max-width: 640px) 100vw, 60rem' : '(max-width: 640px) 100vw, 30rem'}
+                  />
+                </motion.span>
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover:bg-black/20"
+                >
+                  <ZoomIn
+                    size={20}
+                    className="text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  />
+                </span>
+              </motion.button>
+
+              <p
                 aria-hidden="true"
-                className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover:bg-black/20"
+                className="nums-tabular mt-3 border-t border-subtle pt-3 text-micro uppercase tracking-eyebrow text-muted-custom"
               >
-                <ZoomIn
-                  size={20}
-                  className="text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                />
-              </span>
-            </motion.button>
-          </li>
-        ))}
+                Fig. {String(i + 1).padStart(2, '0')}
+              </p>
+            </li>
+          )
+        })}
       </ul>
 
       <AnimatePresence>
