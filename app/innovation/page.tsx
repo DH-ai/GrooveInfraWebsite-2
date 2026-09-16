@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, Sparkles, Boxes, Store, BarChart3 } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
+import PageHeader from '@/components/ui/PageHeader'
+import PageShell from '@/components/ui/PageShell'
+import SectionHead from '@/components/ui/SectionHead'
 
 export const metadata: Metadata = {
   title: 'Innovation',
   description:
-    'Groove Infra Innovation Lab — reimagining the future of interior construction with AI, modular systems, and digital platforms.',
+    'Groove Infra Innovation Lab — cost estimation, modular systems, vendor procurement and project analytics for interior construction.',
   alternates: { canonical: '/innovation' },
   // This page describes unreleased work and is disallowed in robots.txt. robots.txt
   // only asks crawlers not to fetch it; a page already in an index needs this tag
@@ -14,152 +16,112 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-const innovations = [
+const initiatives = [
   {
-    icon: Sparkles,
-    title: 'AI Cost Estimator',
+    title: 'Cost estimator',
+    status: 'In development',
     description:
-      'Instant interior cost predictions using advanced algorithms trained on thousands of Indian interior projects. Upload your floor plan and get an accurate estimate in seconds.',
-    status: 'Coming Soon',
-    color: 'from-amber-500/10 to-yellow-500/5',
+      'Interior cost predictions from a floor plan, trained on completed Indian fit-outs, so a client has a defensible number before a designer is engaged.',
   },
   {
-    icon: Boxes,
-    title: 'Modular Interior Systems',
+    title: 'Modular interior systems',
+    status: 'Prototyping',
     description:
-      'Pre-fabricated, interchangeable interior components that dramatically reduce on-site installation time and project costs while maintaining premium finish quality.',
-    status: 'Coming Soon',
-    color: 'from-blue-500/10 to-cyan-500/5',
+      'Pre-fabricated, interchangeable components that move work off the site and into the workshop, cutting installation time without giving up the finish.',
   },
   {
-    icon: Store,
-    title: 'Vendor Marketplace',
+    title: 'Vendor marketplace',
+    status: 'Planned',
     description:
-      'A digital platform where verified interior contractors bid for your project, driving competitive pricing and transparent procurement across all trade categories.',
-    status: 'Coming Soon',
-    color: 'from-purple-500/10 to-pink-500/5',
+      'Verified contractors bidding for scoped packages, so procurement is competitive and the price of every trade is visible rather than buried in a lump sum.',
   },
   {
-    icon: BarChart3,
-    title: 'Project Intelligence',
+    title: 'Project intelligence',
+    status: 'Planned',
     description:
-      'Real-time construction analytics, milestone tracking, and predictive delay alerts that keep every stakeholder informed — from design to delivery.',
-    status: 'Coming Soon',
-    color: 'from-green-500/10 to-emerald-500/5',
+      'Milestone tracking and delay alerts drawn from site data, so a slipping programme is visible in the week it slips rather than at handover.',
   },
 ]
 
 export default function InnovationPage() {
   return (
-    <div className="min-h-screen bg-base pt-20">
-      {/* Page hero */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="max-w-3xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-groove-gold" />
-            <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-              Innovation Lab
-            </span>
-          </div>
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold text-primary leading-tight mb-6">
-            Groove Infra
-            <br />
-            Innovation Lab
-          </h1>
-          <p className="text-secondary text-xl leading-relaxed max-w-xl">
-            Reimagining the future of interior construction with cutting-edge technology and
-            innovation. Building smarter, faster, and more sustainable spaces.
-          </p>
-        </AnimatedSection>
-      </section>
+    <PageShell>
+      <PageHeader
+        label="Innovation lab"
+        title="What we are building next."
+        intro="Four pieces of work aimed at the parts of a fit-out that are still guesswork: what it will cost, how long it will take, and who is doing it. None of them has shipped, and this page says which stage each is at."
+      />
 
-      {/* Innovation cards */}
-      <section className="pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {innovations.map((item, i) => {
-            const Icon = item.icon
-            return (
-              <AnimatedSection key={item.title} delay={i * 0.08}>
-                <div className={`relative group rounded-2xl border border-subtle bg-surface-2 p-8 overflow-hidden hover:border-groove-gold/20 transition-all duration-300 hover:shadow-glass`}>
-                  {/* Background gradient */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+      {/*
+        A ruled list with the stage in the margin, in place of four cards that
+        each carried a tinted icon chip, a "Coming Soon" pill and a coloured
+        gradient that appeared on hover. Four different accent colours on one page
+        and no way to tell which of the four was actually closest to shipping.
+      */}
+      <section className="mt-24">
+        <SectionHead index="01" label="Initiatives" aside={`${initiatives.length} in progress`} />
 
-                  <div className="relative z-10">
-                    {/* Icon + Status */}
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="w-12 h-12 rounded-xl bg-groove-gold/10 flex items-center justify-center group-hover:bg-groove-gold/20 transition-colors duration-300">
-                        <Icon size={20} className="text-accent-gold" strokeWidth={1.5} />
-                      </div>
-                      <span className="text-[10px] font-semibold tracking-[0.15em] uppercase px-3 py-1 rounded-full border border-groove-gold/30 text-accent-gold">
-                        {item.status}
-                      </span>
-                    </div>
-
-                    <h3 className="font-display font-semibold text-primary text-xl mb-3 group-hover:text-accent-gold transition-colors duration-300">
-                      {item.title}
-                    </h3>
-                    <p className="text-secondary text-sm leading-relaxed">{item.description}</p>
-                  </div>
-                </div>
-              </AnimatedSection>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* Our Vision */}
-      <section className="py-20 bg-surface border-y border-subtle">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <AnimatedSection>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-px w-12 bg-groove-gold" />
-                <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-                  Our Vision
+        <dl className="mt-14 border-b border-subtle">
+          {initiatives.map((item, i) => (
+            <AnimatedSection
+              key={item.title}
+              delay={Math.min(i * 0.05, 0.2)}
+              className="grid grid-cols-1 gap-x-12 gap-y-3 border-t border-subtle py-9 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]"
+            >
+              <dt>
+                <span aria-hidden="true" className="nums-tabular block text-micro text-muted-custom">
+                  {String(i + 1).padStart(2, '0')}
                 </span>
-              </div>
-              <h2 className="font-display text-4xl sm:text-5xl font-bold text-primary mb-6 leading-tight">
-                The Future of
-                <br />
-                Interior Construction
-              </h2>
-              <div className="space-y-4 text-secondary leading-relaxed">
-                <p>
-                  At Groove Infra, we believe the future of commercial interior construction lies
-                  at the intersection of technology, creativity, and craftsmanship. Our innovation
-                  lab is dedicated to developing solutions that make interior construction faster,
-                  smarter, and more sustainable.
-                </p>
-                <p>
-                  We&apos;re investing in AI-powered cost estimation, modular interior systems,
-                  digital vendor platforms, and real-time project analytics to transform how
-                  commercial spaces are built across India.
-                </p>
-              </div>
+                <span className="mt-4 block font-display text-h3 font-semibold text-primary">
+                  {item.title}
+                </span>
+                <span className="mt-3 block text-micro uppercase tracking-eyebrow text-accent-gold">
+                  {item.status}
+                </span>
+              </dt>
+              <dd className="measure text-body text-secondary lg:pt-9">{item.description}</dd>
             </AnimatedSection>
+          ))}
+        </dl>
+      </section>
 
-            <AnimatedSection delay={0.15}>
-              <div className="rounded-2xl border border-subtle bg-base p-8">
-                <h3 className="font-display text-xl font-bold text-primary mb-4">
-                  Interested in Our Innovation Initiatives?
-                </h3>
-                <p className="text-secondary text-sm leading-relaxed mb-6">
-                  Let&apos;s discuss how we can leverage cutting-edge technology to transform your
-                  commercial interior projects. Early adopters will get priority access to our
-                  platform tools.
-                </p>
-                <Link
-                  href="/contact"
-                  className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold transition-all duration-300 hover:scale-105"
-                >
-                  Get in Touch
-                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-            </AnimatedSection>
-          </div>
+      <section className="mt-28">
+        <SectionHead index="02" label="Why" title="The estimate is the weak point." />
+
+        <div className="mt-14 grid grid-cols-1 gap-x-16 gap-y-14 lg:grid-cols-2">
+          <AnimatedSection>
+            <div className="measure space-y-6 text-body-lg text-secondary">
+              <p>
+                A fit-out is priced before anyone has surveyed the site properly, and the number is
+                defended for the rest of the job. That is where programmes slip and where trust goes.
+              </p>
+              <p>
+                Everything on this page attacks the same problem from a different side: better data
+                at the estimate, less work exposed to the site, visible pricing per trade, and early
+                warning when the programme moves.
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.1}>
+            <div className="border-t border-strong pt-10">
+              <h3 className="max-w-[24ch] font-display text-h3 font-semibold text-primary">
+                Want early access?
+              </h3>
+              <p className="measure mt-6 text-body text-secondary">
+                We are running these against live projects first. If you have a programme coming up
+                and want to be one of them, tell us the dates.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-8 inline-flex min-h-11 items-center bg-groove-gold px-8 py-3.5 text-meta font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light"
+              >
+                Start an enquiry
+              </Link>
+            </div>
+          </AnimatedSection>
         </div>
       </section>
-    </div>
+    </PageShell>
   )
 }
