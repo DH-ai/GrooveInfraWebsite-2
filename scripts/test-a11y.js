@@ -636,61 +636,76 @@ async function testReducedMotion(browser) {
   await page.goto(`${BASE}/`, { waitUntil: 'load' })
   await page.waitForTimeout(800)
 
-  const firstSlide = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  await page.waitForTimeout(7000)
-  const laterSlide = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  check(
-    'reduced motion: hero does not rotate on its own',
-    firstSlide === laterSlide,
-    `${firstSlide} -> ${laterSlide}`
-  )
-
-  check(
-    'reduced motion: hero hides the pause control it no longer needs',
-    (await page.locator('button[aria-label*="automatic slide"]').count()) === 0
-  )
-
   const smoothScroll = await page.evaluate(
     () => getComputedStyle(document.documentElement).scrollBehavior
   )
   check('reduced motion: smooth scrolling is off', smoothScroll === 'auto', smoothScroll)
 
+  /*
+   * Scroll reveals must still finish. MotionConfig reducedMotion="user" drops the
+   * transform and keeps the opacity change, so a section that starts at opacity 0
+   * has to end at 1 — if it did not, this preference would blank the page.
+   */
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2))
+  await page.waitForTimeout(1200)
+  const revealed = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-animated-section]')]
+      .filter((el) => {
+        const box = el.getBoundingClientRect()
+        return box.top < window.innerHeight && box.bottom > 0
+      })
+      .every((el) => parseFloat(getComputedStyle(el).opacity) > 0.99)
+  )
+  check('reduced motion: scroll reveals still resolve to visible', revealed)
+
   await context.close()
 }
 
-async function testAutoplayControls(context) {
+/**
+ * The homepage used to carry two things that moved on their own — a hero on a
+ * 5.5s slide timer and an infinite image marquee — and each needed a pause
+ * control to satisfy WCAG 2.2.2. Both are gone, replaced by a single static hero
+ * and a ruled index, so the stronger property is now testable: nothing on the
+ * page moves unless the visitor moves it.
+ */
+async function testNothingAutoplays(context) {
   const page = await context.newPage()
   await page.goto(`${BASE}/`, { waitUntil: 'load' })
+  await settleForAudit(page)
 
-  const heroPause = page.locator('button[aria-label*="automatic slide"]')
-  check('autoplay: hero exposes a pause control', (await heroPause.count()) === 1)
-  check('autoplay: hero pause control starts unpressed', (await heroPause.getAttribute('aria-pressed')) === 'false')
-  const pressed = await actUntil(
-    page,
-    () => heroPause.click(),
-    async () => {
-      if ((await heroPause.getAttribute('aria-pressed')) !== 'true') throw new Error('not pressed')
-    }
+  check(
+    'motion: no carousel widget on the homepage',
+    (await page.locator('[aria-roledescription="carousel"], [aria-roledescription="slide"]').count()) === 0
   )
-  check('autoplay: hero pause control reports pressed', pressed)
 
-  const slideBefore = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  await page.waitForTimeout(7000)
-  const slideAfter = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  check('autoplay: pausing actually stops the hero', slideBefore === slideAfter, `${slideBefore} -> ${slideAfter}`)
-
-  const marquee = page.locator('button:has-text("Pause scrolling")')
-  if ((await marquee.count()) > 0) {
-    await marquee.scrollIntoViewIfNeeded()
-    check('autoplay: image strip exposes a pause control', true)
-    await marquee.click()
-    check(
-      'autoplay: image strip pause control reports pressed',
-      (await page.locator('button:has-text("Resume scrolling")').getAttribute('aria-pressed')) === 'true'
+  /*
+   * A snapshot of every element's box, then the same snapshot five seconds later
+   * without touching the page. Anything that shifted did so on a timer.
+   */
+  const sample = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('main *')].slice(0, 400).map((el) => {
+        const box = el.getBoundingClientRect()
+        return `${Math.round(box.x)},${Math.round(box.y)},${Math.round(box.width)}`
+      })
     )
-  } else {
-    check('autoplay: image strip exposes a pause control', false, 'strip not rendered (no projects with real images)')
-  }
+
+  const before = await sample()
+  await page.waitForTimeout(5200)
+  const after = await sample()
+
+  const moved = before.filter((box, i) => box !== after[i]).length
+  check(
+    'motion: nothing shifts on a timer over five seconds',
+    moved === 0,
+    `${moved} element(s) moved without input`
+  )
+
+  check(
+    'motion: therefore no pause control is needed',
+    (await page.locator('button[aria-pressed]').count()) === 0,
+    'a pause control here would imply something is still moving'
+  )
 
   await page.close()
 }
@@ -758,7 +773,7 @@ async function main() {
   await testFilters(context)
 
   console.log('\n-- motion ------------------------------------------------------')
-  await testAutoplayControls(context)
+  await testNothingAutoplays(context)
   await testReducedMotion(browser)
 
   console.log('\n-- dark-only theme ---------------------------------------------')

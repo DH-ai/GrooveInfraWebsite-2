@@ -334,15 +334,20 @@ async function main() {
     const home = await getHtml('/')
     check('homepage renders', home.status === 200, `status ${home.status}`)
     /*
-     * The hero and the "Our Work" strip are the site's loudest claims about the
-     * portfolio. getProjectsForCarousel filters to owned photography, so the
-     * strip may be short but must never be padded.
+     * The hero and the selected-work index are the site's loudest claims about
+     * the portfolio. getProjectsForCarousel filters to owned photography, so the
+     * index may be short — or absent — but must never be padded with plates.
      */
-    const strip = home.html.split('Spaces We&#x27;ve Crafted')[1] ?? ''
+    const index = home.html.split('Selected work')[1] ?? ''
     check(
-      'the Our Work strip contains no plates',
-      !strip.includes('data-placeholder="true"'),
-      'the carousel is a portfolio claim; a drawn plate does not belong in it'
+      'the selected-work index is present',
+      index.length > 0,
+      'the section heading moved; this check is now measuring nothing'
+    )
+    check(
+      'the selected-work index contains no plates',
+      !index.includes('data-placeholder="true"'),
+      'the index is a portfolio claim; a drawn plate does not belong in it'
     )
 
     // ------------------------------------------------------- no stock anywhere
