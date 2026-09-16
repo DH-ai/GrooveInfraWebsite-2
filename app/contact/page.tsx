@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Contact',
   description:
     "Start your interior construction project with Groove Infra. Get in touch with our team for a personalized consultation.",
+  alternates: { canonical: '/contact' },
 }
 
 const contactInfo = [

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: 'Portfolio',
   description:
     'Browse our portfolio of premium interior construction projects — retail, commercial, residential, and civil across India.',
+  alternates: { canonical: '/projects' },
 }
 
 export const revalidate = 300

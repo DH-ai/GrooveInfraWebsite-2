@@ -2,10 +2,12 @@ import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site'
 import './globals.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import OrganizationSchema from '@/components/seo/OrganizationSchema'
 import ScrollProgress from '@/components/ui/ScrollProgress'
 
 const inter = Inter({
@@ -20,13 +22,18 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
+const defaultTitle = `${SITE_NAME} — ${SITE_TAGLINE}`
+
 export const metadata: Metadata = {
+  // Makes every relative `alternates.canonical` and generated OG image path in
+  // the app resolve to an absolute URL, which social scrapers require.
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Groove Infra — Premium Interior Construction',
-    template: '%s | Groove Infra',
+    default: defaultTitle,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    'Groove Infra delivers premium interior construction — retail fit-outs, corporate offices, hospitality, and residential spaces crafted with precision.',
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     'interior construction',
     'fit-out',
@@ -38,6 +45,38 @@ export const metadata: Metadata = {
     'NCR',
     'India',
   ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: defaultTitle,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    locale: SITE_LOCALE,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: defaultTitle,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  formatDetection: {
+    telephone: false,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -57,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
         </ThemeProvider>
+        <OrganizationSchema />
         {/* Both are no-ops outside Vercel, so local development is unaffected. */}
         <Analytics />
         <SpeedInsights />

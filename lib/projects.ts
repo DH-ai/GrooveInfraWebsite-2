@@ -186,3 +186,33 @@ export const getAllTestimonials = cache(async (): Promise<Testimonial[]> => {
 export function getProjectCategories(): string[] {
   return ['all', 'commercial', 'retail', 'residential', 'civil']
 }
+
+export interface ProjectSitemapEntry {
+  slug: string
+  updatedAt: string | null
+}
+
+/**
+ * Slugs and timestamps only. The sitemap needs neither the descriptions nor the
+ * image arrays, and `created_at` is dropped by `rowToProject`, so this selects
+ * the two columns it actually uses rather than reusing the full-row query.
+ */
+export const getProjectSitemapEntries = cache(async (): Promise<ProjectSitemapEntry[]> => {
+  const supabase = readClient('getProjectSitemapEntries')
+  if (!supabase) return []
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('slug, created_at')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('[projects] getProjectSitemapEntries error:', error.message)
+    return []
+  }
+
+  return (data as Array<{ slug: string; created_at: string | null }>).map((row) => ({
+    slug: row.slug,
+    updatedAt: row.created_at,
+  }))
+})
