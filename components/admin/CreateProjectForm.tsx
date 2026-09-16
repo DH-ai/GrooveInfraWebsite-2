@@ -10,6 +10,14 @@ import {
   type PlannedUpload,
 } from '@/lib/admin-upload'
 import { sanitizeSlug } from '@/lib/upload-constants'
+import Notice from '@/components/ui/Notice'
+import {
+  fieldInputClass,
+  fieldLabelStackClass,
+  fieldTextareaClass,
+  filePickerClass,
+  primaryButtonClass,
+} from '@/components/ui/field-styles'
 
 const CATEGORIES = ['commercial', 'retail', 'residential', 'civil'] as const
 
@@ -46,10 +54,6 @@ export default function CreateProjectForm() {
     }
     if (!computedSlug) {
       setErrorMsg('Slug is required.')
-      return
-    }
-    if (galleryFiles.length === 0) {
-      setErrorMsg('Please add at least one gallery image.')
       return
     }
     if (coverFile) {
@@ -127,45 +131,45 @@ export default function CreateProjectForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
+      className="space-y-10 border-t border-strong pt-10"
     >
       {errorMsg && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        <Notice tone="error" live>
           {errorMsg}
-        </div>
+        </Notice>
       )}
       {statusMsg && (
-        <div className="rounded-2xl border border-groove-gold/30 bg-groove-gold/5 px-4 py-3 text-sm text-primary">
+        <Notice tone="info" live>
           {statusMsg}
-        </div>
+        </Notice>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <label className={fieldLabelStackClass}>
           Title
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder="Project title"
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Slug (auto if empty)
           <input
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder={computedSlug || 'bata-india-office'}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Category
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           >
             <option value="">Select category (optional)</option>
             {CATEGORIES.map((cat) => (
@@ -173,16 +177,16 @@ export default function CreateProjectForm() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Location
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder="Gurgaon, Haryana"
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Year
           <input
             type="number"
@@ -190,92 +194,95 @@ export default function CreateProjectForm() {
             max="2100"
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder="2025"
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Client name
           <input
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder="Bata India LTD"
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Time to complete
           <input
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder="25 weeks"
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Area (optional)
           <input
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
             placeholder="10,000 sq ft"
           />
         </label>
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+      <div className="grid grid-cols-1 gap-8">
+        <label className={fieldLabelStackClass}>
           Basic description
           <textarea
             rows={2}
             value={basicDescription}
             onChange={(e) => setBasicDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className={fieldTextareaClass}
             placeholder="Short summary used on cards."
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Description
           <textarea
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className={fieldTextareaClass}
             placeholder="Full project description for the detail page."
           />
         </label>
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+      <div className="grid grid-cols-1 gap-8">
+        <label className={fieldLabelStackClass}>
           Cover image (optional)
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
-            className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
+            className={filePickerClass}
           />
         </label>
       </div>
 
-      <label className="flex flex-col gap-2 text-sm text-secondary">
-        Gallery images (multiple)
+      <label className={fieldLabelStackClass}>
+        Gallery images (optional, multiple)
         <input
           type="file"
           accept="image/*"
           multiple
-          required
           onChange={(e) =>
             setGalleryFiles(e.target.files ? Array.from(e.target.files) : [])
           }
-          className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
+          className={filePickerClass}
         />
+        <span className="text-meta normal-case tracking-normal text-muted-custom">
+          Leave empty to publish now and add photography later. The project will show a generated
+          plate until images are uploaded, then switch to them automatically.
+        </span>
       </label>
 
       <button
         type="submit"
         disabled={busy}
-        className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        className={primaryButtonClass}
       >
         {busy ? 'Saving…' : 'Save project'}
       </button>

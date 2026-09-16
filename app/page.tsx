@@ -1,27 +1,48 @@
-import Hero from '@/components/home/Hero'
+import Hero, { type HeroFeature } from '@/components/home/Hero'
+import WorkIndex, { type WorkIndexEntry } from '@/components/home/WorkIndex'
 import Stats from '@/components/home/Stats'
 import Services from '@/components/home/Services'
-import PhotoCarousel from '@/components/home/PhotoCarousel'
 import Testimonials from '@/components/home/Testimonials'
 import CallToAction from '@/components/home/CallToAction'
-import { getProjectsForCarousel, getAllTestimonials } from '@/lib/projects'
+import { getPhotographedProjects, getAllTestimonials } from '@/lib/projects'
 
 // Admin mutations flush this page explicitly via revalidateProjectSurfaces; the
 // interval is only a safety net for edits made directly in the database.
 export const revalidate = 300
 
+/** The homepage shows a readable index, not the whole portfolio. */
+const MAX_INDEX_ENTRIES = 6
+
 export default async function HomePage() {
   const [projects, testimonials] = await Promise.all([
-    getProjectsForCarousel(),
+    getPhotographedProjects(),
     getAllTestimonials(),
   ])
 
+  /*
+   * `getPhotographedProjects` has already excluded anything without owned
+   * photography, so the homepage leads with real work or with nothing. Until the
+   * client uploads, the hero falls back to a drawn plate and the index is absent
+   * rather than padded.
+   */
+  const entries: WorkIndexEntry[] = projects.slice(0, MAX_INDEX_ENTRIES).map((project) => ({
+    slug: project.slug,
+    title: project.title,
+    clientName: project.client_name,
+    category: project.category,
+    location: project.location,
+    year: project.year ?? null,
+    image: project.imagery.cover,
+  }))
+
+  const feature: HeroFeature | null = entries[0] ?? null
+
   return (
     <>
-      <Hero />
-      <Stats />
+      <Hero feature={feature} />
+      <WorkIndex entries={entries} />
       <Services />
-      <PhotoCarousel projects={projects} />
+      <Stats />
       <Testimonials testimonials={testimonials} />
       <CallToAction />
     </>

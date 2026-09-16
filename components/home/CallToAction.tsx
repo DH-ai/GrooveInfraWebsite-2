@@ -1,71 +1,53 @@
-'use client'
-
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
+import { CONTACT_EMAIL } from '@/lib/site'
 
+/**
+ * The closing ask.
+ *
+ * Previously a rounded panel with two radial gold glows, a faint grid overlay, a
+ * pulsing dot, gradient-filled text and a button that grew on hover — six
+ * effects competing for the one moment on the page where the visitor is deciding
+ * whether to get in touch. Everything here is type, a rule and a link.
+ */
 export default function CallToAction() {
   return (
-    <section className="py-32 bg-base overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="section-y gutter border-t border-subtle bg-base">
+      <div className="mx-auto w-full max-w-[100rem]">
         <AnimatedSection>
-          <div className="relative rounded-3xl overflow-hidden">
-            {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-groove-dark via-groove-black to-groove-black dark:from-groove-dark dark:to-groove-black" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,168,76,0.12),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(201,168,76,0.06),transparent_60%)]" />
+          <p className="text-micro uppercase tracking-eyebrow text-accent-gold">Next step</p>
 
-            {/* Border */}
-            <div className="absolute inset-0 rounded-3xl border border-groove-gold/10" />
+          <h2 className="mt-8 max-w-[16ch] font-display text-h1 font-semibold text-primary">
+            Tell us the date it has to open.
+          </h2>
 
-            {/* Grid pattern */}
-            <div
-              className="absolute inset-0 opacity-[0.03]"
-              style={{
-                backgroundImage: `linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)`,
-                backgroundSize: '40px 40px',
-              }}
-            />
+          <p className="measure mt-8 text-body-lg text-secondary">
+            Send the drawings, the site address, or just the deadline. We will come back with a
+            programme and a price, and say plainly if the date is not achievable.
+          </p>
 
-            {/* Content */}
-            <div className="relative z-10 px-8 py-16 sm:px-16 sm:py-20 text-center">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-groove-gold/25 text-groove-gold text-xs font-medium tracking-widest uppercase mb-6"
+          <div className="mt-12 flex flex-wrap items-center gap-x-10 gap-y-5">
+            <Link
+              href="/contact"
+              className="group inline-flex min-h-11 items-center gap-3 bg-groove-gold px-8 py-4 text-meta font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light"
+            >
+              Start an enquiry
+              <ArrowRight
+                size={15}
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </Link>
+
+            {CONTACT_EMAIL && (
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta text-secondary transition-colors hover:decoration-groove-gold hover:text-primary"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-groove-gold animate-pulse" />
-                Let&apos;s Build Together
-              </motion.div>
-
-              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-6 max-w-2xl mx-auto">
-                Have a Space to{' '}
-                <span className="text-gradient-gold">Transform?</span>
-              </h2>
-
-              <p className="text-white/60 text-lg max-w-md mx-auto mb-10">
-                Share your vision and we&apos;ll handle everything — from design to delivery.
-              </p>
-
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Link
-                  href="/contact"
-                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-full bg-groove-gold text-black font-medium hover:shadow-gold-hover transition-all duration-300 hover:scale-105"
-                >
-                  Start a Conversation
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link
-                  href="/projects"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-white/15 text-white/80 hover:border-white/30 hover:text-white transition-all duration-300"
-                >
-                  View Our Work
-                </Link>
-              </div>
-            </div>
+                {CONTACT_EMAIL}
+              </a>
+            )}
           </div>
         </AnimatedSection>
       </div>

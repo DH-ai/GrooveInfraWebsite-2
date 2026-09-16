@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server'
+import { ADMIN_COOKIE_NAME } from '@/lib/admin-session'
 
 export async function POST(request: Request) {
   const response = NextResponse.redirect(new URL('/admin/login', request.url))
-  response.cookies.set('admin_auth', '', {
+  response.cookies.set(ADMIN_COOKIE_NAME, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: 0,
   })

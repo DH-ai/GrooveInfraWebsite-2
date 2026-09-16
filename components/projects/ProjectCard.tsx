@@ -1,100 +1,77 @@
-'use client'
-
-import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { MapPin, ArrowUpRight } from 'lucide-react'
-import type { Project } from '@/types/project'
-import { formatCategory, getCoverImage } from '@/lib/utils'
+import { ArrowUpRight } from 'lucide-react'
+import type { ProjectCardData } from '@/types/project'
+import { formatCategory } from '@/lib/utils'
+import ProjectImage from '@/components/ui/ProjectImage'
 
 interface ProjectCardProps {
-  project: Project
+  project: ProjectCardData
 }
 
+/**
+ * A project as a plate with a caption under it.
+ *
+ * This was a rounded, bordered, drop-shadowed tile that lifted on hover, with the
+ * category floating over the photograph in a translucent pill and a location pin
+ * icon beside the place name. Six pieces of chrome around one photograph. Here
+ * the frame is square and unbordered, the caption sits below it on a hairline,
+ * and the only thing that moves is the image itself.
+ *
+ * No longer a client component — the hover states are CSS, so a portfolio of
+ * thirty projects ships no JavaScript for its cards.
+ */
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const cover = getCoverImage(project)
-  const summary = project.basic_description ?? project.description
+  const { summary } = project
 
   return (
-    <motion.article
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-    >
-      <Link href={`/projects/${project.slug}`} className="block group">
-        <div className="rounded-2xl overflow-hidden bg-surface-2 border border-subtle hover:border-groove-gold/20 transition-all duration-300 hover:shadow-glass">
-          {/* Image container */}
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <motion.div
-              className="absolute inset-0"
-              whileHover={{ scale: 1.06 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-            >
-              {cover ? (
-                <Image
-                  src={cover}
-                  alt={project.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-              ) : (
-                <motion.div className="absolute inset-0 bg-surface flex items-center justify-center p-6">
-                  <span className="font-display text-lg text-muted-custom text-center">{project.title}</span>
-                </motion.div>
-              )}
-            </motion.div>
+    <article>
+      <Link href={`/projects/${project.slug}`} className="group block">
+        <div className="relative aspect-[4/3] overflow-hidden bg-surface-2">
+          <ProjectImage
+            image={project.imagery.cover}
+            alt={project.title}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          />
+        </div>
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-
-            {/* Category */}
-            <div className="absolute top-3 left-3">
-              <span className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white/90 border border-white/10">
-                {formatCategory(project.category)}
-              </span>
-            </div>
-
-            {/* Arrow button */}
-            <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-              <ArrowUpRight size={14} className="text-white" />
-            </div>
+        <div className="mt-5 border-t border-subtle pt-4">
+          <div className="flex items-baseline justify-between gap-4">
+            <p className="text-micro uppercase tracking-eyebrow text-accent-gold">
+              {formatCategory(project.category)}
+            </p>
+            <ArrowUpRight
+              size={15}
+              aria-hidden="true"
+              className="shrink-0 text-muted-custom transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent-gold"
+            />
           </div>
 
-          {/* Card body */}
-          <div className="p-5">
-            <h3 className="font-display font-semibold text-primary text-lg mb-1 group-hover:text-accent-gold transition-colors duration-300 line-clamp-1">
-              {project.title}
-            </h3>
-            <div className="flex items-center gap-1.5 text-secondary text-xs mb-3">
-              <MapPin size={10} />
-              <span>{project.location}</span>
-              {project.year && (
-                <>
-                  <span className="text-muted-custom">·</span>
-                  <span>{project.year}</span>
-                </>
-              )}
-            </div>
-            {summary && (
-              <p className="text-secondary text-sm leading-relaxed line-clamp-2">
-                {summary}
-              </p>
+          <h3 className="mt-3 font-display text-h3 font-semibold text-primary transition-colors duration-300 group-hover:text-accent-gold">
+            {project.title}
+          </h3>
+
+          <p className="nums-tabular mt-2 text-meta text-muted-custom">
+            {project.location}
+            {project.year && (
+              <>
+                <span aria-hidden="true" className="px-2 text-muted-custom/50">
+                  ·
+                </span>
+                {project.year}
+              </>
             )}
-            {(project.area || project.duration) && (
-              <div
-                className={`mt-3 pt-3 border-t border-subtle flex items-center ${
-                  project.area && project.duration ? 'justify-between' : 'justify-end'
-                }`}
-              >
-                {project.area && <span className="text-xs text-muted-custom">{project.area}</span>}
-                {project.duration && (
-                  <span className="text-xs text-muted-custom">{project.duration}</span>
-                )}
-              </div>
-            )}
-          </div>
+          </p>
+
+          {summary && <p className="mt-4 text-body text-secondary">{summary}</p>}
+
+          {(project.area || project.duration) && (
+            <p className="nums-tabular mt-4 text-micro uppercase tracking-eyebrow text-muted-custom">
+              {[project.area, project.duration].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
       </Link>
-    </motion.article>
+    </article>
   )
 }

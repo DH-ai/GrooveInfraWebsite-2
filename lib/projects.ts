@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Project, ProjectCategory, Testimonial } from '@/types/project'
-import { hasRealCoverImage } from '@/lib/utils'
+import { resolveProjectImagery } from '@/lib/project-images'
 import { getSupabaseRead } from '@/lib/supabase'
 
 interface ProjectRow {
@@ -26,6 +26,8 @@ interface ProjectRow {
 }
 
 function rowToProject(row: ProjectRow): Project {
+  const images = row.images ?? []
+
   return {
     title: row.title,
     slug: row.slug,
@@ -42,8 +44,15 @@ function rowToProject(row: ProjectRow): Project {
     highlight: row.highlight ?? undefined,
     tags: row.tags ?? undefined,
     cover_image: row.cover_image ?? undefined,
-    images: row.images ?? [],
+    images,
     logo: row.logo ?? undefined,
+    // Resolved here, at the single point every project passes through, so a new
+    // page cannot accidentally read `images` raw and render a broken frame.
+    imagery: resolveProjectImagery({
+      slug: row.slug,
+      cover_image: row.cover_image ?? undefined,
+      images,
+    }),
   }
 }
 
@@ -60,6 +69,13 @@ function readClient(context: string): SupabaseClient | null {
 /**
  * Wrapped in React `cache` so the several helpers below share one query per
  * request instead of each issuing its own full-table read.
+ *
+ * Every query in this file breaks ties on slug. `created_at` alone is not a
+ * total order — a seed or a bulk insert stamps every row in the statement with
+ * the same timestamp, and Postgres is then free to return those rows in any
+ * order. The homepage leads with the first photographed project, so without a
+ * tiebreaker the hero, its Open Graph image and the order of the portfolio could
+ * all change between two revalidations of identical data.
  */
 export const getAllProjects = cache(async (): Promise<Project[]> => {
   const supabase = readClient('getAllProjects')
@@ -69,6 +85,7 @@ export const getAllProjects = cache(async (): Promise<Project[]> => {
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getAllProjects error:', error.message)
@@ -109,6 +126,7 @@ export const getFeaturedProjects = cache(async (limit = 6): Promise<Project[]> =
     .select('*')
     .eq('featured', true)
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
     .limit(limit)
 
   if (error) {
@@ -133,6 +151,7 @@ export const getProjectsByCategory = cache(async (category: string): Promise<Pro
     .select('*')
     .eq('category', category)
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getProjectsByCategory error:', error.message)
@@ -143,17 +162,20 @@ export const getProjectsByCategory = cache(async (category: string): Promise<Pro
 })
 
 /**
- * Only projects with owned photography. `hasRealCoverImage` filters out stock
- * placeholder hosts, which cannot be expressed as a database predicate.
+ * Only projects with owned photography. The homepage is the site's loudest claim
+ * about the work, so a drawn placeholder has no business leading it — better a
+ * shorter index than one padded with invented plates. "Owned" is not expressible
+ * as a database predicate, hence the filter in application code.
  */
-export async function getProjectsForCarousel(): Promise<Project[]> {
+export async function getPhotographedProjects(): Promise<Project[]> {
   const all = await getAllProjects()
-  return all.filter((p) => p.images.length > 0 && hasRealCoverImage(p))
+  return all.filter((p) => p.imagery.hasOwnPhotography)
 }
 
+/** Owned photography only, for the same reason as the homepage. */
 export async function getAllImages(): Promise<string[]> {
   const all = await getAllProjects()
-  return all.flatMap((p) => p.images)
+  return all.flatMap((p) => p.imagery.gallery.flatMap((img) => (img.src ? [img.src] : [])))
 }
 
 export const getAllTestimonials = cache(async (): Promise<Testimonial[]> => {
@@ -165,6 +187,7 @@ export const getAllTestimonials = cache(async (): Promise<Testimonial[]> => {
     .select('*')
     .not('testimonial', 'is', null)
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getAllTestimonials error:', error.message)
@@ -186,3 +209,34 @@ export const getAllTestimonials = cache(async (): Promise<Testimonial[]> => {
 export function getProjectCategories(): string[] {
   return ['all', 'commercial', 'retail', 'residential', 'civil']
 }
+
+export interface ProjectSitemapEntry {
+  slug: string
+  updatedAt: string | null
+}
+
+/**
+ * Slugs and timestamps only. The sitemap needs neither the descriptions nor the
+ * image arrays, and `created_at` is dropped by `rowToProject`, so this selects
+ * the two columns it actually uses rather than reusing the full-row query.
+ */
+export const getProjectSitemapEntries = cache(async (): Promise<ProjectSitemapEntry[]> => {
+  const supabase = readClient('getProjectSitemapEntries')
+  if (!supabase) return []
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('slug, created_at')
+    .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
+
+  if (error) {
+    console.error('[projects] getProjectSitemapEntries error:', error.message)
+    return []
+  }
+
+  return (data as Array<{ slug: string; created_at: string | null }>).map((row) => ({
+    slug: row.slug,
+    updatedAt: row.created_at,
+  }))
+})

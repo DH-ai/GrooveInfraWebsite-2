@@ -1,6 +1,14 @@
 import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { checkAdminAuth } from '@/lib/admin-auth'
+import Notice from '@/components/ui/Notice'
+import PageHeader from '@/components/ui/PageHeader'
+import PageShell from '@/components/ui/PageShell'
+import {
+  fieldInputClass,
+  fieldLabelStackClass,
+  primaryButtonClass,
+} from '@/components/ui/field-styles'
 
 export const metadata: Metadata = {
   title: 'Admin Login',
@@ -9,71 +17,77 @@ export const metadata: Metadata = {
 interface AdminLoginProps {
   searchParams?: {
     error?: string
+    next?: string
   }
 }
 
-export default function AdminLoginPage({ searchParams }: AdminLoginProps) {
-  const adminToken = process.env.ADMIN_TOKEN
-  const token = cookies().get('admin_auth')?.value
-  if (adminToken && token === adminToken) {
+/** Only same-origin relative paths, so `?next=` cannot be used as an open redirect. */
+function safeNextPath(value: string | undefined): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/admin'
+  return value
+}
+
+export default async function AdminLoginPage({ searchParams }: AdminLoginProps) {
+  const auth = await checkAdminAuth()
+  if (auth.ok) {
     redirect('/admin')
   }
 
   const error = searchParams?.error
   const isMissingConfig = error === 'missing-config'
+  const isExpired = error === 'expired'
+  const isRateLimited = error === 'rate-limited'
+  const nextPath = safeNextPath(searchParams?.next)
 
   return (
-    <div className="min-h-screen bg-base pt-24 pb-20">
-      <div className="max-w-md mx-auto px-4">
-        <p className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-          Admin
-        </p>
-        <h1 className="font-display text-3xl font-bold text-primary mt-3">Sign in</h1>
+    <PageShell width="reading">
+      <div className="max-w-[28rem]">
+        <PageHeader label="Admin" title="Sign in." />
 
         {isMissingConfig && (
-          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <Notice tone="warning" className="mt-10">
             Admin environment variables are missing. Set ADMIN_USERNAME, ADMIN_PASSWORD, and
-            ADMIN_TOKEN in .env.local.
-          </div>
+            ADMIN_SESSION_SECRET (or ADMIN_TOKEN) in .env.local.
+          </Notice>
         )}
 
-        {error && !isMissingConfig && (
-          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        {isExpired && (
+          <Notice tone="warning" className="mt-10">
+            Your session expired. Please sign in again.
+          </Notice>
+        )}
+
+        {isRateLimited && (
+          <Notice tone="error" className="mt-10">
+            Too many sign-in attempts. Please wait a few minutes and try again.
+          </Notice>
+        )}
+
+        {error && !isMissingConfig && !isExpired && !isRateLimited && (
+          <Notice tone="error" className="mt-10">
             Invalid username or password.
-          </div>
+          </Notice>
         )}
 
         <form
           action="/api/admin/login"
           method="post"
-          className="mt-6 rounded-3xl bg-surface-2 border border-subtle p-6 space-y-4"
+          className="mt-12 space-y-8 border-t border-strong pt-10"
         >
-          <label className="flex flex-col gap-2 text-sm text-secondary">
+          <input type="hidden" name="next" value={nextPath} />
+          <label className={fieldLabelStackClass}>
             Username
-            <input
-              name="username"
-              required
-              className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-              placeholder="admin"
-            />
+            <input name="username" required className={fieldInputClass} placeholder="admin" />
           </label>
-          <label className="flex flex-col gap-2 text-sm text-secondary">
+          <label className={fieldLabelStackClass}>
             Password
-            <input
-              name="password"
-              type="password"
-              required
-              className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
-            />
+            <input name="password" type="password" required className={fieldInputClass} />
           </label>
-          <button
-            type="submit"
-            className="w-full inline-flex items-center justify-center px-6 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold hover:shadow-gold transition-all"
-          >
-            Login
+          <button type="submit" className={primaryButtonClass}>
+            Sign in
           </button>
         </form>
       </div>
-    </div>
+    </PageShell>
   )
 }

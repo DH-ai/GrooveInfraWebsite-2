@@ -1,96 +1,48 @@
 import { NextResponse } from 'next/server'
-import { getSupabaseAdmin, PROJECTS_BUCKET } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { revalidateProjectSurfaces } from '@/lib/revalidate'
-import { CATEGORY_OPTIONS, sanitizeSlug } from '@/lib/upload-constants'
-
-interface CreateProjectBody {
-  title?: string
-  slug?: string
-  category?: string
-  location?: string
-  client_name?: string
-  basic_description?: string
-  description?: string
-  duration?: string
-  area?: string
-  year?: string | number
-  cover_image?: string | null
-  images?: string[]
-}
+import { isAllowedImageUrl } from '@/lib/supabase-storage'
+import { sanitizeSlug } from '@/lib/upload-constants'
+import { createProjectSchema, firstIssueMessage } from '@/lib/validation'
 
 const DEFAULT_CATEGORY = 'commercial'
 
-function getPublicUrlPrefix(): string {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  return `${base.replace(/\/$/, '')}/storage/v1/object/public/${PROJECTS_BUCKET}/`
-}
-
-function isAllowedImageUrl(url: string): boolean {
-  if (!url) return false
-  return url.startsWith(getPublicUrlPrefix())
-}
-
 export async function POST(request: Request) {
-  const auth = checkAdminAuth()
+  const auth = await checkAdminAuth()
   if (!auth.ok) {
     return NextResponse.json({ error: auth.reason }, { status: 401 })
   }
 
-  let body: CreateProjectBody
+  let raw: unknown
   try {
-    body = (await request.json()) as CreateProjectBody
+    raw = await request.json()
   } catch {
     return NextResponse.json({ error: 'invalid-json' }, { status: 400 })
   }
 
-  const title = String(body.title ?? '').trim()
-  const slugInput = String(body.slug ?? '').trim()
-  const slug = sanitizeSlug(slugInput || title)
-  const categoryInput = String(body.category ?? '').trim()
-  const category = categoryInput || DEFAULT_CATEGORY
-  const location = String(body.location ?? '').trim()
-  const clientName = String(body.client_name ?? '').trim()
-  const basicDescription = String(body.basic_description ?? '').trim()
-  const description = String(body.description ?? '').trim()
-  const duration = String(body.duration ?? '').trim()
-  const area = String(body.area ?? '').trim()
-  const yearRaw = body.year == null ? '' : String(body.year).trim()
-  const coverImageRaw = body.cover_image == null ? '' : String(body.cover_image).trim()
-  const images = Array.isArray(body.images) ? body.images.map((v) => String(v).trim()) : []
-
-  if (!title || !slug) {
-    return NextResponse.json({ error: 'invalid' }, { status: 400 })
+  const parsed = createProjectSchema.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'invalid', detail: firstIssueMessage(parsed.error) },
+      { status: 400 }
+    )
   }
 
-  if (!CATEGORY_OPTIONS.has(category)) {
-    return NextResponse.json({ error: 'invalid-category' }, { status: 400 })
+  const body = parsed.data
+  const slug = sanitizeSlug(body.slug || body.title)
+  if (!slug) {
+    return NextResponse.json({ error: 'invalid-slug' }, { status: 400 })
   }
 
-  let year: number | undefined
-  if (yearRaw) {
-    const parsed = Number(yearRaw)
-    if (!Number.isFinite(parsed)) {
-      return NextResponse.json({ error: 'invalid-year' }, { status: 400 })
-    }
-    year = parsed
-  }
-
-  if (images.length === 0) {
-    return NextResponse.json({ error: 'images-required' }, { status: 400 })
-  }
-  for (const url of images) {
+  for (const url of body.images) {
     if (!isAllowedImageUrl(url)) {
       return NextResponse.json({ error: 'invalid-image-url', url }, { status: 400 })
     }
   }
 
-  let coverImage: string | undefined
-  if (coverImageRaw) {
-    if (!isAllowedImageUrl(coverImageRaw)) {
-      return NextResponse.json({ error: 'invalid-cover-url' }, { status: 400 })
-    }
-    coverImage = coverImageRaw
+  if (body.cover_image && !isAllowedImageUrl(body.cover_image)) {
+    return NextResponse.json({ error: 'invalid-cover-url' }, { status: 400 })
   }
 
   const supabase = getSupabaseAdmin()
@@ -111,20 +63,20 @@ export async function POST(request: Request) {
   }
 
   const row: Record<string, unknown> = {
-    title,
+    title: body.title,
     slug,
-    category,
-    location,
-    client_name: clientName,
-    basic_description: basicDescription,
-    description,
-    duration,
-    images,
+    category: body.category ?? DEFAULT_CATEGORY,
+    location: body.location ?? '',
+    client_name: body.client_name ?? '',
+    basic_description: body.basic_description ?? '',
+    description: body.description ?? '',
+    duration: body.duration ?? '',
+    images: body.images,
   }
 
-  if (year !== undefined) row.year = year
-  if (area) row.area = area
-  if (coverImage) row.cover_image = coverImage
+  if (body.year !== undefined) row.year = body.year
+  if (body.area) row.area = body.area
+  if (body.cover_image) row.cover_image = body.cover_image
 
   const { error: insertError } = await supabase.from('projects').insert(row)
   if (insertError) {

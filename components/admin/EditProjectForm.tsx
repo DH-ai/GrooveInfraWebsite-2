@@ -10,6 +10,14 @@ import {
   validateImageFile,
   type PlannedUpload,
 } from '@/lib/admin-upload'
+import Notice from '@/components/ui/Notice'
+import {
+  fieldInputClass,
+  fieldLabelStackClass,
+  fieldTextareaClass,
+  filePickerClass,
+  primaryButtonClass,
+} from '@/components/ui/field-styles'
 
 const CATEGORIES = ['commercial', 'retail', 'residential', 'civil'] as const
 
@@ -134,60 +142,60 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
+      className="space-y-10 border-t border-strong pt-10"
     >
       {errorMsg && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        <Notice tone="error" live>
           {errorMsg}
-        </div>
+        </Notice>
       )}
       {statusMsg && (
-        <div className="rounded-2xl border border-groove-gold/30 bg-groove-gold/5 px-4 py-3 text-sm text-primary">
+        <Notice tone="info" live>
           {statusMsg}
-        </div>
+        </Notice>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <label className={fieldLabelStackClass}>
           Title
           <input
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Slug
           <input
             readOnly
             value={project.slug}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-muted-custom"
+            className={`${fieldInputClass} text-muted-custom`}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Category
           <select
             required
             value={category}
             onChange={(e) => setCategory(e.target.value as typeof category)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Location
           <input
             required
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Year
           <input
             type="number"
@@ -195,88 +203,88 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             max="2100"
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Client name
           <input
             required
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Time to complete
           <input
             required
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Area (optional)
           <input
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className={fieldInputClass}
           />
         </label>
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+      <div className="grid grid-cols-1 gap-8">
+        <label className={fieldLabelStackClass}>
           Basic description
           <textarea
             required
             rows={2}
             value={basicDescription}
             onChange={(e) => setBasicDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className={fieldTextareaClass}
           />
         </label>
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Description
           <textarea
             required
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className={fieldTextareaClass}
           />
         </label>
       </div>
 
       <div className="space-y-3">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Replace cover image (optional)
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
-            className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
+            className={filePickerClass}
           />
           {project.cover_image && !removeCover && (
-            <span className="text-xs text-muted-custom">
+            <span className="text-meta normal-case tracking-normal text-muted-custom">
               Current cover will be kept unless you upload a new file.
             </span>
           )}
         </label>
-        <label className="flex items-center gap-3 text-sm text-secondary">
+        <label className="flex min-h-11 items-center gap-3 text-meta text-secondary">
           <input
             type="checkbox"
             checked={removeCover}
             onChange={(e) => setRemoveCover(e.target.checked)}
-            className="h-4 w-4 rounded border-subtle bg-base"
+            className="h-4 w-4 border-strong bg-base"
           />
           Remove cover image
         </label>
       </div>
 
       <div className="space-y-3">
-        <label className="flex flex-col gap-2 text-sm text-secondary">
+        <label className={fieldLabelStackClass}>
           Add gallery images (optional)
           <input
             type="file"
@@ -285,19 +293,19 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             onChange={(e) =>
               setGalleryFiles(e.target.files ? Array.from(e.target.files) : [])
             }
-            className="file:mr-4 file:rounded-full file:border-0 file:bg-groove-gold file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black text-secondary"
+            className={filePickerClass}
           />
         </label>
-        <label className="flex items-center gap-3 text-sm text-secondary">
+        <label className="flex min-h-11 items-center gap-3 text-meta text-secondary">
           <input
             type="checkbox"
             checked={replaceGallery}
             onChange={(e) => setReplaceGallery(e.target.checked)}
-            className="h-4 w-4 rounded border-subtle bg-base"
+            className="h-4 w-4 border-strong bg-base"
           />
           Replace existing gallery images
         </label>
-        <p className="text-xs text-muted-custom">
+        <p className="text-meta normal-case tracking-normal text-muted-custom">
           Current gallery images: {project.images.length}. If you replace, upload new images.
         </p>
       </div>
@@ -305,7 +313,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
       <button
         type="submit"
         disabled={busy}
-        className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold hover:shadow-gold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        className={primaryButtonClass}
       >
         {busy ? 'Saving…' : 'Save changes'}
       </button>

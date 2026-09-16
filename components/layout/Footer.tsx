@@ -1,104 +1,157 @@
 import Link from 'next/link'
-import { Mail, Phone, MapPin } from 'lucide-react'
+import { CONTACT_EMAIL } from '@/lib/site'
 
-const footerLinks = {
-  Services: [
-    { label: 'Retail Rollouts', href: '/projects?category=retail' },
-    { label: 'Hospitality & Clubs', href: '/projects?category=commercial' },
-    { label: 'Commercial Renovation', href: '/projects?category=commercial' },
-    { label: 'Residential Makeovers', href: '/projects?category=residential' },
-  ],
-  Company: [
-    { label: 'Portfolio', href: '/projects' },
-    { label: 'About Us', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-  ],
-}
+const PHONE_DISPLAY = '+91 88003 85198'
+const PHONE_HREF = '+918800385198'
+const ADDRESS_LINES = [
+  'Plot No-416/2, Metro Pillar No-127',
+  'Mehrauli-Gurgaon Rd, Ghitorni',
+  'New Delhi 110030',
+]
+const MAP_HREF =
+  'https://www.google.com/maps/place/GROOVE+INFRA/@28.4904516,77.1408546,599m/data=!3m1!1e3!4m10!1m2!2m1!1sPlot+No-416%2F2,+Metro+Pillar+No-127,+Mehrauli-Gurgaon+Rd,+Ghitorni,+New+Delhi,+Delhi+110030!3m6!1s0x390d053059559717:0x5b6648bba5c71fdf!8m2!3d28.4918307!4d77.1434279!15sClpQbG90IE5vLTQxNi8yLCBNZXRybyBQaWxsYXIgTm8tMTI3LCBNZWhyYXVsaS1HdXJnYW9uIFJkLCBHaGl0b3JuaSwgTmV3IERlbGhpLCBEZWxoaSAxMTAwMzCSARRjb25zdHJ1Y3Rpb25fY29tcGFueeABAA!16s%2Fg%2F11g88fkzrr?entry=ttu&g_ep=EgoyMDI2MDkxMy4wIKXMDSoASAFQAw%3D%3D'
 
+const columns = [
+  {
+    title: 'Sectors',
+    links: [
+      { label: 'Retail rollouts', href: '/projects?category=retail' },
+      { label: 'Hospitality and clubs', href: '/projects?category=commercial' },
+      { label: 'Workplace and commercial', href: '/projects?category=commercial' },
+      { label: 'Residential', href: '/projects?category=residential' },
+    ],
+  },
+  {
+    title: 'Studio',
+    links: [
+      { label: 'Portfolio', href: '/projects' },
+      { label: 'About', href: '/about' },
+      { label: 'Contact', href: '/contact' },
+    ],
+  },
+]
+
+/**
+ * The footer, on the same rules as the rest of the site.
+ *
+ * The icons beside the email, phone and address are gone: a 13px envelope next to
+ * an email address is decoration standing where a label would be more useful, and
+ * three of them turn the contact block into a legend. The address is set on its
+ * own lines the way it would be written on an envelope rather than wrapped as one
+ * long sentence.
+ */
 export default function Footer() {
   return (
-    <footer className="border-t border-subtle bg-surface">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main */}
-        <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
-          <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 mb-5">
-              <div className="w-7 h-7 rounded-sm bg-groove-gold flex items-center justify-center">
-                <span className="text-black font-display font-bold text-xs">G</span>
-              </div>
-              <span className="font-display font-semibold text-base tracking-widest uppercase text-primary">
+    <footer className="gutter border-t border-subtle bg-surface">
+      <div className="mx-auto w-full max-w-[100rem]">
+        <div className="grid grid-cols-1 gap-x-12 gap-y-14 py-20 md:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="flex h-7 w-7 items-center justify-center bg-groove-gold"
+              >
+                <span className="font-display text-xs font-bold text-black">G</span>
+              </span>
+              <span className="font-display text-base font-semibold uppercase tracking-widest text-primary">
                 Groove Infra
               </span>
             </Link>
-            <p className="text-sm text-secondary leading-relaxed mb-6 max-w-xs">
-              Premium interior construction for retail, commercial, hospitality, and residential
-              projects across India since 2016.
+
+            <p className="measure-tight mt-6 text-body text-secondary">
+              Interior construction for retail, workplace, hospitality and residential projects
+              across India. Building since 2016.
             </p>
-            <div className="flex flex-col gap-3 text-sm text-secondary">
-              <a href="mailto:contactus@grooveinfra.in" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
-                <Mail size={13} /> contactus@grooveinfra.in
-              </a>
-              <a href="tel:+918800385198" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
-                <Phone size={13} /> +91 88003 85198
-              </a>
+
+            <address className="mt-8 not-italic">
+              <p className="text-meta text-muted-custom">
+                {ADDRESS_LINES.map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </p>
               <a
-                href="https://www.google.com/maps/place/GROOVE+INFRA/@28.4904516,77.1408546,599m/data=!3m1!1e3!4m10!1m2!2m1!1sPlot+No-416%2F2,+Metro+Pillar+No-127,+Mehrauli-Gurgaon+Rd,+Ghitorni,+New+Delhi,+Delhi+110030!3m6!1s0x390d053059559717:0x5b6648bba5c71fdf!8m2!3d28.4918307!4d77.1434279!15sClpQbG90IE5vLTQxNi8yLCBNZXRybyBQaWxsYXIgTm8tMTI3LCBNZWhyYXVsaS1HdXJnYW9uIFJkLCBHaGl0b3JuaSwgTmV3IERlbGhpLCBEZWxoaSAxMTAwMzCSARRjb25zdHJ1Y3Rpb25fY29tcGFueeABAA!16s%2Fg%2F11g88fkzrr?entry=ttu&g_ep=EgoyMDI2MDkxMy4wIKXMDSoASAFQAw%3D%3D"
+                href={MAP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-2 hover:text-accent-gold transition-colors"
+                className="mt-2 inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-subtle text-meta text-secondary transition-colors hover:decoration-groove-gold hover:text-primary"
               >
-                <MapPin size={13} className="flex-shrink-0 mt-0.5" />
-                <span>
-                  Plot No-416/2, Metro Pillar No-127, Mehrauli-Gurgaon Rd, Ghitorni, New Delhi, Delhi
-                  110030
-                </span>
+                Open in maps
               </a>
-            </div>
+            </address>
           </div>
 
-          {/* Links */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h3 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-5">
-                {title}
-              </h3>
-              <ul className="flex flex-col gap-3">
-                {links.map((link) => (
+          {columns.map((column) => (
+            <nav key={column.title} aria-label={column.title}>
+              <h2 className="border-t border-strong pt-4 text-micro uppercase tracking-eyebrow text-muted-custom">
+                {column.title}
+              </h2>
+              <ul className="mt-2">
+                {column.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-secondary hover:text-primary transition-colors duration-200"
+                      className="inline-flex min-h-11 items-center text-meta text-secondary transition-colors duration-200 hover:text-accent-gold"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ))}
 
-          {/* CTA */}
           <div>
-            <h3 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-5">
-              Start a Project
-            </h3>
-            <p className="text-sm text-secondary mb-5">
-              Have a space to transform? Let&apos;s talk.
-            </p>
+            <h2 className="border-t border-strong pt-4 text-micro uppercase tracking-eyebrow text-muted-custom">
+              Enquiries
+            </h2>
+            <ul className="mt-2">
+              {CONTACT_EMAIL && (
+                <li>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="inline-flex min-h-11 items-center text-meta text-secondary transition-colors hover:text-accent-gold"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                </li>
+              )}
+              <li>
+                <a
+                  href={`tel:${PHONE_HREF}`}
+                  className="nums-tabular inline-flex min-h-11 items-center text-meta text-secondary transition-colors hover:text-accent-gold"
+                >
+                  {PHONE_DISPLAY}
+                </a>
+              </li>
+            </ul>
+
             <Link
               href="/contact"
-              className="inline-flex items-center px-6 py-2.5 rounded-full bg-groove-gold text-black text-xs font-semibold tracking-wider uppercase hover:shadow-gold transition-all duration-300 hover:scale-105"
+              className="mt-4 inline-flex min-h-11 items-center bg-groove-gold px-6 text-micro font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light"
             >
-              Enquire
+              Start an enquiry
             </Link>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="py-6 border-t border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-custom">
-          <span>© {new Date().getFullYear()} Groove Infra. All rights reserved.</span>
-          <span>Crafted with precision in Delhi, India.</span>
+        <div className="flex flex-col items-start justify-between gap-1 border-t border-subtle py-5 text-micro text-muted-custom sm:flex-row sm:items-center">
+          <p className="nums-tabular">© {new Date().getFullYear()} Groove Infra</p>
+          <nav aria-label="Legal" className="flex items-center gap-8">
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-11 items-center transition-colors duration-200 hover:text-primary"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/terms"
+              className="inline-flex min-h-11 items-center transition-colors duration-200 hover:text-primary"
+            >
+              Terms
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>

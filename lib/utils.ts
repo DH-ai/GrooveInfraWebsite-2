@@ -9,25 +9,14 @@ export function formatCategory(cat: string): string {
   return cat.charAt(0).toUpperCase() + cat.slice(1)
 }
 
-const PLACEHOLDER_HOSTS = ['picsum.photos', 'images.unsplash.com', 'plus.unsplash.com']
-
-export function isPlaceholderImageUrl(url: string): boolean {
-  try {
-    const host = new URL(url).hostname
-    return PLACEHOLDER_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))
-  } catch {
-    return false
-  }
-}
-
-export function getCoverImage(project: { cover_image?: string; images: string[] }): string | null {
-  const candidates = [project.cover_image, ...project.images].filter(Boolean) as string[]
-  for (const src of candidates) {
-    if (!isPlaceholderImageUrl(src)) return src
-  }
-  return null
-}
-
-export function hasRealCoverImage(project: { cover_image?: string; images: string[] }): boolean {
-  return getCoverImage(project) !== null
+/**
+ * The second half of a credit line, dropped when it only repeats the first.
+ *
+ * A fit-out is usually titled after whoever commissioned it, so a project called
+ * "Aurum & Co" has "Aurum & Co" as its client too. Anywhere the two are printed
+ * side by side the line repeats itself, which reads like a data-entry mistake
+ * rather than a credit.
+ */
+export function distinctCredit(primary: string, secondary: string): string | null {
+  return secondary.trim() === primary.trim() ? null : secondary
 }

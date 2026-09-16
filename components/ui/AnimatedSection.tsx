@@ -33,6 +33,11 @@ export default function AnimatedSection({
   return (
     <motion.div
       ref={ref}
+      // Marks the element for the <noscript> rule in the root layout. These
+      // sections are server-rendered with an inline `opacity: 0`, so without
+      // that override every one of them stays permanently invisible when
+      // scripting is unavailable.
+      data-animated-section=""
       className={cn(className)}
       initial={{ opacity: 0, ...directionMap[direction] }}
       animate={inView ? { opacity: 1, y: 0, x: 0 } : {}}

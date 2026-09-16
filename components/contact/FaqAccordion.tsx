@@ -35,35 +35,68 @@ export default function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <div className="divide-y divide-subtle">
-      {faqs.map((faq, i) => (
-        <div key={i}>
-          <button
-            onClick={() => setOpen(open === i ? null : i)}
-            className="w-full flex items-center justify-between py-5 text-left gap-4 group"
-          >
-            <span className={`font-medium text-sm sm:text-base transition-colors duration-200 ${open === i ? 'text-accent-gold' : 'text-primary group-hover:text-accent-gold'}`}>
-              {faq.q}
-            </span>
-            <span className="flex-shrink-0 w-6 h-6 rounded-full border border-subtle flex items-center justify-center text-secondary">
-              {open === i ? <Minus size={12} /> : <Plus size={12} />}
-            </span>
-          </button>
-          <AnimatePresence initial={false}>
-            {open === i && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.28, ease: 'easeOut' }}
-                className="overflow-hidden"
+    <div className="border-b border-subtle">
+      {faqs.map((faq, i) => {
+        const expanded = open === i
+        const panelId = `faq-panel-${i}`
+        const buttonId = `faq-button-${i}`
+
+        return (
+          <div key={faq.q} className="border-t border-subtle">
+            {/*
+              The heading wraps the button rather than the other way round. That
+              keeps each question in the document outline, so screen-reader users
+              can jump between questions with heading navigation, while the button
+              remains the thing that is actually operable.
+            */}
+            <h3>
+              <button
+                type="button"
+                id={buttonId}
+                aria-expanded={expanded}
+                aria-controls={panelId}
+                onClick={() => setOpen(expanded ? null : i)}
+                className="group flex w-full min-h-11 items-baseline justify-between gap-6 py-6 text-left"
               >
-                <p className="text-secondary text-sm leading-relaxed pb-5 max-w-2xl">{faq.a}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ))}
+                {/*
+                  The sheet number pairs each question with the ruled lists used
+                  across the rest of the site, and gives the answer below it a
+                  left margin to hang from.
+                */}
+                <span aria-hidden="true" className="nums-tabular shrink-0 text-micro text-muted-custom">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span
+                  className={`flex-1 font-display text-lede font-medium transition-colors duration-200 ${
+                    expanded ? 'text-accent-gold' : 'text-primary group-hover:text-accent-gold'
+                  }`}
+                >
+                  {faq.q}
+                </span>
+                <span aria-hidden="true" className="shrink-0 text-muted-custom">
+                  {expanded ? <Minus size={16} /> : <Plus size={16} />}
+                </span>
+              </button>
+            </h3>
+            <AnimatePresence initial={false}>
+              {expanded && (
+                <motion.div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.28, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <p className="measure pb-7 pl-9 text-body text-secondary">{faq.a}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )
+      })}
     </div>
   )
 }

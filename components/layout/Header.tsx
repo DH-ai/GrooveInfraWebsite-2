@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-import ThemeToggle from '@/components/ui/ThemeToggle'
+import { useBackdropClose, useDialog } from '@/lib/hooks/use-dialog'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
@@ -15,10 +15,18 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ]
 
+function isActive(pathname: string, href: string) {
+  return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
+}
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+
+  const closeMenu = () => setMenuOpen(false)
+  const dialogRef = useDialog({ open: menuOpen, onClose: closeMenu })
+  const onBackdropClick = useBackdropClose(closeMenu)
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 60)
@@ -30,98 +38,106 @@ export default function Header() {
     setMenuOpen(false)
   }, [pathname])
 
-  // On hero pages the nav overlays the dark image, so text should be white.
-  // On other pages, it adapts to theme.
-  const isHeroPage = pathname === '/'
-
   return (
     <>
       <motion.header
+        // Same marker the scroll-reveal sections carry, for the same two reasons:
+        // the <noscript> rule in the root layout has to force it visible, and the
+        // accessibility suite has to wait for its entrance to finish before
+        // judging contrast — a half-faded gold button reports as a violation.
+        data-animated-section=""
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
           scrolled
-            ? 'py-3 bg-surface/80 backdrop-blur-xl border-b border-subtle'
-            : 'py-5 bg-transparent'
+            ? 'border-b border-subtle bg-surface/80 py-3 backdrop-blur-xl'
+            : 'bg-transparent py-5'
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-7 h-7 rounded-sm bg-groove-gold flex items-center justify-center">
-              <span className="text-black font-display font-bold text-xs">G</span>
-            </div>
+        {/*
+          Both heroes now run a photograph to the top of the viewport, and a
+          photograph is not a background you can predict: the Cartier store shot
+          is near-white exactly where the wordmark sits. Unscrolled, the header
+          lays a short gradient behind itself so the chrome keeps its contrast
+          whatever the image underneath happens to be doing.
+        */}
+        <div
+          aria-hidden="true"
+          className={cn(
+            'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 via-black/40 to-transparent transition-opacity duration-300',
+            scrolled ? 'opacity-0' : 'opacity-100'
+          )}
+        />
+        <div className="gutter relative mx-auto flex w-full max-w-[100rem] items-center justify-between">
+          <Link href="/" className="group flex items-center gap-3" aria-label="Groove Infra — home">
             <span
-              className={cn(
-                'font-display font-semibold text-base tracking-widest uppercase transition-colors duration-300',
-                scrolled || !isHeroPage ? 'text-primary' : 'text-white'
-              )}
+              className="flex h-7 w-7 items-center justify-center bg-groove-gold"
+              aria-hidden="true"
             >
+              <span className="font-display text-xs font-bold text-black">G</span>
+            </span>
+            <span className="font-display text-base font-semibold uppercase tracking-widest text-primary">
               Groove Infra
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden items-center gap-9 md:flex" aria-label="Primary">
             {navLinks.map((link) => {
-              const active = pathname === link.href || pathname.startsWith(link.href + '/')
+              const active = isActive(pathname, link.href)
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'text-sm tracking-wide transition-colors duration-200 relative group',
-                    active
-                      ? 'text-groove-gold'
-                      : scrolled || !isHeroPage
-                      ? 'text-secondary hover:text-primary'
-                      : 'text-white hover:text-white'
+                    'group inline-flex min-h-11 items-center text-meta transition-colors duration-200',
+                    active ? 'text-accent-gold' : 'text-secondary hover:text-primary'
                   )}
                 >
-                  {link.label}
-                  <span
-                    className={
-                      cn(
-                      'absolute -bottom-0.5 left-0 h-px bg-groove-gold transition-all duration-100',
-                      active ? 'w-full' : 'w-0 group-hover:w-full'
-                    )}
-                  />
+                  <span className="relative">
+                    {link.label}
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'absolute -bottom-1 left-0 h-px bg-groove-gold transition-all duration-200',
+                        active ? 'w-full' : 'w-0 group-hover:w-full'
+                      )}
+                    />
+                  </span>
                 </Link>
               )
             })}
           </nav>
 
-          {/* Right side */}
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Link
               href="/contact"
-              className={cn(
-                'hidden md:inline-flex items-center px-5 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300',
-                scrolled || !isHeroPage
-                  ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-black text-white hover:opacity-80'
-              )}
+              className="hidden min-h-11 items-center bg-groove-gold px-6 text-micro font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light md:inline-flex"
             >
               Enquire
             </Link>
+            {/*
+              The panel below renders above the header and carries its own close
+              button, so this trigger only ever opens. It still reports
+              aria-expanded, which is what tells a screen reader that the panel
+              it controls is currently showing.
+            */}
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={cn(
-                'md:hidden p-2 transition-colors',
-                scrolled || !isHeroPage ? 'text-secondary hover:text-primary' : 'text-white/80 hover:text-white'
-              )}
-              aria-label="Toggle menu"
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="md:hidden inline-flex h-11 w-11 items-center justify-center text-secondary transition-colors hover:text-primary"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              aria-label="Open menu"
             >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              <Menu size={22} aria-hidden="true" />
             </button>
           </div>
         </div>
       </motion.header>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -129,53 +145,61 @@ export default function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 md:hidden"
+            className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm md:hidden"
+            onClick={onBackdropClick}
           >
-            <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={() => setMenuOpen(false)}
-            />
-            <motion.nav
-              className="absolute top-0 left-0 right-0 bg-surface border-b border-subtle pt-24 pb-10 px-6"
+            <motion.div
+              id="mobile-navigation"
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site navigation"
+              tabIndex={-1}
+              className="absolute top-0 left-0 right-0 bg-surface border-b border-subtle pb-10 px-6 pt-5"
               initial={{ y: -16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -16, opacity: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <div className="flex flex-col gap-6">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.07 }}
-                  >
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="inline-flex h-11 w-11 items-center justify-center text-secondary transition-colors hover:text-primary"
+                  aria-label="Close menu"
+                >
+                  <X size={22} aria-hidden="true" />
+                </button>
+              </div>
+
+              <nav aria-label="Site" className="flex flex-col gap-2 pt-4">
+                {navLinks.map((link) => {
+                  const active = isActive(pathname, link.href)
+                  return (
                     <Link
+                      key={link.href}
                       href={link.href}
+                      aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'text-2xl font-display font-medium',
-                        pathname === link.href ? 'text-accent-gold' : 'text-primary'
+                        'inline-flex min-h-11 items-center font-display text-h3 font-medium',
+                        active ? 'text-accent-gold' : 'text-primary'
                       )}
                     >
                       {link.label}
                     </Link>
-                  </motion.div>
-                ))}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.32 }}
-                  className="pt-4 border-t border-subtle"
+                  )
+                })}
+              </nav>
+
+              <div className="pt-6 mt-4 border-t border-subtle">
+                <Link
+                  href="/contact"
+                  className="inline-flex min-h-11 items-center bg-groove-gold px-7 text-micro font-semibold uppercase tracking-eyebrow text-black"
                 >
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center px-7 py-3 rounded-full bg-groove-gold text-black text-sm font-semibold tracking-wide uppercase"
-                  >
-                    Enquire
-                  </Link>
-                </motion.div>
+                  Enquire
+                </Link>
               </div>
-            </motion.nav>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

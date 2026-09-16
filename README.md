@@ -14,11 +14,13 @@ Built with **Next.js 14 App Router**, TypeScript, Tailwind CSS, and Framer Motio
 | Animations | Framer Motion |
 | Database | Supabase |
 | Email | Resend |
+| Spam | Cloudflare Turnstile |
 | Deployment | Vercel |
 
 ## Getting Started
 
 ```bash
+cp .env.example .env.local   # then fill it in — see SETUP.md
 npm install
 npm run dev       # dev server on localhost:3000
 npm run build     # production build
@@ -27,21 +29,20 @@ npm run lint      # ESLint check
 
 ## Environment Variables
 
-Create a `.env.local` at the project root:
+Every variable, what it is for, and where to get it: **[SETUP.md](SETUP.md)**.
+[`.env.example`](.env.example) is the copy-paste version.
 
-```env
-RESEND_API_KEY=re_xxxxxxxxxxxx
+The short list: Supabase URL and both keys, admin credentials plus a session
+signing secret, `NEXT_PUBLIC_SITE_URL`, Resend key and addresses, and optionally a
+Cloudflare Turnstile key pair.
 
-# Public (@grooveinfra.in)
-PUBLIC_CONTACT_EMAIL=contactus@grooveinfra.in
-NOREPLY_FROM=Groove Infra <noreply@grooveinfra.in>
-ENQUIRY_FROM=Groove Infra Enquiries <enquire@grooveinfra.in>
+## Setup and Operations
 
-# Private — set only in .env.local (never commit)
-ENQUIRY_INBOX=your-personal@gmail.com
-```
+[SETUP.md](SETUP.md) covers creating the Supabase schema and storage bucket,
+signing into the admin panel, issuing Turnstile and Resend keys, the Vercel
+variable list, uploading project photography, and what each failure symptom means.
 
-See [Checklist.md](Checklist.md) for email roles and admin panel tasks.
+[Checklist.md](Checklist.md) tracks the remaining product work.
 
 ## Project Structure
 
@@ -49,6 +50,8 @@ See [Checklist.md](Checklist.md) for email roles and admin panel tasks.
 app/            # Next.js App Router pages & API routes
 components/     # React components (layout, home, projects, ui)
 lib/            # Data fetching helpers and utilities
+scripts/        # Test suites (a11y, contrast, image fallback, API integration)
+supabase/       # Schema and migrations
 types/          # TypeScript interfaces
 public/         # Static assets
 ```
