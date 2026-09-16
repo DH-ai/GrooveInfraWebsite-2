@@ -43,7 +43,7 @@ export default function Footer() {
                 <Phone size={13} /> +91 88003 85198
               </a>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=Plot+No-416%2F2%2C+Metro+Pillar+No-127%2C+Mehrauli-Gurgaon+Rd%2C+Ghitorni%2C+New+Delhi%2C+Delhi+110030"
+                href="https://www.google.com/maps/place/GROOVE+INFRA/@28.4904516,77.1408546,599m/data=!3m1!1e3!4m10!1m2!2m1!1sPlot+No-416%2F2,+Metro+Pillar+No-127,+Mehrauli-Gurgaon+Rd,+Ghitorni,+New+Delhi,+Delhi+110030!3m6!1s0x390d053059559717:0x5b6648bba5c71fdf!8m2!3d28.4918307!4d77.1434279!15sClpQbG90IE5vLTQxNi8yLCBNZXRybyBQaWxsYXIgTm8tMTI3LCBNZWhyYXVsaS1HdXJnYW9uIFJkLCBHaGl0b3JuaSwgTmV3IERlbGhpLCBEZWxoaSAxMTAwMzCSARRjb25zdHJ1Y3Rpb25fY29tcGFueeABAA!16s%2Fg%2F11g88fkzrr?entry=ttu&g_ep=EgoyMDI2MDkxMy4wIKXMDSoASAFQAw%3D%3D"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-2 hover:text-accent-gold transition-colors"
