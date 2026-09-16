@@ -1,263 +1,137 @@
-'use client'
-
-import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
-import type { ResolvedImage } from '@/lib/project-images'
+import { ArrowDown, ArrowRight } from 'lucide-react'
 import ProjectImage from '@/components/ui/ProjectImage'
+import type { ResolvedImage } from '@/lib/project-images'
+import { distinctCredit, formatCategory } from '@/lib/utils'
 
-const SLIDE_DURATION_MS = 5500
-
-/**
- * The copy is positioning, not a claim about a particular job, so it is fixed.
- * The backdrops are not: they were four hotlinked stock photographs of other
- * people's shops and offices, sitting directly under headings about our work.
- * They now come from the client's own uploads via `backdrops`, and fall back to a
- * drawn plate seeded from the slide's own tag.
- */
-const slides = [
-  {
-    tag: 'Retail Rollouts',
-    heading: ['Spaces That', 'Drive Sales'],
-    sub: "End-to-end retail fit-outs for India's fastest-growing brands.",
-  },
-  {
-    tag: 'Commercial Interiors',
-    heading: ['Where Work', 'Becomes Culture'],
-    sub: 'Corporate environments engineered for performance and identity.',
-  },
-  {
-    tag: 'Hospitality & Clubs',
-    heading: ['Atmospheres', 'People Return To'],
-    sub: 'Hotels, restaurants, and lounges built to leave a lasting impression.',
-  },
-  {
-    tag: 'Residential Makeovers',
-    heading: ['Your Home,', 'Reimagined'],
-    sub: 'Bespoke residential interiors crafted to reflect who you are.',
-  },
-]
-
-interface HeroProps {
-  /**
-   * Owned photography to run behind the slides, in order. Shorter than `slides`
-   * is fine — it is cycled — and empty is fine, which is the state until the
-   * client uploads. Nothing here needs changing when they do.
-   */
-  backdrops?: ResolvedImage[]
+export interface HeroFeature {
+  slug: string
+  title: string
+  clientName: string
+  category: string
+  location: string
+  year: number | null
+  image: ResolvedImage
 }
 
-export default function Hero({ backdrops = [] }: HeroProps) {
-  const [current, setCurrent] = useState(0)
-  // Hovering or tabbing into the hero suspends rotation; the explicit control
-  // below stops it for good. They are tracked separately so moving the mouse
-  // away does not silently restart a carousel the user asked to stop.
-  const [suspended, setSuspended] = useState(false)
-  const [stopped, setStopped] = useState(false)
-  const reduceMotion = useReducedMotion()
+interface HeroProps {
+  /** The one project to lead with. Null until anything has been uploaded. */
+  feature?: HeroFeature | null
+}
 
-  // WCAG 2.2.2: content that moves by itself for more than five seconds needs a
-  // mechanism to pause it. Hover alone is not one — it is unavailable to keyboard
-  // and touch users.
-  const rotating = !stopped && !suspended && !reduceMotion
-
-  const next = useCallback(() => setCurrent((c) => (c + 1) % slides.length), [])
-  const prev = useCallback(() => setCurrent((c) => (c - 1 + slides.length) % slides.length), [])
-
-  useEffect(() => {
-    if (!rotating) return
-    const id = setInterval(next, SLIDE_DURATION_MS)
-    return () => clearInterval(id)
-  }, [rotating, next])
-
-  const slide = slides[current]
-  const backdrop: ResolvedImage = backdrops.length
-    ? backdrops[current % backdrops.length]
-    : { src: null, isPlaceholder: true, seed: `hero-${slide.tag}` }
+/**
+ * One project, full bleed, named.
+ *
+ * This was four slides rotating on a five-second timer, each with its own
+ * heading, and each backed by a stock photograph of somebody else's shop. It
+ * cost a pause control, an aria-live region, a progress bar and a hover-suspend
+ * state to stay accessible, and it still asked a first-time visitor to watch a
+ * slideshow before learning what the firm does.
+ *
+ * A fit-out contractor is hired on evidence, so the evidence leads: one real
+ * project, at full size, with the client named under it. Nothing moves, nothing
+ * needs pausing, and the whole section is server-rendered — the hero now ships
+ * no JavaScript at all.
+ */
+export default function Hero({ feature = null }: HeroProps) {
+  const backdrop: ResolvedImage = feature?.image ?? {
+    src: null,
+    isPlaceholder: true,
+    seed: 'groove-hero',
+  }
 
   return (
-    <section
-      aria-roledescription="carousel"
-      aria-label="Sectors we build for"
-      /*
-       * 100svh rather than 100vh: on mobile browsers 100vh is measured against
-       * the viewport with the URL bar retracted, so a full-height hero has its
-       * bottom edge — the slide controls — cut off on first paint.
-       */
-      className="relative min-h-[100svh] overflow-hidden"
-      onMouseEnter={() => setSuspended(true)}
-      onMouseLeave={() => setSuspended(false)}
-      onFocus={() => setSuspended(true)}
-      onBlur={() => setSuspended(false)}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`bg-${current}`}
-          className="absolute inset-0 scale-[1.04]"
-          initial={{ opacity: 0, scale: 1.08 }}
-          animate={{ opacity: 1, scale: 1.04 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <ProjectImage
-            image={backdrop}
-            /*
-             * Decorative: the slide's heading and subheading already carry
-             * everything the backdrop conveys, so describing it again would only
-             * add noise for a screen-reader user.
-             */
-            alt=""
-            priority={current === 0}
-            sizes="100vw"
-          />
-        </motion.div>
-      </AnimatePresence>
+    <section className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden">
+      <div className="absolute inset-0">
+        <ProjectImage image={backdrop} alt="" priority sizes="100vw" />
+      </div>
 
-      <div aria-hidden="true" className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/20 to-black/75"
-      />
+      <div aria-hidden="true" className="hero-scrim absolute inset-0" />
+      <div aria-hidden="true" className="hero-wash absolute inset-0" />
 
-      {/*
-        Only the active slide is in the DOM, so announcing changes while the
-        carousel rotates on its own would interrupt a screen-reader user every
-        five seconds. Announcements are enabled only once rotation has stopped,
-        which is what the APG carousel pattern prescribes.
-      */}
-      <div
-        className="relative z-10 mx-auto flex h-[100svh] max-w-7xl flex-col justify-center px-4 pt-20 sm:px-6 lg:px-8"
-        aria-live={rotating ? 'off' : 'polite'}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`content-${current}`}
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`${slide.tag} — slide ${current + 1} of ${slides.length}`}
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="max-w-3xl"
-          >
-            <div className="mb-6 flex items-center gap-3">
-              <span aria-hidden="true" className="h-px w-12 bg-groove-gold" />
-              <span className="text-xs font-medium uppercase tracking-[0.22em] text-groove-gold">
-                {slide.tag}
-              </span>
-            </div>
+      <div className="relative z-10 gutter pb-16 pt-32 sm:pb-20">
+        <div className="mx-auto w-full max-w-[100rem]">
+          <h1 className="max-w-[19ch] font-display text-h1 font-semibold text-white">
+            Interiors delivered on the date we promised.
+          </h1>
 
-            <h1 className="mb-6 font-display text-5xl font-bold leading-[1.04] tracking-tight text-white sm:text-6xl md:text-7xl lg:text-8xl">
-              {slide.heading[0]}
-              <br />
-              <span className="text-gradient-gold">{slide.heading[1]}</span>
-            </h1>
+          <p className="measure-tight mt-7 text-body-lg text-white/85">
+            Retail, workplace, hospitality and residential fit-outs across India. One team from
+            setting out to handover, since 2016.
+          </p>
 
-            <p className="mb-10 max-w-md text-lg leading-relaxed text-white/80 sm:text-xl">
-              {slide.sub}
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Link
+              href="/projects"
+              className="group inline-flex min-h-11 items-center gap-3 border-b border-groove-gold pb-1 text-meta font-medium uppercase tracking-eyebrow text-groove-gold"
+            >
+              See the work
+              <ArrowRight
+                size={14}
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-11 items-center border-b border-white/25 pb-1 text-meta font-medium uppercase tracking-eyebrow text-white/80 transition-colors hover:border-white hover:text-white"
+            >
+              Start a project
+            </Link>
+          </div>
+
+          {/*
+            The credit line is the point of leading with a photograph: an
+            unattributed interior shot proves nothing, and could have come from
+            anywhere. Naming the client and the job makes it evidence.
+
+            It shares its rule with the scroll cue so the hero closes on one
+            hairline rather than two competing ones.
+          */}
+          <div className="mt-14 flex items-baseline justify-between gap-8 border-t border-white/20 pt-4 text-meta">
+            {feature ? (
+              <p className="text-white/70">
+                <Link
+                  href={`/projects/${feature.slug}`}
+                  className="group inline-flex min-h-11 flex-wrap items-baseline gap-x-3 gap-y-1"
+                >
+                  <span className="font-medium text-white group-hover:text-groove-gold">
+                    {feature.title}
+                  </span>
+                  <span aria-hidden="true" className="text-white/35">
+                    ·
+                  </span>
+                  <span className="nums-tabular">{credit(feature)}</span>
+                </Link>
+              </p>
+            ) : (
+              <p className="text-white/60">Project photography in progress.</p>
+            )}
+
+            {/*
+              The cue is a label and an arrow, not an animation. A bouncing chevron
+              is motion that starts on its own and never stops, which needs a pause
+              control to satisfy WCAG 2.2.2 — a disproportionate amount of
+              machinery for the job of saying "there is more below".
+            */}
+            <p className="hidden shrink-0 items-center gap-2 uppercase tracking-eyebrow text-white/45 sm:flex">
+              Scroll
+              <ArrowDown size={13} aria-hidden="true" />
             </p>
-
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/projects"
-                className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-groove-gold px-7 py-3.5 text-sm font-medium text-black transition-all duration-300 hover:scale-105 hover:shadow-gold-hover"
-              >
-                View Our Work
-                <ArrowRight
-                  size={15}
-                  aria-hidden="true"
-                  className="transition-transform group-hover:translate-x-1"
-                />
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/40 px-7 py-3.5 text-sm font-medium text-white transition-all duration-300 hover:border-white hover:bg-white/10"
-              >
-                Start a Project
-              </Link>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-        <p
-          aria-hidden="true"
-          className="absolute bottom-12 right-6 flex items-baseline gap-3 sm:right-10"
-        >
-          <span className="font-display text-5xl font-bold leading-none tabular-nums text-white/45">
-            0{current + 1}
-          </span>
-          <span className="text-sm text-white/60">/ 0{slides.length}</span>
-        </p>
+          </div>
+        </div>
       </div>
-
-      {/*
-        Every control below is at least 44px in both directions. The dots were
-        previously 6px squares, which is under even the 24px WCAG 2.5.8 minimum;
-        the visible dot is now decoration inside a full-size hit area.
-      */}
-      <button
-        type="button"
-        onClick={prev}
-        className="absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:left-6"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft size={18} aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        onClick={next}
-        className="absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 sm:right-6"
-        aria-label="Next slide"
-      >
-        <ChevronRight size={18} aria-hidden="true" />
-      </button>
-
-      <div className="absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center">
-        {!reduceMotion && (
-          <button
-            type="button"
-            onClick={() => setStopped((prev) => !prev)}
-            aria-pressed={stopped}
-            aria-label={stopped ? 'Start automatic slide changes' : 'Stop automatic slide changes'}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-white/80 transition-colors hover:text-white"
-          >
-            {stopped ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
-          </button>
-        )}
-
-        {slides.map((s, i) => (
-          <button
-            key={s.tag}
-            type="button"
-            onClick={() => setCurrent(i)}
-            aria-current={i === current}
-            aria-label={`Show slide ${i + 1}: ${s.tag}`}
-            className="group flex h-11 w-6 items-center justify-center"
-          >
-            <span
-              aria-hidden="true"
-              className={`rounded-full transition-all duration-300 ${
-                i === current
-                  ? 'h-1.5 w-5 bg-groove-gold'
-                  : 'h-1.5 w-1.5 bg-white/50 group-hover:bg-white/80'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-
-      {rotating && (
-        <motion.div
-          key={`progress-${current}`}
-          aria-hidden="true"
-          className="absolute bottom-0 left-0 h-[2px] w-full origin-left bg-groove-gold/60"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: SLIDE_DURATION_MS / 1000, ease: 'linear' }}
-        />
-      )}
     </section>
   )
+}
+
+function credit(feature: HeroFeature): string {
+  return [
+    distinctCredit(feature.title, feature.clientName),
+    formatCategory(feature.category),
+    feature.location,
+    feature.year,
+  ]
+    .filter(Boolean)
+    .join(', ')
 }

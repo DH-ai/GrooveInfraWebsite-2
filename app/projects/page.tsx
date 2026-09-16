@@ -18,24 +18,16 @@ export default async function ProjectsPage() {
   const categories = getProjectCategories()
 
   return (
-    <div className="pt-24 pb-20 min-h-screen bg-base">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <AnimatedSection className="py-16">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-px w-12 bg-groove-gold" />
-            <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-              Our Portfolio
-            </span>
-          </div>
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold text-primary leading-tight mb-5">
-            Every Project,
-            <br />
-            A Story
+    <div className="gutter min-h-screen bg-base pb-28 pt-36">
+      <div className="mx-auto w-full max-w-[100rem]">
+        <AnimatedSection>
+          <p className="text-micro uppercase tracking-eyebrow text-accent-gold">Portfolio</p>
+          <h1 className="mt-8 max-w-[20ch] font-display text-h1 font-semibold text-primary">
+            Every job, and the date it opened.
           </h1>
-          <p className="text-secondary text-lg max-w-lg">
-            {projects.length} projects across India — each one built with precision, purpose, and an
-            obsession for quality.
+          <p className="measure mt-8 text-body-lg text-secondary">
+            <span className="nums-tabular">{projects.length}</span> projects across India. Filter by
+            sector, or read them in the order they were handed over.
           </p>
         </AnimatedSection>
 
@@ -44,7 +36,9 @@ export default async function ProjectsPage() {
           component, so the raw storage URLs and full descriptions stay on the
           server.
         */}
-        <ProjectGrid projects={projects.map(toProjectCardData)} categories={categories} />
+        <div className="mt-20">
+          <ProjectGrid projects={projects.map(toProjectCardData)} categories={categories} />
+        </div>
       </div>
     </div>
   )

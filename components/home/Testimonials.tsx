@@ -1,129 +1,70 @@
-'use client'
-
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Quote, ChevronLeft, ChevronRight } from 'lucide-react'
+import SectionHead from '@/components/ui/SectionHead'
 import AnimatedSection from '@/components/ui/AnimatedSection'
 import type { Testimonial } from '@/types/project'
-import { formatCategory } from '@/lib/utils'
+import { distinctCredit, formatCategory } from '@/lib/utils'
 
 interface TestimonialsProps {
   testimonials: Testimonial[]
 }
 
+/**
+ * Client quotes, all of them, at once.
+ *
+ * This was a one-at-a-time carousel: previous and next buttons, a dot for each
+ * quote, a slide transition, and eleven quotes hidden behind twelve clicks. A
+ * testimonial is evidence, and hiding evidence behind a control is a strange
+ * thing to do with it — particularly when the visitor has no way of knowing
+ * whether the next one is worth the click.
+ *
+ * Set as a ruled list, every quote is readable in one pass, the section needs no
+ * client JavaScript, and the attribution sits with the words instead of under a
+ * pair of arrows.
+ */
 export default function Testimonials({ testimonials }: TestimonialsProps) {
-  const [index, setIndex] = useState(0)
-  const [direction, setDirection] = useState(1)
-
   if (!testimonials.length) return null
 
-  const current = testimonials[index]
-
-  function next() {
-    setDirection(1)
-    setIndex((i) => (i + 1) % testimonials.length)
-  }
-
-  function prev() {
-    setDirection(-1)
-    setIndex((i) => (i - 1 + testimonials.length) % testimonials.length)
-  }
-
   return (
-    <section className="py-28 bg-surface border-y border-subtle overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="text-center mb-16">
-          <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-            Client Stories
-          </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold text-primary mt-3">
-            What Our Clients Say
-          </h2>
-        </AnimatedSection>
+    <section className="section-y gutter border-t border-subtle bg-base">
+      <div className="mx-auto w-full max-w-[100rem]">
+        <SectionHead
+          index="04"
+          label="In their words"
+          title="What clients said afterwards."
+          aside={`${testimonials.length} ${testimonials.length === 1 ? 'client' : 'clients'}`}
+        />
 
-        <div className="max-w-3xl mx-auto">
-          {/* Quote icon */}
-          <AnimatedSection className="flex justify-center mb-8">
-            <div className="w-12 h-12 rounded-full bg-groove-gold/10 flex items-center justify-center">
-              <Quote size={20} className="text-accent-gold" />
-            </div>
-          </AnimatedSection>
-
-          {/* Testimonial */}
-          <div className="relative min-h-[140px] flex items-center justify-center">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={index}
-                custom={direction}
-                initial={{ opacity: 0, x: direction * 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction * -40 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="text-center"
-              >
-                <blockquote className="font-display text-xl sm:text-2xl md:text-3xl font-medium text-primary leading-relaxed mb-8">
-                  &ldquo;{current.text}&rdquo;
-                </blockquote>
-                <div className="flex flex-col items-center gap-1">
-                  <span className="font-semibold text-primary">{current.client}</span>
-                  <span className="text-sm text-secondary">{current.project}</span>
-                  <span className="text-xs text-muted-custom mt-1 px-3 py-0.5 rounded-full border border-subtle">
-                    {formatCategory(current.category)}
+        <div className="mt-14 grid grid-cols-1 gap-x-16 lg:grid-cols-2">
+          {testimonials.map((testimonial, i) => (
+            <AnimatedSection key={`${testimonial.client}-${i}`} delay={Math.min(i * 0.05, 0.2)}>
+              <figure className="flex h-full flex-col border-t border-subtle py-9">
+                <blockquote className="measure font-display text-lede font-medium text-primary">
+                  {/*
+                    Real typographic quotation marks, hung outside the measure so
+                    the first word still lines up with everything below it.
+                  */}
+                  <span aria-hidden="true" className="-ml-[0.45em] text-muted-custom">
+                    &ldquo;
                   </span>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+                  {testimonial.text}
+                  <span aria-hidden="true" className="text-muted-custom">
+                    &rdquo;
+                  </span>
+                </blockquote>
 
-          {/* Navigation */}
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={prev}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-strong text-secondary transition-colors duration-200 hover:border-groove-gold/60 hover:text-primary"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft size={16} aria-hidden="true" />
-            </button>
-
-            {/*
-              The visible dot stays small; the button around it is a full-size hit
-              area. Previously the target was the 6px dot itself.
-            */}
-            <div className="flex">
-              {testimonials.map((t, i) => (
-                <button
-                  key={t.client}
-                  type="button"
-                  onClick={() => {
-                    setDirection(i > index ? 1 : -1)
-                    setIndex(i)
-                  }}
-                  aria-current={i === index}
-                  aria-label={`Show testimonial ${i + 1} of ${testimonials.length}: ${t.client}`}
-                  className="group flex h-11 w-6 items-center justify-center"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`rounded-full transition-all duration-300 ${
-                      i === index
-                        ? 'h-1.5 w-5 bg-groove-gold'
-                        : 'h-1.5 w-1.5 bg-subtle group-hover:bg-groove-gold/50'
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={next}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-strong text-secondary transition-colors duration-200 hover:border-groove-gold/60 hover:text-primary"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight size={16} aria-hidden="true" />
-            </button>
-          </div>
+                <figcaption className="mt-6 text-meta">
+                  <span className="font-medium text-primary">{testimonial.client}</span>
+                  <span className="mt-1 block text-muted-custom">
+                    {[
+                      distinctCredit(testimonial.client, testimonial.project),
+                      formatCategory(testimonial.category),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </figcaption>
+              </figure>
+            </AnimatedSection>
+          ))}
         </div>
       </div>
     </section>
