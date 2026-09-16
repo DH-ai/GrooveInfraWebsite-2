@@ -152,17 +152,17 @@ export const getProjectsByCategory = cache(async (category: string): Promise<Pro
 })
 
 /**
- * Only projects with owned photography. The homepage carousel is the site's
- * loudest claim about the work, so a drawn placeholder has no business in it —
- * better a shorter carousel than one padded with invented plates. "Owned" is not
- * expressible as a database predicate, hence the filter in application code.
+ * Only projects with owned photography. The homepage is the site's loudest claim
+ * about the work, so a drawn placeholder has no business leading it — better a
+ * shorter index than one padded with invented plates. "Owned" is not expressible
+ * as a database predicate, hence the filter in application code.
  */
-export async function getProjectsForCarousel(): Promise<Project[]> {
+export async function getPhotographedProjects(): Promise<Project[]> {
   const all = await getAllProjects()
   return all.filter((p) => p.imagery.hasOwnPhotography)
 }
 
-/** Owned photography only, for the same reason as the carousel. */
+/** Owned photography only, for the same reason as the homepage. */
 export async function getAllImages(): Promise<string[]> {
   const all = await getAllProjects()
   return all.flatMap((p) => p.imagery.gallery.flatMap((img) => (img.src ? [img.src] : [])))
