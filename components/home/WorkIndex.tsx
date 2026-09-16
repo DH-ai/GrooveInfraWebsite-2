@@ -60,10 +60,12 @@ export default function WorkIndex({ entries }: WorkIndexProps) {
                   href={`/projects/${entry.slug}`}
                   className="group grid grid-cols-[auto_1fr] items-center gap-x-6 gap-y-5 py-6 sm:grid-cols-[3rem_1fr_auto_auto] sm:gap-x-8"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="nums-tabular text-micro text-muted-custom sm:self-start sm:pt-2"
-                  >
+                  {/*
+                    Centred with the title rather than pinned to the top of the
+                    row: the row is as tall as its thumbnail, so a top-aligned
+                    number floated a long way above the project it numbers.
+                  */}
+                  <span aria-hidden="true" className="nums-tabular text-micro text-muted-custom">
                     {String(i + 1).padStart(2, '0')}
                   </span>
 
