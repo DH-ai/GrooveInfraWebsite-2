@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface GlassCardProps {
@@ -15,9 +15,13 @@ export default function GlassCard({ children, className, tilt = true, glow = fal
   const ref = useRef<HTMLDivElement>(null)
   const [rotate, setRotate] = useState({ x: 0, y: 0 })
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 })
+  // A card that pitches in 3D under the cursor is exactly the kind of
+  // unnecessary movement the preference exists to switch off.
+  const reduceMotion = useReducedMotion()
+  const tiltEnabled = tilt && !reduceMotion
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (!tilt || !ref.current) return
+    if (!tiltEnabled || !ref.current) return
     const rect = ref.current.getBoundingClientRect()
     const cx = (e.clientX - rect.left) / rect.width
     const cy = (e.clientY - rect.top) / rect.height
@@ -35,7 +39,7 @@ export default function GlassCard({ children, className, tilt = true, glow = fal
       ref={ref}
       className={cn(
         'relative overflow-hidden rounded-2xl glass',
-        glow && 'dark:glow-gold',
+        glow && 'glow-gold',
         className
       )}
       onMouseMove={handleMouseMove}

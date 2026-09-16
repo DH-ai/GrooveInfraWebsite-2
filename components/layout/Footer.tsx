@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Mail, Phone, MapPin } from 'lucide-react'
+import { CONTACT_EMAIL } from '@/lib/site'
 
 const footerLinks = {
   Services: [
@@ -24,9 +25,12 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2.5 mb-5">
-              <div className="w-7 h-7 rounded-sm bg-groove-gold flex items-center justify-center">
-                <span className="text-black font-display font-bold text-xs">G</span>
-              </div>
+              <span
+                aria-hidden="true"
+                className="flex h-7 w-7 items-center justify-center rounded-sm bg-groove-gold"
+              >
+                <span className="font-display text-xs font-bold text-black">G</span>
+              </span>
               <span className="font-display font-semibold text-base tracking-widest uppercase text-primary">
                 Groove Infra
               </span>
@@ -35,20 +39,25 @@ export default function Footer() {
               Premium interior construction for retail, commercial, hospitality, and residential
               projects across India since 2016.
             </p>
-            <div className="flex flex-col gap-3 text-sm text-secondary">
-              <a href="mailto:contactus@grooveinfra.in" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
-                <Mail size={13} /> contactus@grooveinfra.in
-              </a>
-              <a href="tel:+918800385198" className="flex items-center gap-2 hover:text-accent-gold transition-colors">
-                <Phone size={13} /> +91 88003 85198
+            <div className="flex flex-col text-sm text-secondary">
+              {CONTACT_EMAIL && (
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="inline-flex min-h-11 items-center gap-2 transition-colors hover:text-accent-gold"
+                >
+                  <Mail size={13} aria-hidden="true" /> {CONTACT_EMAIL}
+                </a>
+              )}
+              <a href="tel:+918800385198" className="inline-flex min-h-11 items-center gap-2 transition-colors hover:text-accent-gold">
+                <Phone size={13} aria-hidden="true" /> +91 88003 85198
               </a>
               <a
                 href="https://www.google.com/maps/search/?api=1&query=Plot+No-416%2F2%2C+Metro+Pillar+No-127%2C+Mehrauli-Gurgaon+Rd%2C+Ghitorni%2C+New+Delhi%2C+Delhi+110030"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-2 hover:text-accent-gold transition-colors"
+                className="inline-flex min-h-11 items-start gap-2 py-2 transition-colors hover:text-accent-gold"
               >
-                <MapPin size={13} className="flex-shrink-0 mt-0.5" />
+                <MapPin size={13} aria-hidden="true" className="mt-0.5 flex-shrink-0" />
                 <span>
                   Plot No-416/2, Metro Pillar No-127, Mehrauli-Gurgaon Rd, Ghitorni, New Delhi, Delhi
                   110030
@@ -63,12 +72,12 @@ export default function Footer() {
               <h3 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-5">
                 {title}
               </h3>
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col">
                 {links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-secondary hover:text-primary transition-colors duration-200"
+                      className="inline-flex min-h-11 items-center text-sm text-secondary transition-colors duration-200 hover:text-primary"
                     >
                       {link.label}
                     </Link>
@@ -88,7 +97,7 @@ export default function Footer() {
             </p>
             <Link
               href="/contact"
-              className="inline-flex items-center px-6 py-2.5 rounded-full bg-groove-gold text-black text-xs font-semibold tracking-wider uppercase hover:shadow-gold transition-all duration-300 hover:scale-105"
+              className="inline-flex min-h-11 items-center rounded-full px-6 bg-groove-gold text-black text-xs font-semibold tracking-wider uppercase hover:shadow-gold transition-all duration-300 hover:scale-105"
             >
               Enquire
             </Link>
@@ -99,10 +108,16 @@ export default function Footer() {
         <div className="py-6 border-t border-subtle flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-custom">
           <span>© {new Date().getFullYear()} Groove Infra. All rights reserved.</span>
           <nav aria-label="Legal" className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-primary transition-colors duration-200">
+            <Link
+              href="/privacy"
+              className="inline-flex min-h-11 items-center transition-colors duration-200 hover:text-primary"
+            >
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-primary transition-colors duration-200">
+            <Link
+              href="/terms"
+              className="inline-flex min-h-11 items-center transition-colors duration-200 hover:text-primary"
+            >
               Terms &amp; Conditions
             </Link>
           </nav>

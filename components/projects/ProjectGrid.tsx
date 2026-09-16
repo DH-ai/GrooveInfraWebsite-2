@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import ProjectCard from './ProjectCard'
 import ProjectFilter from './ProjectFilter'
 import type { Project } from '@/types/project'
+import { formatCategory } from '@/lib/utils'
 
 interface ProjectGridProps {
   projects: Project[]
@@ -22,6 +23,15 @@ export default function ProjectGrid({ projects, categories }: ProjectGridProps) 
       <div className="mb-10">
         <ProjectFilter categories={categories} active={active} onChange={setActive} />
       </div>
+
+      {/*
+        Choosing a filter silently replaces the grid, which a screen-reader user
+        has no way of noticing. This announces the new result count instead.
+      */}
+      <p aria-live="polite" className="sr-only">
+        {filtered.length === 1 ? '1 project' : `${filtered.length} projects`} shown
+        {active === 'all' ? '' : ` in ${formatCategory(active)}`}.
+      </p>
 
       <motion.div
         layout

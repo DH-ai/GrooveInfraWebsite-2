@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Pause, Play } from 'lucide-react'
 import type { Project } from '@/types/project'
 import { getCoverImage } from '@/lib/utils'
 import AnimatedSection from '@/components/ui/AnimatedSection'
@@ -11,16 +13,19 @@ interface PhotoCarouselProps {
   projects: Project[]
 }
 
+type CarouselItem = { src: string; href: string; title: string; category: string }
+
 function CarouselRow({
   items,
   direction,
   speed,
+  running,
 }: {
-  items: { src: string; href: string; title: string; category: string }[]
+  items: CarouselItem[]
   direction: 'left' | 'right'
   speed: number
+  running: boolean
 }) {
-  const doubled = [...items, ...items]
   const xStart = direction === 'left' ? '0%' : '-50%'
   const xEnd = direction === 'left' ? '-50%' : '0%'
 
@@ -28,45 +33,62 @@ function CarouselRow({
     <div className="overflow-hidden">
       <motion.div
         className="flex gap-4 w-max"
-        animate={{ x: [xStart, xEnd] }}
-        transition={{ duration: speed, repeat: Infinity, ease: 'linear' }}
+        animate={running ? { x: [xStart, xEnd] } : { x: xStart }}
+        transition={running ? { duration: speed, repeat: Infinity, ease: 'linear' } : { duration: 0 }}
       >
-        {doubled.map((item, i) => (
-          <Link
-            key={`${item.href}-${i}`}
-            href={item.href}
-            className="group relative flex-shrink-0 w-72 h-52 sm:w-80 sm:h-60 rounded-xl overflow-hidden"
-          >
-            <motion.div
-              className="absolute inset-0"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.4 }}
+        {/*
+          The track is the item list twice over so it can loop seamlessly. Only
+          the first copy is real content: the clone is hidden from assistive tech
+          and removed from the tab order, otherwise every project in the strip is
+          announced and tabbed through twice.
+        */}
+        {[items, items].map((copy, copyIndex) =>
+          copy.map((item) => (
+            <Link
+              key={`${copyIndex}-${item.href}`}
+              href={item.href}
+              tabIndex={copyIndex === 0 ? undefined : -1}
+              aria-hidden={copyIndex === 0 ? undefined : true}
+              className="group relative flex-shrink-0 w-72 h-52 sm:w-80 sm:h-60 rounded-xl overflow-hidden"
             >
-              <Image
-                src={item.src}
-                alt={item.title}
-                fill
-                className="object-cover"
-                sizes="320px"
-              />
-            </motion.div>
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-400 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100">
-              <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-white/60 mb-1">
-                {item.category}
+              <motion.span
+                className="absolute inset-0 block"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Image
+                  src={item.src}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                  sizes="320px"
+                />
+              </motion.span>
+              <span className="absolute inset-0 flex flex-col justify-end bg-black/0 p-4 opacity-0 transition-colors duration-300 group-hover:bg-black/50 group-hover:opacity-100 group-focus-visible:bg-black/50 group-focus-visible:opacity-100">
+                <span className="mb-1 text-[10px] font-medium uppercase tracking-[0.15em] text-white/80">
+                  {item.category}
+                </span>
+                <span className="font-display text-base font-semibold leading-tight text-white">
+                  {item.title}
+                </span>
               </span>
-              <span className="text-white font-display text-base font-semibold leading-tight">
-                {item.title}
-              </span>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))
+        )}
       </motion.div>
     </div>
   )
 }
 
 export default function PhotoCarousel({ projects }: PhotoCarouselProps) {
+  const [paused, setPaused] = useState(false)
+  const reduceMotion = useReducedMotion()
+
+  // WCAG 2.2.2 requires a way to stop any motion that starts on its own and runs
+  // for more than five seconds; this strip runs indefinitely. Reduced-motion
+  // users get it stopped without having to ask.
+  const running = !paused && !reduceMotion
+
   const items = projects
     .map((p) => {
       const src = getCoverImage(p)
@@ -100,19 +122,28 @@ export default function PhotoCarousel({ projects }: PhotoCarouselProps) {
               Spaces We&apos;ve Crafted
             </h2>
           </div>
-          <p className="text-secondary text-sm max-w-xs sm:pb-1">
-            Click any image to explore the full project gallery and client story.
-          </p>
+          <div className="max-w-xs sm:pb-1">
+            <p className="text-secondary text-sm">
+              Select any image to explore the full project gallery and client story.
+            </p>
+            <button
+              type="button"
+              onClick={() => setPaused((prev) => !prev)}
+              aria-pressed={paused}
+              className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full border border-strong px-4 text-xs font-medium tracking-wide text-secondary transition-colors hover:border-groove-gold/60 hover:text-primary"
+            >
+              {paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
+              {paused ? 'Resume scrolling' : 'Pause scrolling'}
+            </button>
+          </div>
         </AnimatedSection>
       </div>
 
-      {/* Row 1 → left */}
       <div className="mb-4">
-        <CarouselRow items={row1} direction="left" speed={38} />
+        <CarouselRow items={row1} direction="left" speed={38} running={running} />
       </div>
 
-      {/* Row 2 → right */}
-      <CarouselRow items={row2} direction="right" speed={44} />
+      <CarouselRow items={row2} direction="right" speed={44} running={running} />
     </section>
   )
 }

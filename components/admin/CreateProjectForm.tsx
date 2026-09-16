@@ -130,7 +130,7 @@ export default function CreateProjectForm() {
       className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
     >
       {errorMsg && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           {errorMsg}
         </div>
       )}
@@ -147,7 +147,7 @@ export default function CreateProjectForm() {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder="Project title"
           />
         </label>
@@ -156,7 +156,7 @@ export default function CreateProjectForm() {
           <input
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder={computedSlug || 'bata-india-office'}
           />
         </label>
@@ -165,7 +165,7 @@ export default function CreateProjectForm() {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           >
             <option value="">Select category (optional)</option>
             {CATEGORIES.map((cat) => (
@@ -178,7 +178,7 @@ export default function CreateProjectForm() {
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder="Gurgaon, Haryana"
           />
         </label>
@@ -190,7 +190,7 @@ export default function CreateProjectForm() {
             max="2100"
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder="2025"
           />
         </label>
@@ -199,7 +199,7 @@ export default function CreateProjectForm() {
           <input
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder="Bata India LTD"
           />
         </label>
@@ -208,7 +208,7 @@ export default function CreateProjectForm() {
           <input
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder="25 weeks"
           />
         </label>
@@ -217,7 +217,7 @@ export default function CreateProjectForm() {
           <input
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
             placeholder="10,000 sq ft"
           />
         </label>
@@ -230,7 +230,7 @@ export default function CreateProjectForm() {
             rows={2}
             value={basicDescription}
             onChange={(e) => setBasicDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className="rounded-xl border border-strong bg-base px-4 py-3 text-primary"
             placeholder="Short summary used on cards."
           />
         </label>
@@ -240,7 +240,7 @@ export default function CreateProjectForm() {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className="rounded-xl border border-strong bg-base px-4 py-3 text-primary"
             placeholder="Full project description for the detail page."
           />
         </label>

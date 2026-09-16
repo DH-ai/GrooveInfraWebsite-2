@@ -76,40 +76,52 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-center gap-6 mt-10">
+          <div className="mt-10 flex items-center justify-center gap-4">
             <button
+              type="button"
               onClick={prev}
-              className="w-10 h-10 rounded-full border border-subtle flex items-center justify-center text-secondary hover:text-primary hover:border-groove-gold/50 transition-all duration-200"
-              aria-label="Previous"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-strong text-secondary transition-colors duration-200 hover:border-groove-gold/60 hover:text-primary"
+              aria-label="Previous testimonial"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} aria-hidden="true" />
             </button>
 
-            {/* Dots */}
-            <div className="flex gap-1.5">
-              {testimonials.map((_, i) => (
+            {/*
+              The visible dot stays small; the button around it is a full-size hit
+              area. Previously the target was the 6px dot itself.
+            */}
+            <div className="flex">
+              {testimonials.map((t, i) => (
                 <button
-                  key={i}
+                  key={t.client}
+                  type="button"
                   onClick={() => {
                     setDirection(i > index ? 1 : -1)
                     setIndex(i)
                   }}
-                  className={`rounded-full transition-all duration-300 ${
-                    i === index
-                      ? 'w-6 h-1.5 bg-groove-gold'
-                      : 'w-1.5 h-1.5 bg-subtle hover:opacity-60'
-                  }`}
-                  aria-label={`Testimonial ${i + 1}`}
-                />
+                  aria-current={i === index}
+                  aria-label={`Show testimonial ${i + 1} of ${testimonials.length}: ${t.client}`}
+                  className="group flex h-11 w-6 items-center justify-center"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`rounded-full transition-all duration-300 ${
+                      i === index
+                        ? 'h-1.5 w-5 bg-groove-gold'
+                        : 'h-1.5 w-1.5 bg-subtle group-hover:bg-groove-gold/50'
+                    }`}
+                  />
+                </button>
               ))}
             </div>
 
             <button
+              type="button"
               onClick={next}
-              className="w-10 h-10 rounded-full border border-subtle flex items-center justify-center text-secondary hover:text-primary hover:border-groove-gold/50 transition-all duration-200"
-              aria-label="Next"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-strong text-secondary transition-colors duration-200 hover:border-groove-gold/60 hover:text-primary"
+              aria-label="Next testimonial"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} aria-hidden="true" />
             </button>
           </div>
         </div>

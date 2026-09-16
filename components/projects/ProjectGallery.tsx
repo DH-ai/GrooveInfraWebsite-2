@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
+import { useBackdropClose, useDialog } from '@/lib/hooks/use-dialog'
 
 interface ProjectGalleryProps {
   images: string[]
@@ -12,123 +13,172 @@ interface ProjectGalleryProps {
 
 export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
   const [lightbox, setLightbox] = useState<number | null>(null)
+  const isOpen = lightbox !== null
+
+  const closeLightbox = useCallback(() => setLightbox(null), [])
+  const dialogRef = useDialog({ open: isOpen, onClose: closeLightbox })
+  const onBackdropClick = useBackdropClose(closeLightbox)
+
+  const step = useCallback(
+    (delta: number) => {
+      setLightbox((current) =>
+        current === null ? null : (current + delta + images.length) % images.length
+      )
+    },
+    [images.length]
+  )
+
+  // Arrow keys are the expected way to move through a set of images once the
+  // dialog has focus; without them the only way through the gallery is to tab to
+  // the previous/next buttons for every single image.
+  useEffect(() => {
+    if (!isOpen) return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        step(-1)
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        step(1)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, step])
 
   if (!images.length) return null
 
-  function openLightbox(i: number) {
-    setLightbox(i)
-  }
-
-  function closeLightbox() {
-    setLightbox(null)
-  }
-
-  function prev() {
-    if (lightbox === null) return
-    setLightbox((lightbox - 1 + images.length) % images.length)
-  }
-
-  function next() {
-    if (lightbox === null) return
-    setLightbox((lightbox + 1) % images.length)
-  }
+  const controlClass =
+    'inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20'
 
   return (
     <>
-      {/* Gallery grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 list-none">
         {images.map((src, i) => (
-          <motion.button
-            key={i}
-            onClick={() => openLightbox(i)}
-            className={`group relative overflow-hidden rounded-xl bg-surface-2 cursor-zoom-in ${
-              i === 0 ? 'col-span-2 md:col-span-2 aspect-[16/9]' : 'aspect-square'
-            }`}
-            whileHover={{ scale: 1.01 }}
-            transition={{ duration: 0.25 }}
+          <li
+            key={src}
+            className={i === 0 ? 'col-span-2 md:col-span-2' : undefined}
           >
-            <motion.div
-              className="absolute inset-0"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.4 }}
+            <motion.button
+              type="button"
+              onClick={() => setLightbox(i)}
+              className={`group relative block w-full overflow-hidden rounded-xl bg-surface-2 cursor-zoom-in ${
+                i === 0 ? 'aspect-[16/9]' : 'aspect-square'
+              }`}
+              whileHover={{ scale: 1.01 }}
+              transition={{ duration: 0.25 }}
+              aria-label={`Enlarge image ${i + 1} of ${images.length}`}
             >
-              <Image
-                src={src}
-                alt={`${title} — image ${i + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 33vw"
-              />
-            </motion.div>
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-              <ZoomIn
-                size={20}
-                className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              />
-            </div>
-          </motion.button>
+              <motion.span
+                className="absolute inset-0 block"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Image
+                  src={src}
+                  alt={`${title} — image ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 33vw"
+                />
+              </motion.span>
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover:bg-black/20"
+              >
+                <ZoomIn
+                  size={20}
+                  className="text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                />
+              </span>
+            </motion.button>
+          </li>
         ))}
-      </div>
+      </ul>
 
-      {/* Lightbox */}
       <AnimatePresence>
-        {lightbox !== null && (
+        {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center"
-            onClick={closeLightbox}
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm"
+            onClick={onBackdropClick}
           >
-            {/* Close */}
-            <button
-              onClick={closeLightbox}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
+            <div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${title} — image gallery`}
+              tabIndex={-1}
+              className="relative flex h-full w-full items-center justify-center"
             >
-              <X size={18} />
-            </button>
-
-            {/* Counter */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/50 text-sm z-10">
-              {lightbox + 1} / {images.length}
-            </div>
-
-            {/* Navigation */}
-            <button
-              onClick={(e) => { e.stopPropagation(); prev() }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); next() }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
-            >
-              <ChevronRight size={20} />
-            </button>
-
-            {/* Image */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={lightbox}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
-                transition={{ duration: 0.25 }}
-                className="relative w-full max-w-4xl mx-6 aspect-video"
-                onClick={(e) => e.stopPropagation()}
+              <button
+                type="button"
+                onClick={closeLightbox}
+                className={`absolute right-4 top-4 z-10 ${controlClass}`}
+                aria-label="Close gallery"
               >
-                <Image
-                  src={images[lightbox]}
-                  alt={`${title} — ${lightbox + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 1200px) 100vw, 900px"
-                  priority
-                />
-              </motion.div>
-            </AnimatePresence>
+                <X size={18} aria-hidden="true" />
+              </button>
+
+              {/*
+                Politely announced so a screen reader user hears which image the
+                gallery moved to after an arrow key, rather than having the
+                picture swapped underneath them in silence.
+              */}
+              <p
+                aria-live="polite"
+                aria-atomic="true"
+                className="absolute left-1/2 top-6 z-10 -translate-x-1/2 text-sm text-white/70"
+              >
+                Image {lightbox + 1} of {images.length}
+              </p>
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => step(-1)}
+                    className={`absolute left-4 top-1/2 z-10 -translate-y-1/2 ${controlClass}`}
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft size={20} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => step(1)}
+                    className={`absolute right-4 top-1/2 z-10 -translate-y-1/2 ${controlClass}`}
+                    aria-label="Next image"
+                  >
+                    <ChevronRight size={20} aria-hidden="true" />
+                  </button>
+                </>
+              )}
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={lightbox}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 0.25 }}
+                  className="relative mx-6 aspect-video w-full max-w-4xl"
+                >
+                  <Image
+                    src={images[lightbox]}
+                    alt={`${title} — image ${lightbox + 1} of ${images.length}`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1200px) 100vw, 900px"
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

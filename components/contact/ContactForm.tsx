@@ -13,10 +13,15 @@ type Status = 'idle' | 'loading' | 'success' | 'error'
 
 type FieldErrors = Partial<Record<'name' | 'email' | 'message', string>>
 
-const inputClass =
-  'w-full px-4 py-3 rounded-xl bg-surface-2 border border-subtle text-primary placeholder:text-muted-custom text-sm focus:outline-none focus:border-groove-gold/50 transition-colors'
-const errorInputClass =
-  'w-full px-4 py-3 rounded-xl bg-surface-2 border border-red-500/60 text-primary placeholder:text-muted-custom text-sm focus:outline-none transition-colors'
+// The border is what makes these controls identifiable as controls, so it uses
+// border-strong to clear WCAG 1.4.11's 3:1 for non-text UI; border-subtle sits at
+// 1.3:1 against the page and reads as no border at all. The native focus outline
+// is deliberately not suppressed — a 50%-opacity border change was the only focus
+// signal before, which is neither thick enough nor high-contrast enough to see.
+const baseInputClass =
+  'w-full px-4 py-3 rounded-xl bg-surface-2 text-primary placeholder:text-muted-custom text-sm transition-colors'
+const inputClass = `${baseInputClass} border border-strong hover:border-groove-gold/50`
+const errorInputClass = `${baseInputClass} border border-red-400`
 
 // Deliberately permissive: the server is the authority on validity, this only
 // catches obvious typos before a round trip.
@@ -65,6 +70,13 @@ export default function ContactForm() {
     if (Object.keys(errors).length > 0) {
       setStatus('idle')
       setErrorMessage(null)
+      // Without this the message appears next to a field that may be off-screen
+      // and the keyboard user is left on the submit button with no indication of
+      // what went wrong.
+      const firstInvalid = (['name', 'email', 'message'] as const).find((field) => errors[field])
+      if (firstInvalid) {
+        form.querySelector<HTMLElement>(`#${firstInvalid}`)?.focus()
+      }
       return
     }
 
@@ -116,13 +128,20 @@ export default function ContactForm() {
   if (status === 'success') {
     return (
       <motion.div
+        // Submitting removes the form, and with it the button that had focus.
+        // Focus would otherwise fall back to <body>, so the confirmation panel
+        // takes it and is announced as a status region.
+        ref={(node) => node?.focus()}
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         role="status"
-        aria-live="polite"
         className="flex flex-col items-center justify-center text-center py-20"
       >
-        <div className="w-16 h-16 rounded-full bg-groove-gold/10 flex items-center justify-center mb-6">
+        <div
+          aria-hidden="true"
+          className="w-16 h-16 rounded-full bg-groove-gold/10 flex items-center justify-center mb-6"
+        >
           <CheckCircle size={28} className="text-accent-gold" />
         </div>
         <h2 className="font-display text-2xl font-bold text-primary mb-2">Message Sent!</h2>
@@ -132,7 +151,7 @@ export default function ContactForm() {
         <button
           type="button"
           onClick={resetForm}
-          className="mt-6 text-sm font-medium text-accent-gold underline underline-offset-4 hover:text-primary transition-colors"
+          className="mt-6 inline-flex min-h-11 items-center text-sm font-medium text-accent-gold underline underline-offset-4 transition-colors hover:text-primary"
         >
           Send another message
         </button>
@@ -169,7 +188,7 @@ export default function ContactForm() {
             className={fieldErrors.name ? errorInputClass : inputClass}
           />
           {fieldErrors.name && (
-            <p id="name-error" className="mt-1.5 text-xs text-red-500">
+            <p id="name-error" className="mt-1.5 text-xs text-red-400">
               {fieldErrors.name}
             </p>
           )}
@@ -208,7 +227,7 @@ export default function ContactForm() {
             className={fieldErrors.email ? errorInputClass : inputClass}
           />
           {fieldErrors.email && (
-            <p id="email-error" className="mt-1.5 text-xs text-red-500">
+            <p id="email-error" className="mt-1.5 text-xs text-red-400">
               {fieldErrors.email}
             </p>
           )}
@@ -239,10 +258,10 @@ export default function ContactForm() {
               type="button"
               aria-pressed={projectType === t}
               onClick={() => setProjectType(t === projectType ? '' : t)}
-              className={`px-4 py-2 rounded-full text-xs font-medium border transition-all duration-200 ${
+              className={`inline-flex min-h-11 items-center rounded-full border px-4 text-xs font-medium transition-colors duration-200 ${
                 projectType === t
-                  ? 'bg-groove-gold text-black border-groove-gold'
-                  : 'border-subtle text-secondary hover:border-groove-gold/40 hover:text-primary'
+                  ? 'border-groove-gold bg-groove-gold text-black'
+                  : 'border-strong text-secondary hover:border-groove-gold/60 hover:text-primary'
               }`}
             >
               {t}
@@ -273,7 +292,7 @@ export default function ContactForm() {
           {messageLength > MESSAGE_MAX * 0.8 && (
             <span
               className={`text-[11px] ${
-                messageLength > MESSAGE_MAX ? 'text-red-500' : 'text-muted-custom'
+                messageLength > MESSAGE_MAX ? 'text-red-400' : 'text-muted-custom'
               }`}
             >
               {messageLength.toLocaleString()} / {MESSAGE_MAX.toLocaleString()}
@@ -293,7 +312,7 @@ export default function ContactForm() {
           className={`${fieldErrors.message ? errorInputClass : inputClass} resize-none`}
         />
         {fieldErrors.message && (
-          <p id="message-error" className="mt-1.5 text-xs text-red-500">
+          <p id="message-error" className="mt-1.5 text-xs text-red-400">
             {fieldErrors.message}
           </p>
         )}
@@ -305,11 +324,12 @@ export default function ContactForm() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
+          // role="alert" already implies an assertive live region; pairing it
+          // with aria-live="polite" leaves the two contradicting each other.
           role="alert"
-          aria-live="polite"
-          className="flex items-start gap-2 text-sm text-red-500 bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3"
+          className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
         >
-          <AlertCircle size={15} className="mt-0.5 shrink-0" />
+          <AlertCircle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>
             {errorMessage ?? 'Something went wrong. Please try again or email us directly.'}
           </span>

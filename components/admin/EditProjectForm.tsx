@@ -137,7 +137,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
       className="rounded-3xl bg-surface-2 border border-subtle p-6 sm:p-8 space-y-8"
     >
       {errorMsg && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
           {errorMsg}
         </div>
       )}
@@ -154,7 +154,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -162,7 +162,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
           <input
             readOnly
             value={project.slug}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-muted-custom"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-muted-custom"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -171,7 +171,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             required
             value={category}
             onChange={(e) => setCategory(e.target.value as typeof category)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
@@ -184,7 +184,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             required
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -195,7 +195,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             max="2100"
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -204,7 +204,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             required
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -213,7 +213,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             required
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -221,7 +221,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
           <input
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="h-11 rounded-xl border border-subtle bg-base px-4 text-primary"
+            className="h-11 rounded-xl border border-strong bg-base px-4 text-primary"
           />
         </label>
       </div>
@@ -234,7 +234,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             rows={2}
             value={basicDescription}
             onChange={(e) => setBasicDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className="rounded-xl border border-strong bg-base px-4 py-3 text-primary"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-secondary">
@@ -244,7 +244,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="rounded-xl border border-subtle bg-base px-4 py-3 text-primary"
+            className="rounded-xl border border-strong bg-base px-4 py-3 text-primary"
           />
         </label>
       </div>
@@ -269,7 +269,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             type="checkbox"
             checked={removeCover}
             onChange={(e) => setRemoveCover(e.target.checked)}
-            className="h-4 w-4 rounded border-subtle bg-base"
+            className="h-4 w-4 rounded border-strong bg-base"
           />
           Remove cover image
         </label>
@@ -293,7 +293,7 @@ export default function EditProjectForm({ project }: EditProjectFormProps) {
             type="checkbox"
             checked={replaceGallery}
             onChange={(e) => setReplaceGallery(e.target.checked)}
-            className="h-4 w-4 rounded border-subtle bg-base"
+            className="h-4 w-4 rounded border-strong bg-base"
           />
           Replace existing gallery images
         </label>

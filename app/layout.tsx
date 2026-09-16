@@ -4,11 +4,12 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site'
 import './globals.css'
-import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import MotionProvider from '@/components/layout/MotionProvider'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import OrganizationSchema from '@/components/seo/OrganizationSchema'
 import ScrollProgress from '@/components/ui/ScrollProgress'
+import SkipLink from '@/components/ui/SkipLink'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -81,21 +82,27 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('groove-theme')||((window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light');if(t==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
-          }}
-        />
+        <noscript>
+          <style>{'[data-animated-section]{opacity:1!important;transform:none!important}'}</style>
+        </noscript>
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans bg-base text-primary`}>
-        <ThemeProvider>
+        <MotionProvider>
+          <SkipLink />
           <ScrollProgress />
           <Header />
-          <main>{children}</main>
+          {/*
+            tabIndex -1 makes this a valid target for the skip link: without it
+            the browser moves the indicator but not keyboard focus, so the next
+            Tab returns to the header the user was trying to bypass.
+          */}
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
           <Footer />
-        </ThemeProvider>
+        </MotionProvider>
         <OrganizationSchema />
         {/* Both are no-ops outside Vercel, so local development is unaffected. */}
         <Analytics />
