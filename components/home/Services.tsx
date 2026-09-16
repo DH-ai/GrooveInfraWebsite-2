@@ -59,7 +59,7 @@ export default function Services() {
             <AnimatedSection
               key={service.title}
               delay={Math.min(i * 0.06, 0.24)}
-              className="grid grid-cols-1 gap-x-12 gap-y-4 border-t border-subtle py-9 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]"
+              className="grid grid-cols-1 gap-x-12 gap-y-4 border-t border-subtle py-9 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]"
             >
               <dt>
                 <span
