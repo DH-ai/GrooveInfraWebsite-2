@@ -96,29 +96,36 @@ export default function AboutPage() {
       />
 
       {/*
-        Three drawn plates on a square grid, where three hotlinked picsum.photos
-        images used to sit under the alt text "Groove Infra at work". Once the
-        client's photography is in storage these become a selection from it.
+        Three drawn plates, where three hotlinked picsum.photos images used to sit
+        under the alt text "Groove Infra at work". Once the client's photography is
+        in storage these become a selection from it.
+
+        The frames carry a hairline. A plate is a deliberately recessive tonal
+        field — that is what lets one sit in a grid beside a real photograph
+        without shouting — and at this size, with no edge, it reads as a hole in
+        the page rather than as a frame waiting for an image. The caption says what
+        it is for the same reason: "Site work, Delhi NCR" described a photograph
+        that does not exist.
       */}
       <AnimatedSection className="mt-24">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div className="relative aspect-[4/3] overflow-hidden bg-surface sm:col-span-2 sm:aspect-[16/9]">
+          <div className="relative aspect-[4/3] overflow-hidden border border-subtle bg-surface sm:col-span-2 sm:aspect-[16/9]">
             <ProjectImage
               image={{ src: null, isPlaceholder: true, seed: 'about-lead' }}
               alt=""
               sizes="(max-width: 640px) 100vw, 66vw"
-              label="Site work, Delhi NCR"
+              label="Photography in progress"
             />
           </div>
           <div className="grid grid-cols-2 gap-6 sm:grid-cols-1">
-            <div className="relative aspect-[4/3] overflow-hidden bg-surface">
+            <div className="relative aspect-[4/3] overflow-hidden border border-subtle bg-surface">
               <ProjectImage
                 image={{ src: null, isPlaceholder: true, seed: 'about-detail' }}
                 alt=""
                 sizes="(max-width: 640px) 50vw, 33vw"
               />
             </div>
-            <div className="relative aspect-[4/3] overflow-hidden bg-surface">
+            <div className="relative aspect-[4/3] overflow-hidden border border-subtle bg-surface">
               <ProjectImage
                 image={{ src: null, isPlaceholder: true, seed: 'about-handover' }}
                 alt=""
