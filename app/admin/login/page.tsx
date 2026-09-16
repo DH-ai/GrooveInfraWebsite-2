@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export const metadata: Metadata = {
   title: 'Admin Login',
@@ -9,18 +9,26 @@ export const metadata: Metadata = {
 interface AdminLoginProps {
   searchParams?: {
     error?: string
+    next?: string
   }
 }
 
-export default function AdminLoginPage({ searchParams }: AdminLoginProps) {
-  const adminToken = process.env.ADMIN_TOKEN
-  const token = cookies().get('admin_auth')?.value
-  if (adminToken && token === adminToken) {
+/** Only same-origin relative paths, so `?next=` cannot be used as an open redirect. */
+function safeNextPath(value: string | undefined): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/admin'
+  return value
+}
+
+export default async function AdminLoginPage({ searchParams }: AdminLoginProps) {
+  const auth = await checkAdminAuth()
+  if (auth.ok) {
     redirect('/admin')
   }
 
   const error = searchParams?.error
   const isMissingConfig = error === 'missing-config'
+  const isExpired = error === 'expired'
+  const nextPath = safeNextPath(searchParams?.next)
 
   return (
     <div className="min-h-screen bg-base pt-24 pb-20">
@@ -33,11 +41,17 @@ export default function AdminLoginPage({ searchParams }: AdminLoginProps) {
         {isMissingConfig && (
           <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
             Admin environment variables are missing. Set ADMIN_USERNAME, ADMIN_PASSWORD, and
-            ADMIN_TOKEN in .env.local.
+            ADMIN_SESSION_SECRET (or ADMIN_TOKEN) in .env.local.
           </div>
         )}
 
-        {error && !isMissingConfig && (
+        {isExpired && (
+          <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Your session expired. Please sign in again.
+          </div>
+        )}
+
+        {error && !isMissingConfig && !isExpired && (
           <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
             Invalid username or password.
           </div>
@@ -48,6 +62,7 @@ export default function AdminLoginPage({ searchParams }: AdminLoginProps) {
           method="post"
           className="mt-6 rounded-3xl bg-surface-2 border border-subtle p-6 space-y-4"
         >
+          <input type="hidden" name="next" value={nextPath} />
           <label className="flex flex-col gap-2 text-sm text-secondary">
             Username
             <input
