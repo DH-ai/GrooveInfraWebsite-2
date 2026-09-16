@@ -1,22 +1,32 @@
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-base flex items-center justify-center px-4">
-      <div className="text-center">
-        <p className="font-display text-8xl font-bold text-accent-gold mb-4">404</p>
-        <h1 className="font-display text-3xl font-bold text-primary mb-3">Page Not Found</h1>
-        <p className="text-secondary mb-8 max-w-sm mx-auto">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
+    <div className="gutter flex min-h-screen items-center bg-base">
+      <div className="mx-auto w-full max-w-[100rem]">
+        <p aria-hidden="true" className="nums-tabular text-micro text-muted-custom">
+          404
         </p>
-        <Link
-          href="/"
-          className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold transition-all duration-300"
-        >
-          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
-          Back to Home
-        </Link>
+        <h1 className="mt-8 max-w-[20ch] font-display text-h1 font-semibold text-primary">
+          That page is not here.
+        </h1>
+        <p className="measure mt-8 text-body-lg text-secondary">
+          The address is wrong, or the page has moved. The work is all still in the portfolio.
+        </p>
+        <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <Link
+            href="/projects"
+            className="inline-flex min-h-11 items-center bg-groove-gold px-8 py-3.5 text-meta font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light"
+          >
+            View the portfolio
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center border-b border-strong pb-1 text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:border-groove-gold hover:text-accent-gold"
+          >
+            Back to home
+          </Link>
+        </div>
       </div>
     </div>
   )
