@@ -75,7 +75,7 @@ export default function Footer() {
                 href={MAP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-2 inline-flex min-h-11 items-center border-b border-subtle text-meta text-secondary transition-colors hover:border-groove-gold hover:text-primary"
+                className="mt-2 inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-subtle text-meta text-secondary transition-colors hover:decoration-groove-gold hover:text-primary"
               >
                 Open in maps
               </a>

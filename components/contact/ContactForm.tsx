@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import TurnstileWidget from './TurnstileWidget'
 
 const projectTypes = ['Retail', 'Hospitality & Clubs', 'Commercial', 'Residential', 'Civil', 'Other']
@@ -18,10 +18,16 @@ type FieldErrors = Partial<Record<'name' | 'email' | 'message', string>>
 // 1.3:1 against the page and reads as no border at all. The native focus outline
 // is deliberately not suppressed — a 50%-opacity border change was the only focus
 // signal before, which is neither thick enough nor high-contrast enough to see.
+//
+// Square, and set at body size. Rounded corners were the only thing on the page
+// with a radius, and a 14px input is small enough that iOS zooms the viewport
+// when it takes focus.
 const baseInputClass =
-  'w-full px-4 py-3 rounded-xl bg-surface-2 text-primary placeholder:text-muted-custom text-sm transition-colors'
-const inputClass = `${baseInputClass} border border-strong hover:border-groove-gold/50`
+  'mt-3 w-full bg-surface px-4 py-3.5 text-body text-primary placeholder:text-muted-custom transition-colors'
+const inputClass = `${baseInputClass} border border-strong hover:border-groove-gold/60`
 const errorInputClass = `${baseInputClass} border border-red-400`
+
+const labelClass = 'block text-micro uppercase tracking-eyebrow text-muted-custom'
 
 // Deliberately permissive: the server is the authority on validity, this only
 // catches obvious typos before a round trip.
@@ -136,31 +142,28 @@ export default function ContactForm() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         role="status"
-        className="flex flex-col items-center justify-center text-center py-20"
+        className="border-t border-strong py-14"
       >
-        <div
-          aria-hidden="true"
-          className="w-16 h-16 rounded-full bg-groove-gold/10 flex items-center justify-center mb-6"
-        >
-          <CheckCircle size={28} className="text-accent-gold" />
-        </div>
-        <h2 className="font-display text-2xl font-bold text-primary mb-2">Message Sent!</h2>
-        <p className="text-secondary max-w-xs">
-          We&apos;ll review your request and get back to you within 24 business hours.
+        <p className="text-micro uppercase tracking-eyebrow text-accent-gold">Received</p>
+        <h2 className="mt-6 max-w-[24ch] font-display text-h3 font-semibold text-primary">
+          Your enquiry is with us.
+        </h2>
+        <p className="measure mt-5 text-body text-secondary">
+          We read every one. Expect a reply within 24 business hours — sooner if the date is tight.
         </p>
         <button
           type="button"
           onClick={resetForm}
-          className="mt-6 inline-flex min-h-11 items-center text-sm font-medium text-accent-gold underline underline-offset-4 transition-colors hover:text-primary"
+          className="mt-8 inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:decoration-groove-gold hover:text-accent-gold"
         >
-          Send another message
+          Send another
         </button>
       </motion.div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
+    <form onSubmit={handleSubmit} noValidate className="space-y-8">
       {/*
         Honeypot. Hidden from sight and from assistive technology, and skipped in
         the tab order, so only an automated client will ever fill it in.
@@ -170,10 +173,10 @@ export default function ContactForm() {
         <input id="company_website" name="botField" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className="block text-xs font-medium text-secondary mb-2">
-            Your Name *
+          <label htmlFor="name" className={labelClass}>
+            Your name *
           </label>
           <input
             id="name"
@@ -188,14 +191,14 @@ export default function ContactForm() {
             className={fieldErrors.name ? errorInputClass : inputClass}
           />
           {fieldErrors.name && (
-            <p id="name-error" className="mt-1.5 text-xs text-red-400">
+            <p id="name-error" className="mt-2 text-meta text-red-400">
               {fieldErrors.name}
             </p>
           )}
         </div>
         <div>
-          <label htmlFor="company" className="block text-xs font-medium text-secondary mb-2">
-            Company / Brand
+          <label htmlFor="company" className={labelClass}>
+            Company or brand
           </label>
           <input
             id="company"
@@ -209,9 +212,9 @@ export default function ContactForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         <div>
-          <label htmlFor="email" className="block text-xs font-medium text-secondary mb-2">
+          <label htmlFor="email" className={labelClass}>
             Email *
           </label>
           <input
@@ -227,13 +230,13 @@ export default function ContactForm() {
             className={fieldErrors.email ? errorInputClass : inputClass}
           />
           {fieldErrors.email && (
-            <p id="email-error" className="mt-1.5 text-xs text-red-400">
+            <p id="email-error" className="mt-2 text-meta text-red-400">
               {fieldErrors.email}
             </p>
           )}
         </div>
         <div>
-          <label htmlFor="phone" className="block text-xs font-medium text-secondary mb-2">
+          <label htmlFor="phone" className={labelClass}>
             Phone
           </label>
           <input
@@ -248,19 +251,24 @@ export default function ContactForm() {
         </div>
       </div>
 
-      {/* Project type pills */}
       <fieldset>
-        <legend className="block text-xs font-medium text-secondary mb-2">Project Type</legend>
-        <div className="flex flex-wrap gap-2">
+        <legend className={labelClass}>Project type</legend>
+        <div className="mt-3 flex flex-wrap gap-2">
           {projectTypes.map((t) => (
             <button
               key={t}
               type="button"
               aria-pressed={projectType === t}
               onClick={() => setProjectType(t === projectType ? '' : t)}
-              className={`inline-flex min-h-11 items-center rounded-full border px-4 text-xs font-medium transition-colors duration-200 ${
+              /*
+               * Square, and filled when chosen. The underline the portfolio
+               * filter uses is right for a control that acts on the page
+               * immediately; in a form, a selection that has to survive until
+               * submit needs to be unmistakable.
+               */
+              className={`inline-flex min-h-11 items-center border px-4 text-meta transition-colors duration-200 ${
                 projectType === t
-                  ? 'border-groove-gold bg-groove-gold text-black'
+                  ? 'border-groove-gold bg-groove-gold font-medium text-black'
                   : 'border-strong text-secondary hover:border-groove-gold/60 hover:text-primary'
               }`}
             >
@@ -271,8 +279,8 @@ export default function ContactForm() {
       </fieldset>
 
       <div>
-        <label htmlFor="location" className="block text-xs font-medium text-secondary mb-2">
-          City / Location
+        <label htmlFor="location" className={labelClass}>
+          City or location
         </label>
         <input
           id="location"
@@ -285,13 +293,13 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between mb-2">
-          <label htmlFor="message" className="block text-xs font-medium text-secondary">
-            Tell Us About Your Project *
+        <div className="flex items-baseline justify-between gap-4">
+          <label htmlFor="message" className={labelClass}>
+            The project *
           </label>
           {messageLength > MESSAGE_MAX * 0.8 && (
             <span
-              className={`text-[11px] ${
+              className={`nums-tabular text-micro ${
                 messageLength > MESSAGE_MAX ? 'text-red-400' : 'text-muted-custom'
               }`}
             >
@@ -312,7 +320,7 @@ export default function ContactForm() {
           className={`${fieldErrors.message ? errorInputClass : inputClass} resize-none`}
         />
         {fieldErrors.message && (
-          <p id="message-error" className="mt-1.5 text-xs text-red-400">
+          <p id="message-error" className="mt-2 text-meta text-red-400">
             {fieldErrors.message}
           </p>
         )}
@@ -327,30 +335,32 @@ export default function ContactForm() {
           // role="alert" already implies an assertive live region; pairing it
           // with aria-live="polite" leaves the two contradicting each other.
           role="alert"
-          className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          className="flex items-start gap-3 border-l-2 border-red-400 bg-red-500/10 px-4 py-3 text-body text-red-400"
         >
-          <AlertCircle size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+          <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>
             {errorMessage ?? 'Something went wrong. Please try again or email us directly.'}
           </span>
         </motion.div>
       )}
 
+      {/*
+        Square, and only as wide as it needs to be. A full-width pill that grew
+        on hover was the largest element on the page and read as a banner rather
+        than as the end of a form.
+      */}
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="group w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold transition-all duration-300 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
+        className="inline-flex min-h-11 items-center gap-3 bg-groove-gold px-8 py-3.5 text-meta font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === 'loading' ? (
           <>
-            <Loader2 size={14} className="animate-spin" />
-            Sending…
+            <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+            Sending
           </>
         ) : (
-          <>
-            Send Message
-            <Send size={14} className="transition-transform group-hover:translate-x-0.5" />
-          </>
+          'Send enquiry'
         )}
       </button>
     </form>

@@ -1,32 +1,58 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, MapPin } from 'lucide-react'
 import AnimatedSection from '@/components/ui/AnimatedSection'
+import PageHeader from '@/components/ui/PageHeader'
+import PageShell from '@/components/ui/PageShell'
 import ProjectImage from '@/components/ui/ProjectImage'
+import SectionHead from '@/components/ui/SectionHead'
 
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Groove Infra — 11+ years of building premium interior spaces across India. Our story, philosophy, team, and working process.',
+    'Groove Infra has been building interiors across India since 2016. How the firm works, who runs it, and the eight stages every project passes through.',
   // Required on every page: without it the root layout's canonical is inherited,
   // so each page would declare itself canonical at the homepage URL.
   alternates: { canonical: '/about' },
 }
 
-const workingPhases = [
-  { num: '01', title: 'Discovery & Planning', desc: 'Deep-dive into your brief, site, brand, and budget to establish a crystal-clear project roadmap.' },
-  { num: '02', title: 'Information', desc: 'Site surveys, technical documentation, vendor consultations, and feasibility assessments.' },
-  { num: '03', title: 'Architecture', desc: 'Space planning, structural coordination, and detailed layout development with your team.' },
-  { num: '04', title: 'Creativity', desc: 'Concept design, material palettes, mood boards, and 3D visualisations for your sign-off.' },
-  { num: '05', title: 'Production', desc: 'Procurement, fabrication, and pre-assembly of all custom elements at our production units.' },
-  { num: '06', title: 'Technology', desc: 'AV, smart home, lighting control, and MEP integration coordinated with specialist consultants.' },
-  { num: '07', title: 'Deployment', desc: 'On-site construction, quality checks at every milestone, and snagging before handover.' },
-  { num: '08', title: 'User Experience', desc: 'Post-handover review, client training on installed systems.' },
+const stages = [
+  {
+    title: 'Discovery and planning',
+    desc: 'Deep-dive into your brief, site, brand and budget to establish a clear project roadmap.',
+  },
+  {
+    title: 'Information',
+    desc: 'Site surveys, technical documentation, vendor consultations and feasibility assessments.',
+  },
+  {
+    title: 'Architecture',
+    desc: 'Space planning, structural coordination and detailed layout development with your team.',
+  },
+  {
+    title: 'Creativity',
+    desc: 'Concept design, material palettes, mood boards and 3D visualisations for your sign-off.',
+  },
+  {
+    title: 'Production',
+    desc: 'Procurement, fabrication and pre-assembly of every custom element at our production units.',
+  },
+  {
+    title: 'Technology',
+    desc: 'AV, smart home, lighting control and MEP integration, coordinated with specialist consultants.',
+  },
+  {
+    title: 'Deployment',
+    desc: 'On-site construction, quality checks at every milestone, and snagging before handover.',
+  },
+  {
+    title: 'User experience',
+    desc: 'Post-handover review and client training on the systems we installed.',
+  },
 ]
 
 /**
- * `image` is a path under `public/team/`. Leave it unset and the card renders a
+ * `image` is a path under `public/team/`. Leave it unset and the entry renders a
  * monogram instead.
  *
  * The founder's portrait was previously hotlinked from media.licdn.com. Those
@@ -45,12 +71,10 @@ interface TeamMember {
 const team: TeamMember[] = [
   {
     name: 'Abhay Chaturvedi',
-    role: 'Founder & CEO',
-    bio: 'A Project Management Professional having more than 18 years of experience in Commercial interior fit outs , business development, strategic management. Worked with renowned organizations like Bose India Ltd., LG India Ltd. Amtek Auto Ltd. etc.  Handled various projects such as Corporate offices, Warehouse, Data centers, IT parks, Hospitality & Retail projects. Well conversant with Team Building activities including vendor selection, Project Planning, Negotiation, Budgeting, MIS etc',
+    role: 'Founder and CEO',
+    bio: 'A Project Management Professional with more than 18 years in commercial interior fit-outs, business development and strategic management. Previously with Bose India, LG India and Amtek Auto. Has delivered corporate offices, warehouses, data centres, IT parks, hospitality and retail projects, and handles vendor selection, project planning, negotiation, budgeting and MIS.',
   },
 ]
-
-const serviceAreas = ['Delhi', 'Gurgaon', 'Noida']
 
 /** Falls back to initials so a member without a committed portrait still reads as deliberate. */
 function initials(name: string): string {
@@ -64,253 +88,183 @@ function initials(name: string): string {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-base pt-20">
-      {/* Page hero */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="max-w-3xl">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-groove-gold" />
-            <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-              Our Story
-            </span>
-          </div>
-          <h1 className="font-display text-5xl sm:text-6xl md:text-7xl font-bold text-primary leading-tight mb-6">
-            Built on Craft.
-            <br />
-            Driven by Vision.
-          </h1>
-          <p className="text-secondary text-xl leading-relaxed max-w-xl">
-            Since 2016, Groove Infra has been transforming empty spaces into experiences — retail
-            environments that sell, offices that inspire, hospitality spaces that linger in memory.
-          </p>
-        </AnimatedSection>
-      </section>
+    <PageShell>
+      <PageHeader
+        label="The firm"
+        title="One team, from setting out to handover."
+        intro="Groove Infra has built retail, workplace, hospitality and residential interiors across India since 2016. The trades are ours, the programme is ours, and the person who priced the job is the person who hands it over."
+      />
 
-      {/* Image collage */}
-      <section className="pb-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <AnimatedSection>
-          {/*
-            Three drawn plates, where three hotlinked picsum.photos images used to
-            sit under the alt text "Groove Infra at work". Once the client's
-            photography is in storage these become a curated selection from it.
-          */}
-          <div className="grid grid-cols-3 gap-3" style={{ height: '440px' }}>
-            <div className="col-span-2 relative rounded-2xl overflow-hidden">
+      {/*
+        Three drawn plates, where three hotlinked picsum.photos images used to sit
+        under the alt text "Groove Infra at work". Once the client's photography is
+        in storage these become a selection from it.
+
+        The frames carry a hairline. A plate is a deliberately recessive tonal
+        field — that is what lets one sit in a grid beside a real photograph
+        without shouting — and at this size, with no edge, it reads as a hole in
+        the page rather than as a frame waiting for an image. The caption says what
+        it is for the same reason: "Site work, Delhi NCR" described a photograph
+        that does not exist.
+      */}
+      <AnimatedSection className="mt-24">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="relative aspect-[4/3] overflow-hidden border border-subtle bg-surface sm:col-span-2 sm:aspect-[16/9]">
+            <ProjectImage
+              image={{ src: null, isPlaceholder: true, seed: 'about-lead' }}
+              alt=""
+              sizes="(max-width: 640px) 100vw, 66vw"
+              label="Photography in progress"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-1">
+            <div className="relative aspect-[4/3] overflow-hidden border border-subtle bg-surface">
               <ProjectImage
-                image={{ src: null, isPlaceholder: true, seed: 'about-lead' }}
+                image={{ src: null, isPlaceholder: true, seed: 'about-detail' }}
                 alt=""
-                sizes="66vw"
-                label="Site work, Delhi NCR"
+                sizes="(max-width: 640px) 50vw, 33vw"
               />
             </div>
-            <div className="flex flex-col gap-3">
-              <div className="relative flex-1 rounded-2xl overflow-hidden">
-                <ProjectImage
-                  image={{ src: null, isPlaceholder: true, seed: 'about-detail' }}
-                  alt=""
-                  sizes="33vw"
-                />
-              </div>
-              <div className="relative flex-1 rounded-2xl overflow-hidden">
-                <ProjectImage
-                  image={{ src: null, isPlaceholder: true, seed: 'about-handover' }}
-                  alt=""
-                  sizes="33vw"
-                />
-              </div>
+            <div className="relative aspect-[4/3] overflow-hidden border border-subtle bg-surface">
+              <ProjectImage
+                image={{ src: null, isPlaceholder: true, seed: 'about-handover' }}
+                alt=""
+                sizes="(max-width: 640px) 50vw, 33vw"
+              />
             </div>
           </div>
-        </AnimatedSection>
-      </section>
+        </div>
+      </AnimatedSection>
 
-      {/* Our Story */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+      {/*
+        The story and the position it leads to, side by side. Both used to carry
+        their own gold rule and caps label, which made two paragraphs of prose
+        look like two separate sections of the site.
+      */}
+      <section className="mt-28">
+        <SectionHead index="01" label="How we got here" aside="On site in Delhi, Gurgaon and Noida" />
+        <div className="mt-14 grid grid-cols-1 gap-x-16 gap-y-14 lg:grid-cols-2">
           <AnimatedSection>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-px w-12 bg-groove-gold" />
-              <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-                Our Story
-              </span>
-            </div>
-            <div className="space-y-5 text-secondary leading-relaxed text-lg">
+            <div className="measure space-y-6 text-body-lg text-secondary">
               <p>
-                
-                At Groove Infra, we believe great spaces do more than look good — they shape experiences.
-                Whether it&apos;s a retail outlet, workspace, hospitality project, 
-                or commercial interior, every detail influences how people i
-                nteract with the environment around them.
+                Great spaces do more than look good — they shape how people behave in them. Whether
+                it is a retail outlet, a workspace, a hospitality project or a commercial interior,
+                every detail changes how the room is used.
               </p>
               <p>
-                Over the years, we&apos;ve worked with businesses across India to deliver thoughtfully
-                designed and precisely executed spaces, built on a foundation of 
-                craftsmanship, reliability, and long-term trust.
+                We have spent the years since 2016 delivering those spaces for businesses across
+                India, on a foundation of craftsmanship, reliability and repeat work.
               </p>
             </div>
           </AnimatedSection>
 
-          {/* Philosophy */}
           <AnimatedSection delay={0.1}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-px w-12 bg-groove-gold" />
-              <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-                Our Philosophy
-              </span>
-            </div>
-            <h2 className="font-display text-3xl font-bold text-primary mb-5">
-              Where Interior Construction Meets Artistry
-            </h2>
-            <p className="text-secondary leading-relaxed mb-5">
-              We reject the notion that construction is purely functional. Every project is an
-              opportunity to create something that outlasts the brief — a space with genuine
-              character, embedded purpose, and long-term durability.
+            <h3 className="max-w-[24ch] font-display text-h3 font-semibold text-primary">
+              Construction is not only functional.
+            </h3>
+            <p className="measure mt-6 text-body text-secondary">
+              Every project is a chance to make something that outlasts its brief — a space with
+              character, purpose and the durability to still read well in ten years. That is the
+              standard we price to, and the reason our clients come back with their next site.
             </p>
-            
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Our Working — 8 phases */}
-      <section className="py-20 bg-surface border-y border-subtle">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection className="mb-14">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-12 bg-groove-gold" />
-              <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-                Our Working
-              </span>
-            </div>
-            <h2 className="font-display text-4xl sm:text-5xl font-bold text-primary max-w-xl">
-              How Every Project Comes Alive
-            </h2>
-          </AnimatedSection>
+      {/* Eight stages, as a numbered list rather than eight tiles on a grid. */}
+      <section className="mt-28">
+        <SectionHead
+          index="02"
+          label="How a project runs"
+          title="Eight stages, every time."
+          aside={`${stages.length} stages`}
+        />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-subtle">
-            {workingPhases.map((phase, i) => (
-              <AnimatedSection
-                key={phase.num}
-                delay={i * 0.05}
-                className="bg-surface p-7 group hover:bg-base transition-colors duration-300"
-              >
-                <div className="text-xs font-mono text-muted-custom mb-4">{phase.num}</div>
-                <h3 className="font-display font-semibold text-primary text-base mb-3 group-hover:text-accent-gold transition-colors duration-300">
-                  {phase.title}
-                </h3>
-                <p className="text-sm text-secondary leading-relaxed">{phase.desc}</p>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
+        <dl className="mt-14 border-b border-subtle">
+          {stages.map((stage, i) => (
+            <AnimatedSection
+              key={stage.title}
+              delay={Math.min(i * 0.04, 0.24)}
+              className="grid grid-cols-1 gap-x-12 gap-y-2 border-t border-subtle py-7 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]"
+            >
+              <dt className="flex items-baseline gap-5">
+                <span aria-hidden="true" className="nums-tabular text-micro text-muted-custom">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="font-display text-lede font-semibold text-primary">
+                  {stage.title}
+                </span>
+              </dt>
+              <dd className="measure text-body text-secondary lg:pl-0">{stage.desc}</dd>
+            </AnimatedSection>
+          ))}
+        </dl>
       </section>
 
-      {/* Our Team */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimatedSection className="mb-14">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-groove-gold" />
-            <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-              Our Team
-            </span>
-          </div>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-primary">
-            The People Behind the Work
-          </h2>
-        </AnimatedSection>
+      {/* Who runs it. One entry, so a three-column card grid left two holes. */}
+      <section className="mt-28">
+        <SectionHead index="03" label="Who runs it" title="The people accountable." />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {team.map((member, i) => (
-            <AnimatedSection key={member.name} delay={i * 0.1}>
-              <div className="group">
-                <div className="relative aspect-square rounded-2xl overflow-hidden mb-5 bg-surface-2">
+        <div className="mt-14 border-b border-subtle">
+          {team.map((member) => (
+            <AnimatedSection key={member.name}>
+              <article className="grid grid-cols-1 gap-x-12 gap-y-8 border-t border-subtle py-10 sm:grid-cols-[14rem_minmax(0,1fr)]">
+                <div className="relative aspect-square w-40 overflow-hidden bg-surface sm:w-full">
                   {member.image ? (
                     <Image
                       src={member.image}
                       alt={member.name}
                       fill
-                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover grayscale"
+                      sizes="(max-width: 640px) 10rem, 14rem"
                     />
                   ) : (
                     <span
                       /*
-                       * The name is printed directly beneath, so the monogram is
+                       * The name is printed alongside, so the monogram is
                        * decoration and is kept out of the accessibility tree
                        * rather than being announced a second time.
                        */
                       aria-hidden="true"
-                      className="absolute inset-0 flex items-center justify-center border border-subtle font-display text-5xl font-bold text-muted-custom"
+                      className="absolute inset-0 flex items-center justify-center border border-subtle font-display text-display font-semibold text-muted-custom"
                     >
                       {initials(member.name)}
                     </span>
                   )}
                 </div>
-                <h3 className="font-display font-semibold text-primary text-xl mb-0.5">
-                  {member.name}
-                </h3>
-                <p className="text-xs font-medium tracking-wider uppercase text-accent-gold mb-3">
-                  {member.role}
-                </p>
-                <p className="text-sm text-secondary leading-relaxed">{member.bio}</p>
-              </div>
+
+                <div>
+                  <h3 className="font-display text-h3 font-semibold text-primary">{member.name}</h3>
+                  <p className="mt-3 text-micro uppercase tracking-eyebrow text-accent-gold">
+                    {member.role}
+                  </p>
+                  <p className="measure mt-6 text-body text-secondary">{member.bio}</p>
+                </div>
+              </article>
             </AnimatedSection>
           ))}
         </div>
       </section>
 
-      {/* Service Areas */}
-      <section className="py-16 bg-surface border-y border-subtle">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AnimatedSection className="flex flex-col md:flex-row md:items-center gap-10">
-            <div className="flex-shrink-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-px w-12 bg-groove-gold" />
-                <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-                  Service Areas
-                </span>
-              </div>
-              <h2 className="font-display text-2xl font-bold text-primary">We Operate Across</h2>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {serviceAreas.map((city) => (
-                <span
-                  key={city}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-subtle text-sm text-secondary hover:border-groove-gold/40 hover:text-primary transition-colors duration-200"
-                >
-                  <MapPin size={11} className="text-accent-gold" />
-                  {city}
-                </span>
-              ))}
-            </div>
-          </AnimatedSection>
+      <AnimatedSection className="mt-28 border-t border-strong pt-10">
+        <p className="max-w-[20ch] font-display text-h2 font-semibold text-primary">
+          Working to a date?
+        </p>
+        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <Link
+            href="/contact"
+            className="inline-flex min-h-11 items-center bg-groove-gold px-8 py-3.5 text-meta font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light"
+          >
+            Start an enquiry
+          </Link>
+          <Link
+            href="/projects"
+            className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta font-medium uppercase tracking-eyebrow text-primary transition-colors hover:decoration-groove-gold hover:text-accent-gold"
+          >
+            See the work
+          </Link>
         </div>
-      </section>
-
-      {/* Ready to Transform */}
-      <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <AnimatedSection>
-          <h2 className="font-display text-4xl sm:text-5xl font-bold text-primary mb-4">
-            Ready to Transform Your Space?
-          </h2>
-          <p className="text-secondary mb-8 max-w-md mx-auto">
-            Whether it&apos;s a single store or a city rollout — we&apos;re ready to build.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/contact"
-              className="group inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-groove-gold text-black font-medium text-sm hover:shadow-gold transition-all duration-300 hover:scale-105"
-            >
-              Get in Touch
-              <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-subtle text-secondary hover:text-primary hover:border-groove-gold/40 text-sm transition-all duration-300"
-            >
-              View Projects
-            </Link>
-          </div>
-        </AnimatedSection>
-      </section>
-    </div>
+      </AnimatedSection>
+    </PageShell>
   )
 }

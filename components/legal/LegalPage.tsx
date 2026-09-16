@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import PageHeader from '@/components/ui/PageHeader'
+import PageShell from '@/components/ui/PageShell'
 
 /**
  * Shared shell for the privacy policy and terms pages, so the two stay
@@ -44,77 +46,78 @@ export default function LegalPage({
   draft = false,
 }: LegalPageProps) {
   return (
-    <div className="min-h-screen bg-base pt-24 pb-20">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="h-px w-12 bg-groove-gold" />
-          <span className="text-xs font-medium tracking-[0.2em] uppercase text-accent-gold">
-            {eyebrow}
-          </span>
-        </div>
-
-        <h1 className="font-display text-4xl sm:text-5xl font-bold text-primary leading-tight">
-          {title}
-        </h1>
-
-        <p className="mt-4 text-xs uppercase tracking-widest text-muted-custom">
-          Last updated{' '}
-          <time dateTime={lastUpdated}>{formatDate(lastUpdated)}</time>
+    <PageShell width="reading">
+      <PageHeader label={eyebrow} title={title} intro={intro}>
+        <p className="nums-tabular mt-8 border-t border-subtle pt-4 text-micro uppercase tracking-eyebrow text-muted-custom">
+          Last updated <time dateTime={lastUpdated}>{formatDate(lastUpdated)}</time>
         </p>
+      </PageHeader>
 
-        {draft && (
-          <div
-            role="note"
-            className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
+      {draft && (
+        <div
+          role="note"
+          className="mt-10 border-l-2 border-amber-400 bg-amber-500/10 px-5 py-4 text-body text-amber-100"
+        >
+          <strong className="font-semibold">Draft.</strong> This document describes our current
+          practices but is pending legal review. Please contact us if you need a definitive answer
+          on any point below.
+        </div>
+      )}
+
+      {/*
+        Numbered on a hairline rule, the way the rest of the site numbers a list.
+        The clause number used to be part of the heading text, which put it in the
+        accessible name of every section and made "1. Who we are" the thing a
+        screen reader announced.
+      */}
+      <div className="mt-16">
+        {sections.map((section, index) => (
+          <section
+            key={section.heading}
+            aria-labelledby={`section-${index}`}
+            className="border-t border-subtle py-10 first:border-t-0 first:pt-0"
           >
-            <strong className="font-semibold">Draft.</strong> This document describes our current
-            practices but is pending legal review. Please contact us if you need a definitive
-            answer on any point below.
-          </div>
-        )}
-
-        <p className="mt-8 text-secondary leading-relaxed">{intro}</p>
-
-        <div className="mt-12 space-y-10">
-          {sections.map((section, index) => (
-            <section key={section.heading} aria-labelledby={`section-${index}`}>
-              <h2
-                id={`section-${index}`}
-                className="font-display text-xl font-semibold text-primary"
-              >
-                {index + 1}. {section.heading}
-              </h2>
-              {section.body.map((paragraph) => (
-                <p key={paragraph} className="mt-3 text-secondary leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-              {section.bullets && (
-                <ul className="mt-3 space-y-2">
-                  {section.bullets.map((bullet) => (
-                    <li key={bullet} className="flex gap-3 text-secondary leading-relaxed">
-                      <span aria-hidden="true" className="mt-2 h-1 w-1 shrink-0 rounded-full bg-groove-gold" />
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
-        </div>
-
-        <div className="mt-16 rounded-2xl border border-subtle bg-surface-2 p-6">
-          <h2 className="font-display text-lg font-semibold text-primary">Questions?</h2>
-          <p className="mt-2 text-sm text-secondary leading-relaxed">
-            If anything here is unclear, or you want to exercise a right described above, reach
-            us through the{' '}
-            <Link href="/contact" className="text-accent-gold underline underline-offset-4">
-              contact page
-            </Link>
-            .
-          </p>
-        </div>
+            <p aria-hidden="true" className="nums-tabular text-micro text-muted-custom">
+              {String(index + 1).padStart(2, '0')}
+            </p>
+            <h2
+              id={`section-${index}`}
+              className="mt-4 font-display text-h3 font-semibold text-primary"
+            >
+              {section.heading}
+            </h2>
+            {section.body.map((paragraph) => (
+              <p key={paragraph} className="mt-5 text-body text-secondary">
+                {paragraph}
+              </p>
+            ))}
+            {section.bullets && (
+              <ul className="mt-6 border-t border-subtle">
+                {section.bullets.map((bullet) => (
+                  <li
+                    key={bullet}
+                    className="border-b border-subtle py-3 text-body text-secondary"
+                  >
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ))}
       </div>
-    </div>
+
+      <div className="mt-6 border-t border-strong pt-10">
+        <h2 className="font-display text-h3 font-semibold text-primary">Questions?</h2>
+        <p className="measure mt-5 text-body text-secondary">
+          If anything here is unclear, or you want to exercise a right described above, reach us
+          through the{' '}
+          <Link href="/contact" className="text-accent-gold underline underline-offset-4">
+            contact page
+          </Link>
+          .
+        </p>
+      </div>
+    </PageShell>
   )
 }

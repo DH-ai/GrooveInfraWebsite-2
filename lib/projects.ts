@@ -69,6 +69,13 @@ function readClient(context: string): SupabaseClient | null {
 /**
  * Wrapped in React `cache` so the several helpers below share one query per
  * request instead of each issuing its own full-table read.
+ *
+ * Every query in this file breaks ties on slug. `created_at` alone is not a
+ * total order — a seed or a bulk insert stamps every row in the statement with
+ * the same timestamp, and Postgres is then free to return those rows in any
+ * order. The homepage leads with the first photographed project, so without a
+ * tiebreaker the hero, its Open Graph image and the order of the portfolio could
+ * all change between two revalidations of identical data.
  */
 export const getAllProjects = cache(async (): Promise<Project[]> => {
   const supabase = readClient('getAllProjects')
@@ -78,6 +85,7 @@ export const getAllProjects = cache(async (): Promise<Project[]> => {
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getAllProjects error:', error.message)
@@ -118,6 +126,7 @@ export const getFeaturedProjects = cache(async (limit = 6): Promise<Project[]> =
     .select('*')
     .eq('featured', true)
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
     .limit(limit)
 
   if (error) {
@@ -142,6 +151,7 @@ export const getProjectsByCategory = cache(async (category: string): Promise<Pro
     .select('*')
     .eq('category', category)
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getProjectsByCategory error:', error.message)
@@ -177,6 +187,7 @@ export const getAllTestimonials = cache(async (): Promise<Testimonial[]> => {
     .select('*')
     .not('testimonial', 'is', null)
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getAllTestimonials error:', error.message)
@@ -217,6 +228,7 @@ export const getProjectSitemapEntries = cache(async (): Promise<ProjectSitemapEn
     .from('projects')
     .select('slug, created_at')
     .order('created_at', { ascending: false })
+    .order('slug', { ascending: true })
 
   if (error) {
     console.error('[projects] getProjectSitemapEntries error:', error.message)

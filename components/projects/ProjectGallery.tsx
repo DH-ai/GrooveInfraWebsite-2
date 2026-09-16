@@ -68,7 +68,7 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
   const widths = frameWidths(images.length)
 
   const controlClass =
-    'inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20'
+    'inline-flex h-11 w-11 items-center justify-center bg-white/10 text-white transition-colors hover:bg-white/20'
 
   return (
     <>

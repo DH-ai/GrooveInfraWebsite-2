@@ -79,7 +79,12 @@ export default function TurnstileWidget({ onToken, resetKey }: TurnstileWidgetPr
           container.innerHTML = ''
           widgetId = window.turnstile.render(container, {
             sitekey: siteKey,
-            theme: 'auto',
+            /*
+             * `auto` follows the visitor's OS preference, not the page's, so
+             * anyone on a light desktop got a white widget sitting in the middle
+             * of a dark form. The site has one theme, so the widget does too.
+             */
+            theme: 'dark',
             callback: (token) => onToken(token),
             'expired-callback': () => onToken(''),
             'error-callback': () => onToken(''),

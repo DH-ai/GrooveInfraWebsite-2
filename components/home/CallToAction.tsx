@@ -43,7 +43,7 @@ export default function CallToAction() {
             {CONTACT_EMAIL && (
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="inline-flex min-h-11 items-center border-b border-strong pb-1 text-meta text-secondary transition-colors hover:border-groove-gold hover:text-primary"
+                className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-strong text-meta text-secondary transition-colors hover:decoration-groove-gold hover:text-primary"
               >
                 {CONTACT_EMAIL}
               </a>

@@ -63,7 +63,7 @@ export default function Hero({ feature = null }: HeroProps) {
           <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link
               href="/projects"
-              className="group inline-flex min-h-11 items-center gap-3 border-b border-groove-gold pb-1 text-meta font-medium uppercase tracking-eyebrow text-groove-gold"
+              className="group inline-flex min-h-11 items-center gap-3 underline decoration-1 underline-offset-[7px] decoration-groove-gold text-meta font-medium uppercase tracking-eyebrow text-groove-gold"
             >
               See the work
               <ArrowRight
@@ -74,7 +74,7 @@ export default function Hero({ feature = null }: HeroProps) {
             </Link>
             <Link
               href="/contact"
-              className="inline-flex min-h-11 items-center border-b border-white/25 pb-1 text-meta font-medium uppercase tracking-eyebrow text-white/80 transition-colors hover:border-white hover:text-white"
+              className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-white/40 text-meta font-medium uppercase tracking-eyebrow text-white/80 transition-colors hover:decoration-white hover:text-white"
             >
               Start a project
             </Link>

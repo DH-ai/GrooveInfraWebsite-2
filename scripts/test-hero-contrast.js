@@ -38,8 +38,15 @@ const CHROME_CANDIDATES = [
 /** WCAG 1.4.3 for normal-size text. The display headline clears 1.4.6 anyway. */
 const MIN_RATIO = 4.5
 
+/*
+ * A tablet is not a smaller desktop here. The headline wraps to one more line at
+ * this width, which lifts its first line into the part of the scrim that has
+ * already started to release, and the mobile scrim that compensates for exactly
+ * that only applies below 640px.
+ */
 const VIEWPORTS = [
   ['desktop', 1440, 900],
+  ['tablet', 1024, 768],
   ['mobile', 390, 844],
 ]
 
@@ -187,7 +194,9 @@ async function main() {
   })
   const context = await browser.newContext()
 
-  const routes = await heroRoutes(context)
+  // A route substring can be passed to narrow the run while iterating on one hero.
+  const filter = process.argv[2]
+  const routes = (await heroRoutes(context)).filter((r) => !filter || r.includes(filter))
   console.log(`\n-- hero type over photography (${routes.length} route(s)) ----------------`)
 
   for (const route of routes) {

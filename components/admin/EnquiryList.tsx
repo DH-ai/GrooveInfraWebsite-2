@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Building2, AlertTriangle } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import type { EnquiryRecord } from '@/lib/enquiries'
 
 interface EnquiryListProps {
@@ -20,27 +20,26 @@ function formatDate(value: string): string {
 export default function EnquiryList({ enquiries }: EnquiryListProps) {
   if (enquiries.length === 0) {
     return (
-      <div className="rounded-2xl border border-subtle bg-surface-2 px-4 py-6 text-sm text-secondary">
+      <p className="border-t border-subtle py-6 text-body text-secondary">
         No enquiries yet. Submissions from the contact form will appear here.
-      </div>
+      </p>
     )
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className="border-b border-subtle">
       {enquiries.map((enquiry) => (
-        <li
-          key={enquiry.id}
-          className="rounded-2xl border border-subtle bg-surface-2 p-4 text-sm text-secondary"
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <div className="font-semibold text-primary">
+        <li key={enquiry.id} className="border-t border-subtle py-7">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+            <h3 className="font-display text-lede font-semibold text-primary">
               {enquiry.name}
               {enquiry.company && (
-                <span className="ml-2 font-normal text-muted-custom">{enquiry.company}</span>
+                <span className="ml-3 font-sans text-meta font-normal text-muted-custom">
+                  {enquiry.company}
+                </span>
               )}
-            </div>
-            <time dateTime={enquiry.created_at} className="text-xs text-muted-custom">
+            </h3>
+            <time dateTime={enquiry.created_at} className="nums-tabular text-micro text-muted-custom">
               {formatDate(enquiry.created_at)}
             </time>
           </div>
@@ -48,43 +47,61 @@ export default function EnquiryList({ enquiries }: EnquiryListProps) {
           {/*
             Every row here is 44px tall. The email and phone are tap targets, and
             this list is the screen most likely to be read on a phone.
+
+            The labels replace the icons that used to sit beside each value. A
+            12px envelope and a 12px pin are not distinguishable at a glance, and
+            an address is self-evidently an address without one.
           */}
-          <div className="mt-1 flex flex-wrap items-center gap-x-4 text-xs">
-            <a
-              href={`mailto:${enquiry.email}`}
-              className="inline-flex min-h-11 items-center gap-1.5 text-accent-gold hover:underline"
-            >
-              <Mail size={12} aria-hidden="true" />
-              {enquiry.email}
-            </a>
+          <dl className="mt-2 flex flex-wrap items-baseline gap-x-8">
+            <div>
+              <dt className="text-micro uppercase tracking-eyebrow text-muted-custom">Email</dt>
+              <dd>
+                <a
+                  href={`mailto:${enquiry.email}`}
+                  className="inline-flex min-h-11 items-center text-meta text-accent-gold hover:underline"
+                >
+                  {enquiry.email}
+                </a>
+              </dd>
+            </div>
             {enquiry.phone && (
-              <a
-                href={`tel:${enquiry.phone}`}
-                className="inline-flex min-h-11 items-center gap-1.5 text-accent-gold hover:underline"
-              >
-                <Phone size={12} aria-hidden="true" />
-                {enquiry.phone}
-              </a>
+              <div>
+                <dt className="text-micro uppercase tracking-eyebrow text-muted-custom">Phone</dt>
+                <dd>
+                  <a
+                    href={`tel:${enquiry.phone}`}
+                    className="inline-flex min-h-11 items-center text-meta text-accent-gold hover:underline"
+                  >
+                    {enquiry.phone}
+                  </a>
+                </dd>
+              </div>
             )}
             {enquiry.location && (
-              <span className="inline-flex min-h-11 items-center gap-1.5 text-muted-custom">
-                <MapPin size={12} aria-hidden="true" />
-                {enquiry.location}
-              </span>
+              <div>
+                <dt className="text-micro uppercase tracking-eyebrow text-muted-custom">Location</dt>
+                <dd className="inline-flex min-h-11 items-center text-meta text-secondary">
+                  {enquiry.location}
+                </dd>
+              </div>
             )}
             {enquiry.project_type && (
-              <span className="inline-flex min-h-11 items-center gap-1.5 text-muted-custom">
-                <Building2 size={12} aria-hidden="true" />
-                {enquiry.project_type}
-              </span>
+              <div>
+                <dt className="text-micro uppercase tracking-eyebrow text-muted-custom">Type</dt>
+                <dd className="inline-flex min-h-11 items-center text-meta text-secondary">
+                  {enquiry.project_type}
+                </dd>
+              </div>
             )}
-          </div>
+          </dl>
 
-          <p className="mt-3 whitespace-pre-line text-secondary">{enquiry.message}</p>
+          <p className="measure mt-4 whitespace-pre-line text-body text-secondary">
+            {enquiry.message}
+          </p>
 
           {!enquiry.email_sent && (
-            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-200">
-              <AlertTriangle size={11} aria-hidden="true" />
+            <p className="mt-5 inline-flex items-center gap-2 border-l-2 border-amber-400 bg-amber-500/10 px-3 py-2 text-micro uppercase tracking-eyebrow text-amber-100">
+              <AlertTriangle size={12} aria-hidden="true" />
               Notification email did not send — follow up manually
             </p>
           )}
