@@ -216,10 +216,10 @@
       to top,
       rgb(var(--bg)) 0%,
       rgb(var(--bg) / 0.95) 22%,
-      rgb(var(--bg) / 0.85) 38%,
-      rgb(var(--bg) / 0.6) 52%,
-      rgb(var(--bg) / 0.28) 70%,
-      rgb(var(--bg) / 0.08) 86%,
+      rgb(var(--bg) / 0.88) 40%,
+      rgb(var(--bg) / 0.72) 56%,
+      rgb(var(--bg) / 0.45) 72%,
+      rgb(var(--bg) / 0.15) 88%,
       transparent 100%
     );
   }
@@ -245,13 +245,25 @@
     }
   }
 
-  /* Darkens the leading edge, where every line of hero type starts. */
+  /*
+   * Darkens the whole width the type occupies, not just the leading edge.
+   *
+   * The scrim alone is a vertical curve, so it is thinnest exactly where the
+   * headline's first line sits — a little over halfway up. The end of that line
+   * landed on a window in the brightest cover in the set and measured 3.74:1
+   * against white, where the previous wash contributed 0.06 of cover that far
+   * across. It now holds to roughly 70% of the width, which is where the longest
+   * line of the headline ends, and releases over the last third so the
+   * photograph still reads as a photograph.
+   */
   .hero-wash {
     background-image: linear-gradient(
       to right,
-      rgb(var(--bg) / 0.55) 0%,
-      rgb(var(--bg) / 0.2) 45%,
-      transparent 72%
+      rgb(var(--bg) / 0.6) 0%,
+      rgb(var(--bg) / 0.45) 40%,
+      rgb(var(--bg) / 0.3) 62%,
+      rgb(var(--bg) / 0.1) 80%,
+      transparent 92%
     );
   }
 
