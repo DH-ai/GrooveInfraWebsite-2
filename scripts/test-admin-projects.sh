@@ -109,8 +109,21 @@ check "malformed JSON rejected" 400 \
 echo
 echo "-- Create validation (Zod) --------------------------------------"
 
-check "create without images rejected" 400 \
-  "$(admin_post /api/admin/projects '{"title":"No Images","images":[]}')"
+# Creating without images is allowed on purpose: the client publishes projects
+# before their photography is ready, and lib/project-images.ts fills the gap with
+# a generated plate that any later upload supersedes. Previously this was a 400,
+# which pushed editors into pasting a stock URL to get past the form.
+UNPHOTOGRAPHED_SLUG="admin-suite-no-images-$$-$RANDOM"
+check "create without images accepted" 200 \
+  "$(admin_post /api/admin/projects \
+    "{\"title\":\"No Images\",\"slug\":\"$UNPHOTOGRAPHED_SLUG\",\"images\":[]}")"
+
+check "  it renders a generated plate" 1 \
+  "$(curl -s "$BASE/projects/$UNPHOTOGRAPHED_SLUG" | grep -c 'data-placeholder="true"' || true)"
+
+curl -s -X DELETE \
+  "$SUPABASE_URL/rest/v1/projects?slug=eq.$UNPHOTOGRAPHED_SLUG" \
+  -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" >/dev/null
 
 check "create with off-bucket image rejected" 400 \
   "$(admin_post /api/admin/projects \

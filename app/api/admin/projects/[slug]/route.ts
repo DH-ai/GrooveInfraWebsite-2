@@ -21,9 +21,22 @@ async function removeStoragePaths(paths: string[]) {
   if (error) console.error('[admin/projects] storage remove failed:', error.message)
 }
 
-async function removeCoverInStorage(slug: string) {
+/**
+ * Sweeps out superseded cover files. The replacement is already in the bucket by
+ * the time this runs — the browser uploads before it submits — and it is named
+ * `cover.<ext>` like the one it replaces, so it has to be excluded by name or a
+ * cover upload deletes the very file it just wrote.
+ */
+async function removeCoverInStorage(slug: string, keepUrl: string | null) {
+  const prefix = `${getPublicUrlPrefix()}${slug}/`
+  const keep =
+    keepUrl && keepUrl.startsWith(prefix) ? keepUrl.slice(prefix.length).split('?')[0] : null
+
   const files = await listStorageFiles(slug)
-  const covers = files.filter((p) => path.basename(p).startsWith('cover'))
+  const covers = files.filter((p) => {
+    const name = path.basename(p)
+    return name.startsWith('cover') && name !== keep
+  })
   await removeStoragePaths(covers)
 }
 
@@ -137,7 +150,7 @@ export async function POST(
 
   try {
     if (removeCover || body.cover_image) {
-      await removeCoverInStorage(slug)
+      await removeCoverInStorage(slug, coverImage)
     }
     if (replaceGallery) {
       await removeGalleryInStorage(slug, finalImages)

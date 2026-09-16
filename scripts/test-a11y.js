@@ -84,11 +84,17 @@ async function runAxe(page) {
   )
 }
 
-async function auditRoute(context, path, { signIn } = {}) {
-  const page = await context.newPage()
-  await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded' })
-  // Scroll-reveal sections start at opacity 0, and axe skips anything invisible,
-  // so an unscrolled page hides most of its own content from the audit.
+/**
+ * Brings a page to the state an audit should judge it in.
+ *
+ * Scroll-reveal sections start at opacity 0 and axe skips anything invisible, so
+ * an unscrolled page hides most of its own content from the audit. Scrolling
+ * alone is not enough either: axe computes contrast from the composited colour,
+ * so a section caught mid-fade reports a contrast violation on text that is
+ * perfectly legible once the animation finishes. This waits for the reveals to
+ * actually land rather than guessing at a duration.
+ */
+async function settleForAudit(page) {
   await page.evaluate(async () => {
     for (let y = 0; y < document.body.scrollHeight; y += window.innerHeight / 2) {
       window.scrollTo(0, y)
@@ -96,7 +102,26 @@ async function auditRoute(context, path, { signIn } = {}) {
     }
     window.scrollTo(0, 0)
   })
-  await page.waitForTimeout(600)
+
+  await page
+    .waitForFunction(
+      () =>
+        Array.from(document.querySelectorAll('[data-animated-section]')).every(
+          (el) => parseFloat(getComputedStyle(el).opacity) > 0.99
+        ),
+      undefined,
+      { timeout: 5000 }
+    )
+    .catch(() => {
+      // A section that never finishes revealing is itself worth seeing in the
+      // report, so fall through and let axe judge the page as it stands.
+    })
+}
+
+async function auditRoute(context, path, { signIn } = {}) {
+  const page = await context.newPage()
+  await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded' })
+  await settleForAudit(page)
 
   const violations = await runAxe(page)
   check(
@@ -281,6 +306,108 @@ async function withGalleryFixture(run) {
     await run(`/projects/${slug}`)
   } finally {
     await fetch(`${url}/rest/v1/projects?slug=eq.${slug}`, { method: 'DELETE', headers })
+  }
+}
+
+/**
+ * The mirror of withGalleryFixture: a project with nothing uploaded, which is the
+ * state every project is in until the client's photography lands.
+ */
+async function withUnphotographedFixture(run) {
+  const url = envLocal('NEXT_PUBLIC_SUPABASE_URL')
+  const key = envLocal('SUPABASE_SERVICE_ROLE_KEY')
+  if (!url || !key) {
+    check('placeholder fixture created', false, 'Supabase URL or service key missing from .env.local')
+    return
+  }
+
+  const slug = `a11y-placeholder-fixture-${Date.now()}`
+  const headers = {
+    apikey: key,
+    Authorization: `Bearer ${key}`,
+    'Content-Type': 'application/json',
+    Prefer: 'return=minimal',
+  }
+
+  const created = await fetch(`${url}/rest/v1/projects`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      slug,
+      title: 'Accessibility Placeholder Fixture',
+      category: 'commercial',
+      location: 'Test',
+      client_name: 'Test',
+      basic_description: 'Temporary fixture for the accessibility suite.',
+      description: 'Temporary fixture for the accessibility suite.',
+      duration: '1 week',
+      images: [],
+    }),
+  })
+
+  if (!created.ok) {
+    check('placeholder fixture created', false, `${created.status} ${await created.text()}`)
+    return
+  }
+
+  try {
+    await run(`/projects/${slug}`)
+  } finally {
+    await fetch(`${url}/rest/v1/projects?slug=eq.${slug}`, { method: 'DELETE', headers })
+  }
+}
+
+/**
+ * Placeholder plates are drawn with a CSS background-image, and axe cannot
+ * measure contrast against one — it reports nothing rather than a violation. So
+ * the two things that can silently regress here are checked directly: that the
+ * plate stays out of the accessibility tree, and that any caption laid over it
+ * keeps the alpha the contrast audit in ProjectImage.tsx was done at. At 0.45,
+ * where the caption started, it measured 4.27:1 over the brightest part of a
+ * plate and failed.
+ */
+const MIN_PLATE_LABEL_ALPHA = 0.7
+
+async function testPlaceholderImagery(context, projectPath) {
+  const page = await context.newPage()
+  try {
+    await page.goto(`${BASE}${projectPath}`, { waitUntil: 'domcontentloaded' })
+
+    const plate = page.locator('[data-placeholder="true"]').first()
+    check('placeholder: a plate is drawn', (await plate.count()) > 0)
+
+    check(
+      'placeholder: plate is not in the accessibility tree',
+      (await plate.getAttribute('role')) === 'presentation',
+      'a generated tonal field has no image content to announce'
+    )
+
+    await settleForAudit(page)
+    const violations = await runAxe(page)
+    check(
+      'placeholder: axe clean',
+      violations.length === 0,
+      violations.map((v) => `${v.id} (${v.nodes.join(', ')})`).join('; ')
+    )
+
+    // Every caption over a plate, anywhere on the site, not just this fixture.
+    await page.goto(`${BASE}/about`, { waitUntil: 'domcontentloaded' })
+    const alphas = await page.$$eval('[data-placeholder="true"] span', (spans) =>
+      spans
+        .filter((s) => (s.textContent || '').trim().length > 0)
+        .map((s) => {
+          const m = getComputedStyle(s).color.match(/rgba?\(([^)]+)\)/)
+          const parts = m ? m[1].split(',').map((p) => parseFloat(p)) : []
+          return parts.length === 4 ? parts[3] : 1
+        })
+    )
+    check(
+      'placeholder: captions keep their audited opacity',
+      alphas.every((a) => a >= MIN_PLATE_LABEL_ALPHA),
+      `found ${JSON.stringify(alphas)}, need >= ${MIN_PLATE_LABEL_ALPHA}`
+    )
+  } finally {
+    await page.close()
   }
 }
 
@@ -509,61 +636,76 @@ async function testReducedMotion(browser) {
   await page.goto(`${BASE}/`, { waitUntil: 'load' })
   await page.waitForTimeout(800)
 
-  const firstSlide = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  await page.waitForTimeout(7000)
-  const laterSlide = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  check(
-    'reduced motion: hero does not rotate on its own',
-    firstSlide === laterSlide,
-    `${firstSlide} -> ${laterSlide}`
-  )
-
-  check(
-    'reduced motion: hero hides the pause control it no longer needs',
-    (await page.locator('button[aria-label*="automatic slide"]').count()) === 0
-  )
-
   const smoothScroll = await page.evaluate(
     () => getComputedStyle(document.documentElement).scrollBehavior
   )
   check('reduced motion: smooth scrolling is off', smoothScroll === 'auto', smoothScroll)
 
+  /*
+   * Scroll reveals must still finish. MotionConfig reducedMotion="user" drops the
+   * transform and keeps the opacity change, so a section that starts at opacity 0
+   * has to end at 1 — if it did not, this preference would blank the page.
+   */
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2))
+  await page.waitForTimeout(1200)
+  const revealed = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-animated-section]')]
+      .filter((el) => {
+        const box = el.getBoundingClientRect()
+        return box.top < window.innerHeight && box.bottom > 0
+      })
+      .every((el) => parseFloat(getComputedStyle(el).opacity) > 0.99)
+  )
+  check('reduced motion: scroll reveals still resolve to visible', revealed)
+
   await context.close()
 }
 
-async function testAutoplayControls(context) {
+/**
+ * The homepage used to carry two things that moved on their own — a hero on a
+ * 5.5s slide timer and an infinite image marquee — and each needed a pause
+ * control to satisfy WCAG 2.2.2. Both are gone, replaced by a single static hero
+ * and a ruled index, so the stronger property is now testable: nothing on the
+ * page moves unless the visitor moves it.
+ */
+async function testNothingAutoplays(context) {
   const page = await context.newPage()
   await page.goto(`${BASE}/`, { waitUntil: 'load' })
+  await settleForAudit(page)
 
-  const heroPause = page.locator('button[aria-label*="automatic slide"]')
-  check('autoplay: hero exposes a pause control', (await heroPause.count()) === 1)
-  check('autoplay: hero pause control starts unpressed', (await heroPause.getAttribute('aria-pressed')) === 'false')
-  const pressed = await actUntil(
-    page,
-    () => heroPause.click(),
-    async () => {
-      if ((await heroPause.getAttribute('aria-pressed')) !== 'true') throw new Error('not pressed')
-    }
+  check(
+    'motion: no carousel widget on the homepage',
+    (await page.locator('[aria-roledescription="carousel"], [aria-roledescription="slide"]').count()) === 0
   )
-  check('autoplay: hero pause control reports pressed', pressed)
 
-  const slideBefore = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  await page.waitForTimeout(7000)
-  const slideAfter = await page.locator('[aria-roledescription="slide"]').getAttribute('aria-label')
-  check('autoplay: pausing actually stops the hero', slideBefore === slideAfter, `${slideBefore} -> ${slideAfter}`)
-
-  const marquee = page.locator('button:has-text("Pause scrolling")')
-  if ((await marquee.count()) > 0) {
-    await marquee.scrollIntoViewIfNeeded()
-    check('autoplay: image strip exposes a pause control', true)
-    await marquee.click()
-    check(
-      'autoplay: image strip pause control reports pressed',
-      (await page.locator('button:has-text("Resume scrolling")').getAttribute('aria-pressed')) === 'true'
+  /*
+   * A snapshot of every element's box, then the same snapshot five seconds later
+   * without touching the page. Anything that shifted did so on a timer.
+   */
+  const sample = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('main *')].slice(0, 400).map((el) => {
+        const box = el.getBoundingClientRect()
+        return `${Math.round(box.x)},${Math.round(box.y)},${Math.round(box.width)}`
+      })
     )
-  } else {
-    check('autoplay: image strip exposes a pause control', false, 'strip not rendered (no projects with real images)')
-  }
+
+  const before = await sample()
+  await page.waitForTimeout(5200)
+  const after = await sample()
+
+  const moved = before.filter((box, i) => box !== after[i]).length
+  check(
+    'motion: nothing shifts on a timer over five seconds',
+    moved === 0,
+    `${moved} element(s) moved without input`
+  )
+
+  check(
+    'motion: therefore no pause control is needed',
+    (await page.locator('button[aria-pressed]').count()) === 0,
+    'a pause control here would imply something is still moving'
+  )
 
   await page.close()
 }
@@ -618,6 +760,9 @@ async function main() {
   console.log('\n-- keyboard: lightbox -------------------------------------------')
   await withGalleryFixture((fixturePath) => testLightbox(context, fixturePath))
 
+  console.log('\n-- placeholder imagery -----------------------------------------')
+  await withUnphotographedFixture((fixturePath) => testPlaceholderImagery(context, fixturePath))
+
   console.log('\n-- keyboard: mobile navigation ----------------------------------')
   await testMobileMenu(context)
 
@@ -628,7 +773,7 @@ async function main() {
   await testFilters(context)
 
   console.log('\n-- motion ------------------------------------------------------')
-  await testAutoplayControls(context)
+  await testNothingAutoplays(context)
   await testReducedMotion(browser)
 
   console.log('\n-- dark-only theme ---------------------------------------------')

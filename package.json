@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "email:test": "tsx --env-file=.env.local scripts/test-enquiry-emails.ts"
+    "email:test": "tsx --env-file=.env.local scripts/test-enquiry-emails.ts",
+    "test:a11y": "node scripts/test-a11y.js",
+    "test:contrast": "node scripts/test-hero-contrast.js",
+    "test:images": "node scripts/test-image-fallback.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",

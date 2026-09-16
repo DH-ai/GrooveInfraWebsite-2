@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Project, ProjectCategory, Testimonial } from '@/types/project'
-import { hasRealCoverImage } from '@/lib/utils'
+import { resolveProjectImagery } from '@/lib/project-images'
 import { getSupabaseRead } from '@/lib/supabase'
 
 interface ProjectRow {
@@ -26,6 +26,8 @@ interface ProjectRow {
 }
 
 function rowToProject(row: ProjectRow): Project {
+  const images = row.images ?? []
+
   return {
     title: row.title,
     slug: row.slug,
@@ -42,8 +44,15 @@ function rowToProject(row: ProjectRow): Project {
     highlight: row.highlight ?? undefined,
     tags: row.tags ?? undefined,
     cover_image: row.cover_image ?? undefined,
-    images: row.images ?? [],
+    images,
     logo: row.logo ?? undefined,
+    // Resolved here, at the single point every project passes through, so a new
+    // page cannot accidentally read `images` raw and render a broken frame.
+    imagery: resolveProjectImagery({
+      slug: row.slug,
+      cover_image: row.cover_image ?? undefined,
+      images,
+    }),
   }
 }
 
@@ -143,17 +152,20 @@ export const getProjectsByCategory = cache(async (category: string): Promise<Pro
 })
 
 /**
- * Only projects with owned photography. `hasRealCoverImage` filters out stock
- * placeholder hosts, which cannot be expressed as a database predicate.
+ * Only projects with owned photography. The homepage is the site's loudest claim
+ * about the work, so a drawn placeholder has no business leading it — better a
+ * shorter index than one padded with invented plates. "Owned" is not expressible
+ * as a database predicate, hence the filter in application code.
  */
-export async function getProjectsForCarousel(): Promise<Project[]> {
+export async function getPhotographedProjects(): Promise<Project[]> {
   const all = await getAllProjects()
-  return all.filter((p) => p.images.length > 0 && hasRealCoverImage(p))
+  return all.filter((p) => p.imagery.hasOwnPhotography)
 }
 
+/** Owned photography only, for the same reason as the homepage. */
 export async function getAllImages(): Promise<string[]> {
   const all = await getAllProjects()
-  return all.flatMap((p) => p.images)
+  return all.flatMap((p) => p.imagery.gallery.flatMap((img) => (img.src ? [img.src] : [])))
 }
 
 export const getAllTestimonials = cache(async (): Promise<Testimonial[]> => {

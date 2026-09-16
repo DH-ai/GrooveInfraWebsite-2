@@ -41,30 +41,49 @@ export default function Header() {
   return (
     <>
       <motion.header
+        // Same marker the scroll-reveal sections carry, for the same two reasons:
+        // the <noscript> rule in the root layout has to force it visible, and the
+        // accessibility suite has to wait for its entrance to finish before
+        // judging contrast — a half-faded gold button reports as a violation.
+        data-animated-section=""
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+          'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
           scrolled
-            ? 'py-3 bg-surface/80 backdrop-blur-xl border-b border-subtle'
-            : 'py-5 bg-transparent'
+            ? 'border-b border-subtle bg-surface/80 py-3 backdrop-blur-xl'
+            : 'bg-transparent py-5'
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group" aria-label="Groove Infra — home">
+        {/*
+          Both heroes now run a photograph to the top of the viewport, and a
+          photograph is not a background you can predict: the Cartier store shot
+          is near-white exactly where the wordmark sits. Unscrolled, the header
+          lays a short gradient behind itself so the chrome keeps its contrast
+          whatever the image underneath happens to be doing.
+        */}
+        <div
+          aria-hidden="true"
+          className={cn(
+            'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 via-black/40 to-transparent transition-opacity duration-300',
+            scrolled ? 'opacity-0' : 'opacity-100'
+          )}
+        />
+        <div className="gutter relative mx-auto flex w-full max-w-[100rem] items-center justify-between">
+          <Link href="/" className="group flex items-center gap-3" aria-label="Groove Infra — home">
             <span
-              className="w-7 h-7 rounded-sm bg-groove-gold flex items-center justify-center"
+              className="flex h-7 w-7 items-center justify-center bg-groove-gold"
               aria-hidden="true"
             >
-              <span className="text-black font-display font-bold text-xs">G</span>
+              <span className="font-display text-xs font-bold text-black">G</span>
             </span>
-            <span className="font-display font-semibold text-base tracking-widest uppercase text-primary">
+            <span className="font-display text-base font-semibold uppercase tracking-widest text-primary">
               Groove Infra
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8" aria-label="Primary">
+          <nav className="hidden items-center gap-9 md:flex" aria-label="Primary">
             {navLinks.map((link) => {
               const active = isActive(pathname, link.href)
               return (
@@ -73,7 +92,7 @@ export default function Header() {
                   href={link.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'group inline-flex min-h-11 items-center text-sm tracking-wide transition-colors duration-200',
+                    'group inline-flex min-h-11 items-center text-meta transition-colors duration-200',
                     active ? 'text-accent-gold' : 'text-secondary hover:text-primary'
                   )}
                 >
@@ -95,7 +114,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <Link
               href="/contact"
-              className="hidden md:inline-flex min-h-11 items-center px-5 rounded-full bg-groove-gold text-black text-xs font-semibold tracking-wider uppercase transition-opacity duration-300 hover:opacity-85"
+              className="hidden min-h-11 items-center bg-groove-gold px-6 text-micro font-semibold uppercase tracking-eyebrow text-black transition-colors duration-300 hover:bg-groove-gold-light md:inline-flex"
             >
               Enquire
             </Link>
@@ -146,7 +165,7 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={closeMenu}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-secondary transition-colors hover:text-primary"
+                  className="inline-flex h-11 w-11 items-center justify-center text-secondary transition-colors hover:text-primary"
                   aria-label="Close menu"
                 >
                   <X size={22} aria-hidden="true" />
@@ -162,7 +181,7 @@ export default function Header() {
                       href={link.href}
                       aria-current={active ? 'page' : undefined}
                       className={cn(
-                        'inline-flex min-h-11 items-center text-2xl font-display font-medium',
+                        'inline-flex min-h-11 items-center font-display text-h3 font-medium',
                         active ? 'text-accent-gold' : 'text-primary'
                       )}
                     >
@@ -175,7 +194,7 @@ export default function Header() {
               <div className="pt-6 mt-4 border-t border-subtle">
                 <Link
                   href="/contact"
-                  className="inline-flex min-h-11 items-center px-7 rounded-full bg-groove-gold text-black text-sm font-semibold tracking-wide uppercase"
+                  className="inline-flex min-h-11 items-center bg-groove-gold px-7 text-micro font-semibold uppercase tracking-eyebrow text-black"
                 >
                   Enquire
                 </Link>
