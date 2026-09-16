@@ -20,29 +20,35 @@ import {
 export async function sendEnquiryEmails(
   data: EnquiryDetails
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  const teamResult = await sendEmail({
-    from: getEnquiryFrom(),
-    to: getEnquiryInbox(),
-    subject: `New Enquiry: ${data.projectType || 'General'} — ${data.name}`,
-    html: teamEnquiryEmail(data),
-    replyTo: data.email,
-  })
+  // The address getters throw when their env vars are missing, which would
+  // otherwise escape as a 500 on a route that has already stored the enquiry.
+  try {
+    const teamResult = await sendEmail({
+      from: getEnquiryFrom(),
+      to: getEnquiryInbox(),
+      subject: `New Enquiry: ${data.projectType || 'General'} — ${data.name}`,
+      html: teamEnquiryEmail(data),
+      replyTo: data.email,
+    })
 
-  if (!teamResult.ok) {
-    return teamResult
+    if (!teamResult.ok) {
+      return teamResult
+    }
+
+    const userResult = await sendEmail({
+      from: getNoreplyFrom(),
+      to: data.email,
+      subject: 'We received your enquiry — Groove Infra',
+      html: userConfirmationEmail(data),
+      replyTo: getPublicContactEmail(),
+    })
+
+    if (!userResult.ok) {
+      return userResult
+    }
+
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, message: (err as Error).message }
   }
-
-  const userResult = await sendEmail({
-    from: getNoreplyFrom(),
-    to: data.email,
-    subject: 'We received your enquiry — Groove Infra',
-    html: userConfirmationEmail(data),
-    replyTo: getPublicContactEmail(),
-  })
-
-  if (!userResult.ok) {
-    return userResult
-  }
-
-  return { ok: true }
 }

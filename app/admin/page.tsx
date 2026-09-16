@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requireAdmin } from '@/lib/admin-auth'
+import { getAllEnquiries } from '@/lib/enquiries'
 import { getAllProjects } from '@/lib/projects'
 import DeleteProjectForm from '@/components/admin/DeleteProjectForm'
 import CreateProjectForm from '@/components/admin/CreateProjectForm'
+import EnquiryList from '@/components/admin/EnquiryList'
 
 export const metadata: Metadata = {
   title: 'Admin',
@@ -21,7 +23,7 @@ interface AdminPageProps {
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   await requireAdmin()
 
-  const projects = await getAllProjects()
+  const [projects, enquiries] = await Promise.all([getAllProjects(), getAllEnquiries()])
   const successSlug = searchParams?.success === '1' ? searchParams.slug : undefined
   const deletedSlug = searchParams?.deleted === '1' ? searchParams.slug : undefined
   const error = searchParams?.error
@@ -49,7 +51,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         </div>
 
         {successSlug && (
-          <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
             Project created. View it at{' '}
             <Link href={`/projects/${successSlug}`} className="underline underline-offset-2">
               /projects/{successSlug}
@@ -59,13 +61,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         )}
 
         {deletedSlug && (
-          <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          <div className="mb-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-100">
             Project deleted: <span className="font-semibold">{deletedSlug}</span>.
           </div>
         )}
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
             {error === 'slug-exists'
               ? 'A project with that slug already exists.'
               : error === 'invalid'
@@ -79,6 +81,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         )}
 
         <CreateProjectForm />
+
+        <div className="mt-12">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-muted-custom mb-4">
+            Enquiries {enquiries.length > 0 && `(${enquiries.length})`}
+          </h2>
+          <EnquiryList enquiries={enquiries} />
+        </div>
 
         {projects.length > 0 && (
           <div className="mt-12">
@@ -109,7 +118,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     <DeleteProjectForm
                       action={`/api/admin/projects/${project.slug}`}
                       projectTitle={project.title}
-                      buttonClassName="inline-flex items-center rounded-full border border-red-500/40 px-3 py-1 text-xs text-red-200 hover:border-red-500/70 hover:text-red-100 transition-all"
+                      buttonClassName="inline-flex items-center rounded-full border border-red-500/40 px-3 py-1 text-xs text-red-700 dark:text-red-200 hover:border-red-500/70 hover:text-red-800 dark:hover:text-red-100 transition-all"
                     />
                   </div>
                 </div>

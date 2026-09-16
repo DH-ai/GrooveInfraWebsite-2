@@ -4,6 +4,11 @@ import {
   createAdminSession,
   safeEqual,
 } from '@/lib/admin-session'
+import { clientKey, hit } from '@/lib/rate-limit'
+
+/** Ten attempts per IP per fifteen minutes, to blunt password guessing. */
+const LOGIN_ATTEMPT_LIMIT = 10
+const LOGIN_WINDOW_SECONDS = 15 * 60
 
 /** Only same-origin relative paths, so `?next=` cannot be used as an open redirect. */
 function safeNextPath(value: string | null): string {
@@ -12,6 +17,13 @@ function safeNextPath(value: string | null): string {
 }
 
 export async function POST(request: Request) {
+  const limit = hit(clientKey(request, 'admin-login'), LOGIN_ATTEMPT_LIMIT, LOGIN_WINDOW_SECONDS)
+  if (!limit.allowed) {
+    return NextResponse.redirect(new URL('/admin/login?error=rate-limited', request.url), {
+      headers: { 'Retry-After': String(limit.retryAfterSeconds) },
+    })
+  }
+
   const formData = await request.formData()
   const username = String(formData.get('username') ?? '').trim()
   const password = String(formData.get('password') ?? '').trim()

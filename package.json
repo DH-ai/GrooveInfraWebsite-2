@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.2.0",
     "lucide-react": "^0.378.0",
@@ -18,7 +20,8 @@
     "react": "^18",
     "react-dom": "^18",
     "resend": "^6.12.2",
-    "tailwind-merge": "^2.3.0"
+    "tailwind-merge": "^2.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^20",

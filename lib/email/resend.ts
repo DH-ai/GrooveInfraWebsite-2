@@ -43,6 +43,10 @@ export function getPublicContactEmail(): string {
   return process.env.PUBLIC_CONTACT_EMAIL ?? 'contactus@grooveinfra.in'
 }
 
+/**
+ * Reports every failure through the result type rather than throwing, so callers
+ * cannot turn a missing API key or a network fault into an unhandled 500.
+ */
 export async function sendEmail(params: {
   from: string
   to: string | string[]
@@ -50,18 +54,22 @@ export async function sendEmail(params: {
   html: string
   replyTo?: string
 }): Promise<{ ok: true; id: string } | { ok: false; message: string }> {
-  const resend = getResendClient()
-  const { data, error } = await resend.emails.send({
-    from: params.from,
-    to: params.to,
-    subject: params.subject,
-    html: params.html,
-    replyTo: params.replyTo,
-  })
+  try {
+    const resend = getResendClient()
+    const { data, error } = await resend.emails.send({
+      from: params.from,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+      replyTo: params.replyTo,
+    })
 
-  if (error) {
-    return { ok: false, message: error.message }
+    if (error) {
+      return { ok: false, message: error.message }
+    }
+
+    return { ok: true, id: data?.id ?? '' }
+  } catch (err) {
+    return { ok: false, message: (err as Error).message }
   }
-
-  return { ok: true, id: data?.id ?? '' }
 }
