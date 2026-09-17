@@ -56,7 +56,7 @@ export default function LegalPage({
       {draft && (
         <div
           role="note"
-          className="mt-10 border-l-2 border-amber-400 bg-amber-500/10 px-5 py-4 text-body text-amber-100"
+          className="mt-10 border-l-2 border-amber-500 bg-amber-500/10 px-5 py-4 text-body text-amber-900"
         >
           <strong className="font-semibold">Draft.</strong> This document describes our current
           practices but is pending legal review. Please contact us if you need a definitive answer

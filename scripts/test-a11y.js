@@ -776,7 +776,7 @@ async function main() {
   await testNothingAutoplays(context)
   await testReducedMotion(browser)
 
-  console.log('\n-- dark-only theme ---------------------------------------------')
+  console.log('\n-- single theme (no dark: variants) -----------------------------')
   await testNoDeadDarkVariants(context)
 
   await browser.close()

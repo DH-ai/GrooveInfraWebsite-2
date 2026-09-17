@@ -41,7 +41,7 @@ export default function Hero({ feature = null }: HeroProps) {
   }
 
   return (
-    <section className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden">
+    <section data-photo-hero="" className="relative flex min-h-[100svh] flex-col justify-end overflow-hidden">
       <div className="absolute inset-0">
         <ProjectImage image={backdrop} alt="" priority sizes="100vw" />
       </div>
@@ -55,7 +55,7 @@ export default function Hero({ feature = null }: HeroProps) {
             Interiors delivered on the date we promised.
           </h1>
 
-          <p className="measure-tight mt-7 text-body-lg text-white/85">
+          <p className="measure-tight mt-7 text-body-lg text-white/90">
             Retail, workplace, hospitality and residential fit-outs across India. One team from
             setting out to handover, since 2016.
           </p>
@@ -74,7 +74,7 @@ export default function Hero({ feature = null }: HeroProps) {
             </Link>
             <Link
               href="/contact"
-              className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-white/40 text-meta font-medium uppercase tracking-eyebrow text-white/80 transition-colors hover:decoration-white hover:text-white"
+              className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[7px] decoration-white/60 text-meta font-medium uppercase tracking-eyebrow text-white/90 transition-colors hover:decoration-white hover:text-white"
             >
               Start a project
             </Link>
@@ -88,9 +88,9 @@ export default function Hero({ feature = null }: HeroProps) {
             It shares its rule with the scroll cue so the hero closes on one
             hairline rather than two competing ones.
           */}
-          <div className="mt-14 flex items-baseline justify-between gap-8 border-t border-white/20 pt-4 text-meta">
+          <div className="mt-14 flex items-baseline justify-between gap-8 border-t border-white/30 pt-4 text-meta">
             {feature ? (
-              <p className="text-white/70">
+              <p className="text-white/85">
                 <Link
                   href={`/projects/${feature.slug}`}
                   className="group inline-flex min-h-11 flex-wrap items-baseline gap-x-3 gap-y-1"
@@ -98,14 +98,14 @@ export default function Hero({ feature = null }: HeroProps) {
                   <span className="font-medium text-white group-hover:text-groove-gold">
                     {feature.title}
                   </span>
-                  <span aria-hidden="true" className="text-white/35">
+                  <span aria-hidden="true" className="text-white/50">
                     ·
                   </span>
                   <span className="nums-tabular">{credit(feature)}</span>
                 </Link>
               </p>
             ) : (
-              <p className="text-white/60">Project photography in progress.</p>
+              <p className="text-white/80">Project photography in progress.</p>
             )}
 
             {/*
@@ -114,7 +114,7 @@ export default function Hero({ feature = null }: HeroProps) {
               control to satisfy WCAG 2.2.2 — a disproportionate amount of
               machinery for the job of saying "there is more below".
             */}
-            <p className="hidden shrink-0 items-center gap-2 uppercase tracking-eyebrow text-white/45 sm:flex">
+            <p className="hidden shrink-0 items-center gap-2 uppercase tracking-eyebrow text-white/70 sm:flex">
               Scroll
               <ArrowDown size={13} aria-hidden="true" />
             </p>

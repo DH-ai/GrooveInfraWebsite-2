@@ -24,9 +24,9 @@ interface NoticeProps {
  */
 const TONES: Record<NoticeTone, string> = {
   info: 'border-groove-gold bg-groove-gold/10 text-primary',
-  success: 'border-emerald-400 bg-emerald-500/10 text-emerald-100',
-  warning: 'border-amber-400 bg-amber-500/10 text-amber-100',
-  error: 'border-red-400 bg-red-500/10 text-red-100',
+  success: 'border-emerald-600 bg-emerald-500/10 text-emerald-800',
+  warning: 'border-amber-500 bg-amber-500/10 text-amber-900',
+  error: 'border-red-500 bg-red-500/10 text-red-800',
 }
 
 export default function Notice({

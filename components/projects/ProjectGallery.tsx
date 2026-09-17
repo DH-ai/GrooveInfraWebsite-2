@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react'
 import { useBackdropClose, useDialog } from '@/lib/hooks/use-dialog'
@@ -28,7 +29,12 @@ function frameWidths(count: number): boolean[] {
 
 export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
   const [lightbox, setLightbox] = useState<number | null>(null)
+  const [mounted, setMounted] = useState(false)
   const isOpen = lightbox !== null
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const closeLightbox = useCallback(() => setLightbox(null), [])
   const dialogRef = useDialog({ open: isOpen, onClose: closeLightbox })
@@ -128,89 +134,93 @@ export default function ProjectGallery({ images, title }: ProjectGalleryProps) {
         })}
       </ul>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm"
-            onClick={onBackdropClick}
-          >
-            <div
-              ref={dialogRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label={`${title} — image gallery`}
-              tabIndex={-1}
-              className="relative flex h-full w-full items-center justify-center"
-            >
-              <button
-                type="button"
-                onClick={closeLightbox}
-                className={`absolute right-4 top-4 z-10 ${controlClass}`}
-                aria-label="Close gallery"
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm"
+                onClick={onBackdropClick}
               >
-                <X size={18} aria-hidden="true" />
-              </button>
-
-              {/*
-                Politely announced so a screen reader user hears which image the
-                gallery moved to after an arrow key, rather than having the
-                picture swapped underneath them in silence.
-              */}
-              <p
-                aria-live="polite"
-                aria-atomic="true"
-                className="absolute left-1/2 top-6 z-10 -translate-x-1/2 text-sm text-white/70"
-              >
-                Image {lightbox + 1} of {images.length}
-              </p>
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => step(-1)}
-                    className={`absolute left-4 top-1/2 z-10 -translate-y-1/2 ${controlClass}`}
-                    aria-label="Previous image"
-                  >
-                    <ChevronLeft size={20} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => step(1)}
-                    className={`absolute right-4 top-1/2 z-10 -translate-y-1/2 ${controlClass}`}
-                    aria-label="Next image"
-                  >
-                    <ChevronRight size={20} aria-hidden="true" />
-                  </button>
-                </>
-              )}
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={lightbox}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
-                  transition={{ duration: 0.25 }}
-                  className="relative mx-6 aspect-video w-full max-w-4xl"
+                <div
+                  ref={dialogRef}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={`${title} — image gallery`}
+                  tabIndex={-1}
+                  className="relative flex h-full w-full items-center justify-center"
                 >
-                  <ProjectImage
-                    image={images[lightbox]}
-                    alt={`${title} — image ${lightbox + 1} of ${images.length}`}
-                    sizes="(max-width: 1200px) 100vw, 900px"
-                    priority
-                    className="object-contain"
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </motion.div>
+                  <button
+                    type="button"
+                    onClick={closeLightbox}
+                    className={`absolute right-4 top-4 z-10 ${controlClass}`}
+                    aria-label="Close gallery"
+                  >
+                    <X size={18} aria-hidden="true" />
+                  </button>
+
+                  {/*
+                    Politely announced so a screen reader user hears which image the
+                    gallery moved to after an arrow key, rather than having the
+                    picture swapped underneath them in silence.
+                  */}
+                  <p
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="absolute left-1/2 top-6 z-10 -translate-x-1/2 text-sm text-white/85"
+                  >
+                    Image {lightbox + 1} of {images.length}
+                  </p>
+
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => step(-1)}
+                        className={`absolute left-4 top-1/2 z-10 -translate-y-1/2 ${controlClass}`}
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft size={20} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => step(1)}
+                        className={`absolute right-4 top-1/2 z-10 -translate-y-1/2 ${controlClass}`}
+                        aria-label="Next image"
+                      >
+                        <ChevronRight size={20} aria-hidden="true" />
+                      </button>
+                    </>
+                  )}
+
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={lightbox}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.05 }}
+                      transition={{ duration: 0.25 }}
+                      className="relative mx-6 aspect-video w-full max-w-4xl"
+                    >
+                      <ProjectImage
+                        image={images[lightbox]}
+                        alt={`${title} — image ${lightbox + 1} of ${images.length}`}
+                        sizes="(max-width: 1200px) 100vw, 900px"
+                        priority
+                        className="object-contain"
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
     </>
   )
 }

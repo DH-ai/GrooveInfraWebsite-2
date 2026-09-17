@@ -1,7 +1,7 @@
 import { escapeHtml } from './escape'
 import { avatarImgHtml } from './avatar'
 
-const GOLD = '#C9A84C'
+const GOLD = '#D4AF37'
 const GOLD_DARK = '#A8873A'
 const SURFACE = '#111111'
 const BORDER = '#2a2a2a'

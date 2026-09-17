@@ -47,9 +47,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             />
           </div>
 
-          <h3 className="mt-3 font-display text-h3 font-semibold text-primary transition-colors duration-300 group-hover:text-accent-gold">
+          <h2 className="mt-3 font-display text-h3 font-semibold text-primary transition-colors duration-300 group-hover:text-accent-gold">
             {project.title}
-          </h3>
+          </h2>
 
           <p className="nums-tabular mt-2 text-meta text-muted-custom">
             {project.location}

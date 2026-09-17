@@ -6,7 +6,7 @@ export function getAvatarUrl(email: string, name: string): string {
   const hash = createHash('md5').update(email.trim().toLowerCase()).digest('hex')
   const displayName = encodeURIComponent(name.trim() || email.split('@')[0])
   const fallback = encodeURIComponent(
-    `https://ui-avatars.com/api/?name=${displayName}&background=C9A84C&color=111111&size=128&bold=true&format=png`
+    `https://ui-avatars.com/api/?name=${displayName}&background=D4AF37&color=171717&size=128&bold=true&format=png`
   )
   return `https://www.gravatar.com/avatar/${hash}?s=128&d=${fallback}`
 }
@@ -20,7 +20,7 @@ export function avatarImgHtml(email: string, name: string): string {
       alt="${safeName}"
       width="72"
       height="72"
-      style="display:block;width:72px;height:72px;border-radius:50%;border:3px solid #C9A84C;object-fit:cover;"
+      style="display:block;width:72px;height:72px;border-radius:50%;border:3px solid #D4AF37;object-fit:cover;"
     />
   `.trim()
 }

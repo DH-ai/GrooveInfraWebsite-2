@@ -58,7 +58,25 @@ export function useDialog({ open, onClose }: UseDialogOptions) {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
+    /*
+     * Mark page chrome outside the dialog as inert so assistive tech and axe
+     * do not audit header/footer text through the dark overlay (dark type on a
+     * light surface that is visually covered fails contrast).
+     */
+    const background = [
+      document.querySelector('header'),
+      document.querySelector('footer'),
+      document.getElementById('main-content'),
+    ].filter((el): el is HTMLElement => !!el)
+
     const container = containerRef.current
+    for (const el of background) {
+      // Keep the dialog reachable when it is nested inside one of these roots
+      // (e.g. the mobile nav panel lives in the header tree).
+      if (container && el.contains(container)) continue
+      el.setAttribute('inert', '')
+    }
+
     if (container) {
       const first = focusableWithin(container)[0]
       ;(first ?? container).focus()
@@ -104,6 +122,7 @@ export function useDialog({ open, onClose }: UseDialogOptions) {
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
+      for (const el of background) el.removeAttribute('inert')
       returnFocusRef.current?.focus()
     }
   }, [open])

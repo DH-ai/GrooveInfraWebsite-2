@@ -14,8 +14,10 @@ export const alt = `${SITE_NAME} — ${SITE_TAGLINE}`
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
-const GOLD = '#C9A84C'
-const INK = '#080808'
+const GOLD = '#D4AF37'
+const PAPER = '#F8FAFC'
+const INK = '#171717'
+const MUTED = '#64748B'
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -27,7 +29,7 @@ export default function OpengraphImage() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: INK,
+          background: PAPER,
           padding: '72px 80px',
           fontFamily: 'sans-serif',
         }}
@@ -54,7 +56,7 @@ export default function OpengraphImage() {
               fontSize: 82,
               fontWeight: 700,
               lineHeight: 1.05,
-              color: '#F5F5F5',
+              color: INK,
             }}
           >
             {SITE_TAGLINE}
@@ -64,7 +66,7 @@ export default function OpengraphImage() {
               display: 'flex',
               marginTop: 26,
               fontSize: 30,
-              color: '#9A9A9A',
+              color: MUTED,
             }}
           >
             Retail · Hospitality · Commercial · Residential
@@ -77,7 +79,7 @@ export default function OpengraphImage() {
             justifyContent: 'space-between',
             alignItems: 'flex-end',
             fontSize: 24,
-            color: '#6E6E6E',
+            color: MUTED,
           }}
         >
           <span>{SITE_URL.replace(/^https?:\/\//, '')}</span>

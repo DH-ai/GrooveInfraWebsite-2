@@ -47,4 +47,4 @@ export const chipButtonClass =
   'inline-flex min-h-11 items-center border border-strong px-4 text-micro uppercase tracking-eyebrow text-secondary transition-colors hover:border-groove-gold hover:text-primary'
 
 export const dangerChipButtonClass =
-  'inline-flex min-h-11 items-center border border-red-400/60 px-4 text-micro uppercase tracking-eyebrow text-red-200 transition-colors hover:border-red-400 hover:text-red-100'
+  'inline-flex min-h-11 items-center border border-red-500/70 px-4 text-micro uppercase tracking-eyebrow text-red-700 transition-colors hover:border-red-600 hover:text-red-800'

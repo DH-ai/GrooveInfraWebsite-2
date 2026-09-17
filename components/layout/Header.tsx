@@ -20,23 +20,51 @@ function isActive(pathname: string, href: string) {
 }
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false)
+  const [pastHero, setPastHero] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
+
+  // Full-bleed photo heroes keep white chrome until the hero clears the header.
+  const isPhotoHero =
+    pathname === '/' || (pathname.startsWith('/projects/') && pathname !== '/projects')
+  const overPhoto = isPhotoHero && !pastHero
 
   const closeMenu = () => setMenuOpen(false)
   const dialogRef = useDialog({ open: menuOpen, onClose: closeMenu })
   const onBackdropClick = useBackdropClose(closeMenu)
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', handler, { passive: true })
-    return () => window.removeEventListener('scroll', handler)
-  }, [])
-
-  useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (!isPhotoHero) {
+      setPastHero(true)
+      return
+    }
+
+    setPastHero(false)
+
+    const update = () => {
+      const hero = document.querySelector<HTMLElement>('[data-photo-hero]')
+      // Switch only once the hero's bottom edge has cleared the header band,
+      // not after a few dozen pixels of scroll while the photo is still under it.
+      const headerBand = 72
+      if (hero) {
+        setPastHero(hero.getBoundingClientRect().bottom <= headerBand)
+        return
+      }
+      setPastHero(window.scrollY >= window.innerHeight - headerBand)
+    }
+
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [isPhotoHero, pathname])
 
   return (
     <>
@@ -51,25 +79,11 @@ export default function Header() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={cn(
           'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
-          scrolled
-            ? 'border-b border-subtle bg-surface/80 py-3 backdrop-blur-xl'
-            : 'bg-transparent py-5'
+          pastHero || !isPhotoHero
+            ? 'border-b border-subtle bg-surface/90 py-3 backdrop-blur-xl'
+            : 'border-b border-white/10 bg-black/35 py-5 backdrop-blur-xl supports-[backdrop-filter]:bg-black/25'
         )}
       >
-        {/*
-          Both heroes now run a photograph to the top of the viewport, and a
-          photograph is not a background you can predict: the Cartier store shot
-          is near-white exactly where the wordmark sits. Unscrolled, the header
-          lays a short gradient behind itself so the chrome keeps its contrast
-          whatever the image underneath happens to be doing.
-        */}
-        <div
-          aria-hidden="true"
-          className={cn(
-            'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/80 via-black/40 to-transparent transition-opacity duration-300',
-            scrolled ? 'opacity-0' : 'opacity-100'
-          )}
-        />
         <div className="gutter relative mx-auto flex w-full max-w-[100rem] items-center justify-between">
           <Link href="/" className="group flex items-center gap-3" aria-label="Groove Infra — home">
             <span
@@ -78,7 +92,12 @@ export default function Header() {
             >
               <span className="font-display text-xs font-bold text-black">G</span>
             </span>
-            <span className="font-display text-base font-semibold uppercase tracking-widest text-primary">
+            <span
+              className={cn(
+                'font-display text-base font-semibold uppercase tracking-widest transition-colors duration-300',
+                overPhoto ? 'text-white' : 'text-primary'
+              )}
+            >
               Groove Infra
             </span>
           </Link>
@@ -93,7 +112,13 @@ export default function Header() {
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'group inline-flex min-h-11 items-center text-meta transition-colors duration-200',
-                    active ? 'text-accent-gold' : 'text-secondary hover:text-primary'
+                    active
+                      ? overPhoto
+                        ? 'text-groove-gold'
+                        : 'text-accent-gold'
+                      : overPhoto
+                        ? 'text-white/85 hover:text-white'
+                        : 'text-secondary hover:text-primary'
                   )}
                 >
                   <span className="relative">
@@ -127,7 +152,12 @@ export default function Header() {
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="md:hidden inline-flex h-11 w-11 items-center justify-center text-secondary transition-colors hover:text-primary"
+              className={cn(
+                'md:hidden inline-flex h-11 w-11 items-center justify-center transition-colors',
+                overPhoto
+                  ? 'text-white/85 hover:text-white'
+                  : 'text-secondary hover:text-primary'
+              )}
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
               aria-label="Open menu"

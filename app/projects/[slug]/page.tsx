@@ -100,7 +100,7 @@ export default async function ProjectPage({ params }: PageProps) {
         photograph gets the screen before anything else competes with it — the
         title sits over its lower edge where the scrim is darkest.
       */}
-      <header className="relative flex min-h-[82svh] flex-col justify-end overflow-hidden bg-surface">
+      <header data-photo-hero="" className="relative flex min-h-[82svh] flex-col justify-end overflow-hidden bg-surface">
         <div className="absolute inset-0">
           <ProjectImage image={imagery.cover} alt={project.title} sizes="100vw" priority />
         </div>
@@ -116,7 +116,7 @@ export default async function ProjectPage({ params }: PageProps) {
               {project.title}
             </h1>
             {project.basic_description && (
-              <p className="measure-tight mt-7 text-body-lg text-white/85">
+              <p className="measure-tight mt-7 text-body-lg text-white/90">
                 {project.basic_description}
               </p>
             )}

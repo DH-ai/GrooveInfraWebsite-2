@@ -150,7 +150,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
                   <div>
                     {project.imagery.hasOwnPhotography ? (
-                      <span className="inline-flex items-center whitespace-nowrap border-l-2 border-emerald-400 bg-emerald-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-emerald-100">
+                      <span className="inline-flex items-center whitespace-nowrap border-l-2 border-emerald-600 bg-emerald-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-emerald-800">
                         {`${project.imagery.ownedCount} ${
                           project.imagery.ownedCount === 1 ? 'photo' : 'photos'
                         }`}
@@ -158,7 +158,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     ) : (
                       <span
                         data-testid="placeholder-badge"
-                        className="inline-flex items-center whitespace-nowrap border-l-2 border-amber-400 bg-amber-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-amber-100"
+                        className="inline-flex items-center whitespace-nowrap border-l-2 border-amber-500 bg-amber-500/10 px-3 py-1 text-micro uppercase tracking-eyebrow text-amber-900"
                       >
                         Generated plate
                       </span>
