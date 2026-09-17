@@ -10,7 +10,12 @@ import { ADMIN_COOKIE_NAME, verifyAdminSession } from '@/lib/admin-session'
  */
 
 /** Reachable without a session: the login screen, and the endpoints that start/end one. */
-const PUBLIC_ADMIN_PATHS = new Set(['/admin/login', '/api/admin/login', '/api/admin/logout'])
+const PUBLIC_ADMIN_PATHS = new Set([
+  '/admin/login',
+  '/api/admin/login',
+  '/api/admin/logout',
+  '/api/admin/session',
+])
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_ADMIN_PATHS.has(pathname)

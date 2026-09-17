@@ -15,6 +15,8 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ]
 
+const adminLink = { href: '/admin', label: 'Admin' }
+
 function isActive(pathname: string, href: string) {
   return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
 }
@@ -22,12 +24,14 @@ function isActive(pathname: string, href: string) {
 export default function Header() {
   const [pastHero, setPastHero] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
   const pathname = usePathname()
 
   // Full-bleed photo heroes keep white chrome until the hero clears the header.
   const isPhotoHero =
     pathname === '/' || (pathname.startsWith('/projects/') && pathname !== '/projects')
   const overPhoto = isPhotoHero && !pastHero
+  const links = showAdmin ? [...navLinks, adminLink] : navLinks
 
   const closeMenu = () => setMenuOpen(false)
   const dialogRef = useDialog({ open: menuOpen, onClose: closeMenu })
@@ -35,6 +39,23 @@ export default function Header() {
 
   useEffect(() => {
     setMenuOpen(false)
+  }, [pathname])
+
+  // Admin is never advertised publicly. The link appears only after a signed-in
+  // session exists (reached by going to /admin/login directly).
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/session', { credentials: 'same-origin' })
+      .then((res) => (res.ok ? res.json() : { authenticated: false }))
+      .then((data: { authenticated?: boolean }) => {
+        if (!cancelled) setShowAdmin(Boolean(data.authenticated))
+      })
+      .catch(() => {
+        if (!cancelled) setShowAdmin(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [pathname])
 
   useEffect(() => {
@@ -103,7 +124,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden items-center gap-9 md:flex" aria-label="Primary">
-            {navLinks.map((link) => {
+            {links.map((link) => {
               const active = isActive(pathname, link.href)
               return (
                 <Link
@@ -203,7 +224,7 @@ export default function Header() {
               </div>
 
               <nav aria-label="Site" className="flex flex-col gap-2 pt-4">
-                {navLinks.map((link) => {
+                {links.map((link) => {
                   const active = isActive(pathname, link.href)
                   return (
                     <Link
